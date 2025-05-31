@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Economystique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .signup-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .signup-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .signup-logo img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        .btn-signup {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-signup:hover {
+            background-color: #2980b9;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .password-requirements {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .password-match {
+            font-size: 12px;
+            color: #155724;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .password-mismatch {
+            font-size: 12px;
+            color: #721c24;
+            display: none;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Economystique Logo">
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <form action="{{ url_for('signup') }}" method="POST" onsubmit="return validateSignupForm()">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required
+                       onkeyup="checkPasswordMatch()">
+                <div class="password-requirements">
+                    Password must be at least 8 characters long and contain at least one number.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                       required onkeyup="checkPasswordMatch()">
+                <div class="password-match" id="passwordMatch">Passwords match!</div>
+                <div class="password-mismatch" id="passwordMismatch">Passwords do not match!</div>
+            </div>
+
+            <button type="submit" class="btn btn-signup">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+        </div>
+    </div>
+
+    <script>
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const matchMessage = document.getElementById('passwordMatch');
+            const mismatchMessage = document.getElementById('passwordMismatch');
+
+            if (password && confirmPassword) {
+                if (password === confirmPassword) {
+                    matchMessage.style.display = 'block';
+                    mismatchMessage.style.display = 'none';
+                } else {
+                    matchMessage.style.display = 'none';
+                    mismatchMessage.style.display = 'block';
+                }
+            } else {
+                matchMessage.style.display = 'none';
+                mismatchMessage.style.display = 'none';
+            }
+        }
+
+        function validateSignupForm() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirm_password').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (!username || !password || !confirmPassword) {
+                errorMessage.textContent = 'Please fill in all fields';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+
+            if (password.length < 8) {
+                errorMessage.textContent = 'Password must be at least 8 characters long';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+
+            if (!/\d/.test(password)) {
+                errorMessage.textContent = 'Password must contain at least one number';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html> 

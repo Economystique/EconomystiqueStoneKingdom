@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Sales - Economystique{% endblock %}
+
+{% block header_title %}Sales Management{% endblock %}
+
+{% block content %}
+<div class="sales-container">
+    <!-- Sales Overview Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Sales Overview</h2>
+            <div class="date-filter">
+                <label for="startDate">From:</label>
+                <input type="date" id="startDate" class="form-control">
+                <label for="endDate">To:</label>
+                <input type="date" id="endDate" class="form-control">
+                <button class="btn btn-primary" onclick="filterSales()">Filter</button>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Sales List Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Sales History</h2>
+            <button class="btn btn-primary" onclick="exportSales()">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="salesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(this, 0)">Date <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(this, 1)">Product <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(this, 2)">Quantity <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(this, 3)">Total Amount <i class="fas fa-sort"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales_data %}
+                    <tr>
+                        <td>{{ sale.date }}</td>
+                        <td>{{ sale.product_name }}</td>
+                        <td>{{ sale.quantity }}</td>
+                        <td>{{ "₱{:,.2f}".format(sale.total_amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sales Forecast Button -->
+    <button class="btn btn-primary forecast-btn" onclick="window.location.href='{{ url_for('sales_forecast') }}'">
+        <i class="fas fa-chart-line"></i> View Sales Forecast
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.sales-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-filter .form-control {
+    width: 150px;
+}
+
+.chart-container {
+    height: 300px;
+    margin: 20px 0;
+}
+
+.forecast-btn {
+    align-self: flex-end;
+}
+
+@media (max-width: 768px) {
+    .date-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-filter .form-control {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date filters with last 30 days
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+    document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+    
+    // Initialize sales chart
+    const salesData = {
+        labels: {{ sales_data | map(attribute='date') | list | tojson }},
+        datasets: [{
+            label: 'Daily Sales',
+            data: {{ sales_data | map(attribute='total_amount') | list | tojson }},
+            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+            borderColor: 'rgba(52, 152, 219, 1)',
+            borderWidth: 2,
+            tension: 0.4
+        }]
+    };
+
+    const salesChart = new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: salesData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+async function filterSales() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    try {
+        const response = await window.app.fetchData('/api/sales/filter', {
+            method: 'POST',
+            body: JSON.stringify({ startDate, endDate })
+        });
+        
+        if (response.success) {
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while filtering sales data.');
+    }
+}
+
+function exportSales() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const url = `/api/sales/export?startDate=${startDate}&endDate=${endDate}`;
+    window.location.href = url;
+}
+
+function sortTable(header, columnIndex) {
+    const table = header.closest('table');
+    const type = columnIndex === 3 ? 'number' : 'string';
+    window.app.sortTable(table, columnIndex, type);
+}
+</script>
+{% endblock %} 

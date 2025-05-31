@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Account - Economystique{% endblock %}
+
+{% block header_title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <!-- Profile Card -->
+    <div class="card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h2>{{ user_data.user_name }}</h2>
+        </div>
+        <div class="profile-content">
+            <form id="profileForm" onsubmit="return updateProfile(event)">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           value="{{ user_data.user_name }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="card">
+        <h2 class="card-title">Change Password</h2>
+        <form id="passwordForm" onsubmit="return updatePassword(event)">
+            <div class="form-group">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" class="form-control" id="currentPassword" 
+                       name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" class="form-control" id="newPassword" 
+                       name="new_password" required>
+                <div class="password-requirements">
+                    Password must be at least 8 characters long and contain at least one number.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirmPassword" 
+                       name="confirm_password" required>
+                <div class="password-match" id="passwordMatch">Passwords match!</div>
+                <div class="password-mismatch" id="passwordMismatch">Passwords do not match!</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Change Password</button>
+        </form>
+    </div>
+
+    <!-- Account Activity Card -->
+    <div class="card">
+        <h2 class="card-title">Recent Activity</h2>
+        <div class="activity-list">
+            {% for activity in user_data.activities %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-{{ activity.icon }}"></i>
+                </div>
+                <div class="activity-details">
+                    <div class="activity-description">{{ activity.description }}</div>
+                    <div class="activity-time">{{ activity.timestamp }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.account-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-avatar {
+    font-size: 64px;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.profile-content {
+    padding: 20px;
+}
+
+.password-requirements {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.password-match,
+.password-mismatch {
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+.password-match {
+    color: #155724;
+}
+
+.password-mismatch {
+    color: #721c24;
+}
+
+.activity-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--background-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: var(--primary-color);
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-description {
+    margin-bottom: 5px;
+}
+
+.activity-time {
+    font-size: 12px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .account-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const matchMessage = document.getElementById('passwordMatch');
+    const mismatchMessage = document.getElementById('passwordMismatch');
+
+    function checkPasswordMatch() {
+        if (newPassword.value && confirmPassword.value) {
+            if (newPassword.value === confirmPassword.value) {
+                matchMessage.style.display = 'block';
+                mismatchMessage.style.display = 'none';
+            } else {
+                matchMessage.style.display = 'none';
+                mismatchMessage.style.display = 'block';
+            }
+        } else {
+            matchMessage.style.display = 'none';
+            mismatchMessage.style.display = 'none';
+        }
+    }
+
+    newPassword.addEventListener('input', checkPasswordMatch);
+    confirmPassword.addEventListener('input', checkPasswordMatch);
+});
+
+async function updateProfile(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await window.app.fetchData('/api/account/profile', {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+
+        if (response.success) {
+            alert('Profile updated successfully!');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating your profile.');
+    }
+}
+
+async function updatePassword(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    if (data.new_password !== data.confirm_password) {
+        alert('Passwords do not match.');
+        return;
+    }
+
+    if (data.new_password.length < 8 || !/\d/.test(data.new_password)) {
+        alert('Password must be at least 8 characters long and contain at least one number.');
+        return;
+    }
+
+    try {
+        const response = await window.app.fetchData('/api/account/password', {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+
+        if (response.success) {
+            alert('Password updated successfully!');
+            form.reset();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating your password.');
+    }
+}
+</script>
+{% endblock %} 

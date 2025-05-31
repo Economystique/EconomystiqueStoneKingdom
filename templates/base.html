@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="window-container">
+        <div class="app-container">
+            <!-- Logo -->
+            <div class="logo-container">
+                <h1 class="brand">ECONOMYSTIQUE</h1>
+            </div>
+
+            <!-- Top Header -->
+            <div class="top-header">
+                <button class="notifications-btn">🔔</button>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <h2 class="nav-title">Main</h2>
+                        <ul>
+                            <li>
+                                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                                    <span class="nav-icon">☰</span>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link">
+                                    <span class="nav-icon">☰</span>
+                                    Performance Comparison
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <hr>
+
+                    <div class="nav-section">
+                        <h2 class="nav-title">Inventory</h2>
+                        <ul>
+                            <li>
+                                <a href="{{ url_for('inventory') }}" class="nav-link {% if request.endpoint == 'inventory' %}active{% endif %}">
+                                    <span class="nav-icon">🥘</span>
+                                    Ingredients
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link">
+                                    <span class="nav-icon">🍽️</span>
+                                    Products
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link">
+                                    <span class="nav-icon">♻️</span>
+                                    Wastage
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <hr>
+
+                    <div class="nav-section">
+                        <h2 class="nav-title">Sales</h2>
+                        <ul>
+                            <li>
+                                <a href="{{ url_for('sales') }}" class="nav-link {% if request.endpoint == 'sales' %}active{% endif %}">
+                                    <span class="nav-icon">📋</span>
+                                    Sales Report
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link">
+                                    <span class="nav-icon">📊</span>
+                                    Sales Forecast
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('pos') }}" class="nav-link {% if request.endpoint == 'pos' %}active{% endif %}">
+                                    <span class="nav-icon">💰</span>
+                                    POS
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <ul>
+                        <li>
+                            <a href="{{ url_for('account') }}" class="nav-link {% if request.endpoint == 'account' %}active{% endif %}">
+                                <span class="nav-icon">👤</span>
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('logout') }}" class="nav-link">
+                                <span class="nav-icon">🚪</span>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="content-header">
+                    <h1>{% block header_title %}{% endblock %}</h1>
+                </header>
+                <div class="content">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        // Ensure proper scaling
+        function setAppDimensions() {
+            const container = document.querySelector('.window-container');
+            const targetWidth = 1920;
+            const targetHeight = 1080;
+            const targetRatio = targetWidth / targetHeight;
+            
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const windowRatio = windowWidth / windowHeight;
+            
+            if (windowRatio > targetRatio) {
+                // Window is wider than target ratio
+                container.style.width = `${windowHeight * targetRatio}px`;
+                container.style.height = '100vh';
+            } else {
+                // Window is taller than target ratio
+                container.style.width = '100vw';
+                container.style.height = `${windowWidth / targetRatio}px`;
+            }
+        }
+
+        // Set dimensions on load and resize
+        window.addEventListener('load', setAppDimensions);
+        window.addEventListener('resize', setAppDimensions);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 
