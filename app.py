@@ -22,7 +22,7 @@ def get_db_connection():
     return conn
 
 # Login required decorator
-def login_required(f):
+def login_required(f): 
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
