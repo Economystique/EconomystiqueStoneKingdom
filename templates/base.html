@@ -148,10 +148,6 @@
                 container.style.height = `${windowWidth / targetRatio}px`;
             }
         }
-
-        // Set dimensions on load and resize
-        window.addEventListener('load', setAppDimensions);
-        window.addEventListener('resize', setAppDimensions);
     </script>
     {% block extra_js %}{% endblock %}
 </body>
