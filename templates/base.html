@@ -12,18 +12,13 @@
 <body>
     <div class="window-container">
         <div class="app-container">
-            <!-- Logo -->
-            <div class="logo-container">
-                <h1 class="brand">ECONOMYSTIQUE</h1>
-            </div>
-
-            <!-- Top Header -->
-            <div class="top-header">
-                <button class="notifications-btn">🔔</button>
-            </div>
-
-            <!-- Sidebar -->
+            <!-- Sidebar with Logo -->
             <aside class="sidebar">
+                <!-- Logo -->
+                <div class="logo-container">
+                    <h1 class="brand">ECONOMYSTIQUE</h1>
+                </div>
+
                 <nav class="sidebar-nav">
                     <div class="nav-section">
                         <h2 class="nav-title">Main</h2>
@@ -49,14 +44,8 @@
                         <h2 class="nav-title">Inventory</h2>
                         <ul>
                             <li>
-                                <a href="{{ url_for('inventory') }}" class="nav-link {% if request.endpoint == 'inventory' %}active{% endif %}">
-                                    <span class="nav-icon">🥘</span>
-                                    Ingredients
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="nav-link">
-                                    <span class="nav-icon">🍽️</span>
+                                <a href="{{ url_for('products') }}" class="nav-link {% if request.endpoint == 'products' %}active{% endif %}">
+                                    <span class="nav-icon">📦</span>
                                     Products
                                 </a>
                             </li>
@@ -113,6 +102,11 @@
                     </ul>
                 </div>
             </aside>
+
+            <!-- Top Header -->
+            <div class="top-header">
+                <button class="notifications-btn">🔔</button>
+            </div>
 
             <!-- Main Content -->
             <main class="main-content">

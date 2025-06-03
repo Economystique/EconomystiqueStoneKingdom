@@ -1,0 +1,178 @@
+/* Inventory Page Specific Styles */
+
+/* Content Header */
+.content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.content-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Buttons */
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background-color: #B22222;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #8B0000;
+}
+
+.btn-secondary {
+    background-color: #F0F0F0;
+    color: #2D3748;
+}
+
+.btn-secondary:hover {
+    background-color: #E5E5E5;
+}
+
+/* Table Toolbar */
+.table-toolbar {
+    margin-bottom: 1rem;
+}
+
+.search-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #4299E1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Inventory Table */
+.inventory-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+    background-color: white;
+    border-radius: 0.5rem;
+}
+
+.inventory-table th {
+    background-color: #F8FAFC;
+    color: #4A5568;
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.inventory-table th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+.inventory-table th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+.inventory-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #E2E8F0;
+    color: #2D3748;
+    background-color: white;
+}
+
+.inventory-table tr:last-child td:first-child {
+    border-bottom-left-radius: 0.5rem;
+}
+
+.inventory-table tr:last-child td:last-child {
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Table Actions */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #EDF2F7;
+}
+
+.action-btn.edit:hover {
+    color: #3182CE;
+}
+
+.action-btn.delete:hover {
+    color: #E53E3E;
+}
+
+/* Responsive Table */
+@media (max-width: 1024px) {
+    .inventory-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* Content Area */
+.content {
+    padding: 2rem;
+    background-color: #F8F9FA;
+    min-height: calc(100vh - 60px);
+    width: 100%;
+}
+
+/* Main Content Area Adjustments */
+.main-content {
+    padding: 0;
+    background-color: #F8F9FA;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+} 

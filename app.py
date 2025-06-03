@@ -143,25 +143,77 @@ def dashboard():
                          expired_products=expired_products,
                          best_sellers=best_sellers)
 
-@app.route('/inventory')
+@app.route('/products')
 @login_required
-def inventory():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Get ingredients
-    cursor.execute("SELECT * FROM inventory ORDER BY name")
-    ingredients = cursor.fetchall()
-    
-    # Get products
-    cursor.execute("SELECT * FROM products ORDER BY name")
-    products = cursor.fetchall()
-
-    conn.close()
-    
-    return render_template('inventory.html',
-                         ingredients=ingredients,
-                         products=products)
+def products():
+    # Dummy data for design preview
+    dummy_products = [
+        {
+            'sku': 'PT001',
+            'product_name': 'Chopao',
+            'category': 'Food',
+            'brand': 'Zentra',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT002',
+            'product_name': 'Bottle Water',
+            'category': 'Beverage',
+            'brand': 'SAHUR!',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT003',
+            'product_name': 'Butter',
+            'category': 'Dairy',
+            'brand': 'VitaNest',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT004',
+            'product_name': 'Ice Cream',
+            'category': 'FrozenFood',
+            'brand': 'Sunryze',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT005',
+            'product_name': 'Sanitary Pads',
+            'category': 'Hygiene',
+            'brand': 'VelvoCare',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT006',
+            'product_name': 'Detergent',
+            'category': 'Home Supplies',
+            'brand': 'Nimbus2000',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT007',
+            'product_name': 'Notebook',
+            'category': 'Stationery',
+            'brand': 'Buzzbi',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+    ]
+    return render_template('products.html', products=dummy_products)
 
 @app.route('/sales')
 @login_required
@@ -314,6 +366,8 @@ def sales_forecast():
         'forecast': round(forecast, 2),
         'history': df['quantity'].tolist()
     })
+def on_loaded():
+    webview.windows[0].gui.window.showMaximized()
 
 def start_server():
     app.run(port=5000)
@@ -325,8 +379,7 @@ if __name__ == '__main__':
     # Create and show the window
     webview.create_window('Economystique', 
                          'http://127.0.0.1:5000',
-                         width=1920,
-                         height=1080,
+                         maximized=True,
                          resizable=True,
                          min_size=(640, 360))
-    webview.start()
+    webview.start(on_loaded, gui='qt')
