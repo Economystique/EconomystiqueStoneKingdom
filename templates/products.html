@@ -4,29 +4,81 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
+<style>
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 4px;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        cursor: pointer;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .show {
+        display: block;
+    }
+
+    .active-category {
+        background-color: #e9ecef;
+    }
+</style>
 {% endblock %}
 
-{% block header_title %}Product List{% endblock %}
+<!-- {% block header_title %}Product List{% endblock %} --> 
 
 {% block content %}
+<h1>Product List</h1>
 <div class="content-header">
     <p class="subtitle">Manage your inventory fast, and efficient</p>
-    <div class="header-actions">
-        <button class="btn btn-secondary">
-            <span class="icon">📦</span>
-            Restock
-        </button>
-        <button class="btn btn-primary">
-            <span class="icon">⚠️</span>
-            Declare Wastage
-        </button>
-    </div>
+    <br>
 </div>
 
 <div class="content">
     <div class="table-toolbar">
-        <div class="search-container">
-            <input type="text" placeholder="Search" class="search-input">
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" placeholder="Search" class="search-input">
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-category" id="categoryBtn">
+                    <span class="icon">⇩</span>
+                    <span id="selectedCategory">All Categories</span>
+                </button>
+                <div id="categoryDropdown" class="dropdown-content">
+                    <a data-category="all">All Categories</a>
+                    {% for category in categories %}
+                    <a data-category="{{ category }}">{{ category }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-restock">
+                <span class="icon">📦</span>
+                Restock
+            </button>
+            <button class="btn btn-wastage">
+                <span class="icon">⚠️</span>
+                Declare Wastage
+            </button>
         </div>
     </div>
 
@@ -45,7 +97,7 @@
             </thead>
             <tbody>
                 {% for product in products %}
-                <tr>
+                <tr data-category="{{ product.category }}">
                     <td>{{ product.sku }}</td>
                     <td>{{ product.product_name }}</td>
                     <td>{{ product.brand }}</td>
@@ -67,18 +119,60 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
+    // Dropdown functionality
+    const categoryBtn = document.getElementById('categoryBtn');
+    const categoryDropdown = document.getElementById('categoryDropdown');
+    const selectedCategory = document.getElementById('selectedCategory');
     const searchInput = document.querySelector('.search-input');
     const tableRows = document.querySelectorAll('.inventory-table tbody tr');
 
-    searchInput.addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-
-        tableRows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
+    // Toggle dropdown
+    categoryBtn.addEventListener('click', function() {
+        categoryDropdown.classList.toggle('show');
     });
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function(e) {
+        if (!categoryBtn.contains(e.target)) {
+            categoryDropdown.classList.remove('show');
+        }
+    });
+
+    // Category selection
+    categoryDropdown.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A') {
+            const category = e.target.getAttribute('data-category');
+            selectedCategory.textContent = e.target.textContent;
+            filterProducts(category, searchInput.value);
+            categoryDropdown.classList.remove('show');
+
+            // Update active category
+            document.querySelectorAll('.dropdown-content a').forEach(a => {
+                a.classList.remove('active-category');
+            });
+            e.target.classList.add('active-category');
+        }
+    });
+
+    // Search functionality
+    searchInput.addEventListener('input', function(e) {
+        const category = selectedCategory.textContent === 'All Categories' ? 'all' : selectedCategory.textContent;
+        filterProducts(category, e.target.value);
+    });
+
+    // Combined filter function
+    function filterProducts(category, searchTerm) {
+        searchTerm = searchTerm.toLowerCase();
+        
+        tableRows.forEach(row => {
+            const rowCategory = row.getAttribute('data-category');
+            const text = row.textContent.toLowerCase();
+            const matchesCategory = category === 'all' || rowCategory === category;
+            const matchesSearch = text.includes(searchTerm);
+            
+            row.style.display = matchesCategory && matchesSearch ? '' : 'none';
+        });
+    }
 });
 </script>
 {% endblock %} 
