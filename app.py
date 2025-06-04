@@ -100,6 +100,7 @@ def logout():
 
 @app.route('/dashboard')
 @login_required
+# TEST COMMIT
 def dashboard():
     # Dummy data for top products
     best_sellers = [
