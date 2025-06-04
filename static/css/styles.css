@@ -185,38 +185,171 @@ body {
     flex: 1;
     position: absolute;
     margin-left: 259px;  /* Match exactly the sidebar width */
-    margin-top: 57px;    /* Match exactly the header height */
-    padding: 2rem;
+    margin-top: 45px;    /* Match exactly the header height */
+    padding: 1rem;
     overflow-y: auto;
     height: calc(100vh - 57px);
     width: calc(100vw - 259px);
 }
 
-/* Header */
-.content-header {
+/* Content Area */
+.content {
+    background-color: transparent; 
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    height: 100%;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.top-cards-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.card {
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.small-card {
+    height: 300px;
+}
+
+.card-title {
+    margin: 0;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.top-products .card-title {
+    background-color: #DDA853;
+}
+
+.least-sold .card-title {
+    background-color: #215E7D;
+}
+
+.near-expiry .card-title {
+    background-color: #B03052;
+}
+
+.critical-items .card-title {
+    background-color: #B03032;
+}
+
+.product-item {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.quantity {
+    background: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    min-width: 2rem;
+    text-align: center;
+}
+
+.product-name {
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1.55fr 0.755fr;
+    gap: 1.5rem;
+}
+
+.performance-card {
+    padding: 1.5rem;
+}
+
+.performance-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
-.content-header h1 {
-    font-size: 32px;
-    font-weight: 600;
-    color: #2d3748;
+.performance-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.performance-title h2 {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.performance-stats {
+    background-color: transparent;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.chart-container {
+    height: 300px;
+    width: 100%;
+}
+
+.time-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.time-button, .compare-button {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    background: white;
+    cursor: pointer;
+}
+
+.time-button.active {
+    background: #3B82F6;
+    color: white;
+    border-color: #3B82F6;
+}
+
+.compare-button {
+    margin-left: 0.5rem;
+}
+
+.critical-items {
+    width: 100%;
+    height: 420px;
+    overflow-y: auto;
 }
 
 /* Lists */
 ul {
     list-style: none;
-}
-
-/* Content Area */
-.content {
-    background-color: #ffffff;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    height: 100%;
 }
 
 /* Alert Messages */
@@ -243,20 +376,6 @@ ul {
     gap: 1.5rem;
 }
 
-/* Cards */
-.card {
-    background-color: #ffffff;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-}
-
-.card-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 1rem;
-}
-
 /* Tables */
 .table {
     width: 100%;
@@ -274,13 +393,6 @@ ul {
     font-weight: 600;
     color: #4a5568;
     background-color: #f7fafc;
-}
-
-/* Charts */
-.chart-container {
-    width: 100%;
-    height: 300px;
-    position: relative;
 }
 
 /* Typography */

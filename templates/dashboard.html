@@ -2,87 +2,93 @@
 
 {% block title %}Dashboard - Economystique{% endblock %}    
 
-{% block header_title %}Welcome, Admin!{% endblock %} <!--edit this to put user name in dashboard accordingly-->
+<!--{% block header_title %}Welcome, Admin!{% endblock %} -->
 
 {% block content %}
-
-    <!-- Best Selling Products Card -->
-    <div class="card">
-        <h2 class="card-title">Top Products</h2>
-        {% for product in best_sellers %}
-        <div class="product-item">
-            <div class="product-info">
-                <div class="product-stats">
-                    <span class="quantity">{{ product.rank }}</span>
-                    <span class="revenue">{{ product.name }}</span>
+<h1>Welcome, Admin!</h1>
+<br>
+<div class="dashboard-grid">
+    <div class="top-cards-row">
+        <!-- Best Selling Products Card -->
+        <div class="card small-card top-products">
+            <h2 class="card-title">Top Products</h2>
+            {% for product in best_sellers %}
+            <div class="product-item">
+                <div class="product-info">
+                    <div class="product-stats">
+                        <span class="quantity">{{ product.rank }}</span>
+                        <span class="revenue">{{ product.name }}</span>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
-    <!-- Least Sold Products Card -->
-    <div class="card">
-        <h2 class="card-title">Least Sold Products</h2>
-        {% for product in least_products %}
-        <div class="product-item">
-            <div class="product-info">
-                <span class="product-name">{{ product.rank }}</span>
-                <span class="quantity">{{ product.name}} units</span>
+        <!-- Least Sold Products Card -->
+        <div class="card small-card least-sold">
+            <h2 class="card-title">Least Sold Products</h2>
+            {% for product in least_products %}
+            <div class="product-item">
+                <div class="product-info">
+                    <span class="product-name">{{ product.rank }}</span>
+                    <span class="quantity">{{ product.name}}</span>
+                </div>
             </div>
-        </div>
-        {% endfor %}
-    </div>  
+            {% endfor %}
+        </div>  
 
-    <!-- Sales Performance Card -->
-    <div class="card">
-        <div class="performance-header">
-            <div class="performance-title">
-                <i class="fas fa-chart-line"></i>
-                Performance
+        <!-- Near Expiry Products Card -->
+        <div class="card small-card near-expiry">
+            <h2 class="card-title">Near Expiry Products</h2>
+            {% for product in near_expiry %}
+            <div class="product-item">
+                <div class="product-info">
+                    <span>{{ product.quantity }}</span>
+                    <span>{{ product.name }}</span>
+                    <h5>{{ product.expiry_date }}</h5>
+                </div>
             </div>
-            <div class="time-controls">
-                <button class="time-button" data-period="D">D</button>
-                <button class="time-button active" data-period="M">M</button>
-                <button class="time-button" data-period="Y">Y</button>
-                <button class="compare-button">COMPARE</button>
-            </div>
-        </div>
-        <div class="performance-stats">
-            Sales increased by ___ this month. Sales increased by ___ this month. Sales increased by ___ this month. Sales increased by ___
-        </div>
-        <div class="chart-container">
-            <canvas id="salesChart"></canvas>
+            {% endfor %}
         </div>
     </div>
 
-    <!-- Expired Products Card -->
-    <div class="card">
-        <h2 class="card-title">Near Expiry Products</h2>
-        {% for product in near_expiry %}
-        <div class="product-item">
-            <div class="product-info">
-                <span>{{ product.quantity }}</span>
-                <span>{{ product.name }}</span>
-                <h5>{{ product.expiry_date }}</h5> <!--fix composition of the card-->
+    <div class="bottom-section">
+        <!-- Sales Performance Card -->
+        <div class="card performance-card">
+            <div class="performance-header">
+                <div class="performance-title">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>Performance</h2>
+                </div>
+                <div class="time-controls">
+                    <button class="time-button" data-period="D">D</button>
+                    <button class="time-button active" data-period="M">M</button>
+                    <button class="time-button" data-period="Y">Y</button>
+                    <button class="compare-button">COMPARE</button>
+                </div>
+            </div>
+            <div class="performance-stats">
+                Sales increased by ___ this month. Sales increased by ___ this month. Sales increased by ___ this month. Sales increased by ___
+            </div>
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
-        {% endfor %}
-    </div>  
-    
-    <!-- Critical Items Card -->
-    <div class="card">
-        <h2 class="card-title">Critical Items</h2>
-        {% for item in critical_items %}
-        <div class="product-item"> 
-            <div class="product-info">
-                <span class="quantity">{{ item.quantity }}</span>
-                <span class="product-name">{{ item.name }}</span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
 
+        <!-- Critical Items Card -->
+        <div class="card critical-items">
+            <h2 class="card-title">Critical Items</h2>
+            {% for item in critical_items %}
+            <div class="product-item"> 
+                <div class="product-info">
+                    <span class="quantity">{{ item.quantity }}</span>
+                    <span class="product-name">{{ item.name }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
