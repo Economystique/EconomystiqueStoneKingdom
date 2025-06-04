@@ -283,7 +283,7 @@ body {
     gap: 1.5rem;
 }
 
-.performance-card {
+.bottom-card {
     padding: 1.5rem;
 }
 
@@ -343,7 +343,7 @@ body {
 
 .critical-items {
     width: 100%;
-    height: 420px;
+    height: 100%;
     overflow-y: auto;
 }
 
