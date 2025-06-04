@@ -101,47 +101,96 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    # Dummy data for top products
+    best_sellers = [
+        {
+            'name': 'Chopao',
+            'rank': 1,
+        },
+        {
+            'name': 'Bottle Water',
+            'rank': 2,
+        },
+        {
+            'name': 'Ice Cream',
+            'rank': 3,
+        }
+    ]
 
-    # Get sales performance data
-    cursor.execute("""
-        SELECT strftime('%Y-%m', date) as month,
-               SUM(total_amount) as total_sales
-        FROM sales
-        GROUP BY month
-        ORDER BY month DESC
-        LIMIT 6
-    """)
-    sales_data = cursor.fetchall()
-    
-    # Get expired products
-    cursor.execute("""
-        SELECT *
-        FROM inventory
-        WHERE expiry_date < date('now')
-    """)
-    expired_products = cursor.fetchall()
-    
-    # Get best selling products
-    cursor.execute("""
-        SELECT p.name,
-               COUNT(*) as sale_count,
-               SUM(s.total_amount) as total_revenue
-        FROM sales s
-        JOIN products p ON s.product_id = p.id
-        GROUP BY p.id
-        ORDER BY sale_count DESC
-        LIMIT 5
-    """)
-    best_sellers = cursor.fetchall()
-    
-    conn.close()
-    
+    # Dummy data for least sold products
+    least_products = [
+        {
+            'name': 'Butter',
+            'rank': 1,
+        },
+        {
+            'name': 'Sanitary Pads',
+            'rank': 2,
+        },
+        {
+            'name': 'Notebook',
+            'rank': 3,
+        } 
+    ]
+
+    # Dummy data for expired products
+    near_expiry = [
+        {'name': 'Milk', 'quantity': 45, 'expiry_date': '2024-03-15'},
+        {'name': 'Yogurt', 'quantity': 30, 'expiry_date': '2024-03-16'},
+        {'name': 'Bread', 'quantity': 25, 'expiry_date': '2024-03-14'},
+        {'name': 'Fresh Juice', 'quantity': 20, 'expiry_date': '2024-03-15'},
+        {'name': 'Cheese', 'quantity': 15, 'expiry_date': '2024-03-13'}
+    ]
+
+    #Dummy data for critical items
+    critical_items = [
+        {
+            'name': 'Milk',
+            'quantity': 45,
+            
+        },
+        {
+            'name': 'Milk',
+            'quantity': 45,
+            
+        },
+        {
+            'name': 'Milk',
+            'quantity': 45,
+            
+        },
+        {
+            'name': 'Milk',
+            'quantity': 45,
+            
+        },{
+            'name': 'Milk',
+            'quantity': 45,
+            
+        }
+    ]
+
+    # Dummy data for sales performance
+    sales_data = [
+        {'month': '01', 'total_sales': 50},
+        {'month': '02', 'total_sales': 150},
+        {'month': '03', 'total_sales': 250},
+        {'month': '04', 'total_sales': 200},
+        {'month': '05', 'total_sales': 300},
+        {'month': '06', 'total_sales': 150},
+        {'month': '07', 'total_sales': 200},
+        {'month': '08', 'total_sales': 100},
+        {'month': '09', 'total_sales': 150},
+        {'month': '10', 'total_sales': 200},
+        {'month': '11', 'total_sales': 350},
+        {'month': '12', 'total_sales': 400}
+    ]
     return render_template('dashboard.html',
                          sales_data=sales_data,
-                         expired_products=expired_products,
-                         best_sellers=best_sellers)
+                         least_products=least_products,
+                         near_expiry=near_expiry,
+                         best_sellers=best_sellers,
+                         critical_items=critical_items)
 
 @app.route('/products')
 @login_required

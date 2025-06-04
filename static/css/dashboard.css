@@ -16,7 +16,6 @@
     background: #fff;
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .product-card.top-products {
@@ -52,62 +51,90 @@
 }
 
 .product-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 6px;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f7fafc;
+    margin-bottom: 0.75rem;
 }
 
-.product-number {
-    width: 24px;
-    height: 24px;
+.product-item:last-child {
+    margin-bottom: 0;
+}
+
+.product-info {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.product-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2d3748;
+    margin: 0;
+}
+
+.product-stats {
+    display: flex;
+    justify-content: space-between;
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.quantity {
+    color: #4299e1;
+    font-weight: 500;
+}
+
+.revenue {
+    color: #48bb78;
     font-weight: 500;
 }
 
 /* Performance Section */
-.performance-section {
-    background: #fff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 0 1.5rem 1.5rem;
 }
 
 .performance-header {
+    background-color: #7CCCE4;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 .performance-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 18px;
-    font-weight: 500;
-    color: #2d3748;
+    font-size: 1rem;
+    color: #4a5568;
+}
+
+.performance-title i {
+    color: #4a5568;
 }
 
 .time-controls {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .time-button {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 0.75rem;
     border: 1px solid #e2e8f0;
-    border-radius: 6px;
+    border-radius: 4px;
     background: #f7fafc;
     color: #4a5568;
+    font-size: 0.875rem;
     cursor: pointer;
-    font-size: 14px;
+    transition: all 0.2s;
 }
 
 .time-button.active {
@@ -117,20 +144,36 @@
 }
 
 .compare-button {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 0.75rem;
     border: 1px solid #e2e8f0;
-    border-radius: 6px;
+    border-radius: 4px;
     background: #f7fafc;
     color: #4a5568;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
     cursor: pointer;
-    font-size: 14px;
-    margin-left: 1rem;
+}
+
+.performance-stats {
+    background: rgba(124, 204, 228, 0.8); /* #7CCCE4 with 80% opacity */
+    color: #2b6cb0;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
 }
 
 .chart-container {
-    margin-top: 1rem;
     height: 300px;
     position: relative;
+    margin-top: 1rem;
+}
+
+/* Chart Customization */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* Critical Items Section */
@@ -172,11 +215,9 @@
     font-weight: 500;
 }
 
-.performance-stats {
-    background: #EBF8FF;
-    border-radius: 6px;
-    padding: 1rem;
-    margin: 1rem 0;
-    color: #2B6CB0;
-    font-size: 14px;
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
 } 

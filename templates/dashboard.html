@@ -1,113 +1,150 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Economystique{% endblock %} 
+{% block title %}Dashboard - Economystique{% endblock %}    
 
 {% block header_title %}Welcome, Admin!{% endblock %} <!--edit this to put user name in dashboard accordingly-->
 
 {% block content %}
-<div class="grid">
+
+    <!-- Best Selling Products Card -->
+    <div class="card">
+        <h2 class="card-title">Top Products</h2>
+        {% for product in best_sellers %}
+        <div class="product-item">
+            <div class="product-info">
+                <div class="product-stats">
+                    <span class="quantity">{{ product.rank }}</span>
+                    <span class="revenue">{{ product.name }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Least Sold Products Card -->
+    <div class="card">
+        <h2 class="card-title">Least Sold Products</h2>
+        {% for product in least_products %}
+        <div class="product-item">
+            <div class="product-info">
+                <span class="product-name">{{ product.rank }}</span>
+                <span class="quantity">{{ product.name}} units</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>  
+
     <!-- Sales Performance Card -->
     <div class="card">
-        <h2 class="card-title">Sales Performance</h2>
+        <div class="performance-header">
+            <div class="performance-title">
+                <i class="fas fa-chart-line"></i>
+                Performance
+            </div>
+            <div class="time-controls">
+                <button class="time-button" data-period="D">D</button>
+                <button class="time-button active" data-period="M">M</button>
+                <button class="time-button" data-period="Y">Y</button>
+                <button class="compare-button">COMPARE</button>
+            </div>
+        </div>
+        <div class="performance-stats">
+            Sales increased by ___ this month. Sales increased by ___ this month. Sales increased by ___ this month. Sales increased by ___
+        </div>
         <div class="chart-container">
             <canvas id="salesChart"></canvas>
         </div>
     </div>
 
-    <!-- Best Selling Products Card -->
-    <div class="card">
-        <h2 class="card-title">Best Selling Products</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Sales Count</th>
-                    <th>Revenue</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in best_sellers %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.sale_count }}</td>
-                    <td>{{ "₱{:,.2f}".format(product.total_revenue) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
     <!-- Expired Products Card -->
     <div class="card">
-        <h2 class="card-title">Expired Products</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Expiry Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in expired_products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.quantity }}</td>
-                    <td>{{ product.expiry_date }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h2 class="card-title">Near Expiry Products</h2>
+        {% for product in near_expiry %}
+        <div class="product-item">
+            <div class="product-info">
+                <span>{{ product.quantity }}</span>
+                <span>{{ product.name }}</span>
+                <h5>{{ product.expiry_date }}</h5> <!--fix composition of the card-->
+            </div>
+        </div>
+        {% endfor %}
+    </div>  
+    
+    <!-- Critical Items Card -->
+    <div class="card">
+        <h2 class="card-title">Critical Items</h2>
+        {% for item in critical_items %}
+        <div class="product-item"> 
+            <div class="product-info">
+                <span class="quantity">{{ item.quantity }}</span>
+                <span class="product-name">{{ item.name }}</span>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Prepare sales data
-    const salesData = {
-        labels: {{ sales_data | map(attribute='month') | list | tojson }},
-        datasets: [{
-            label: 'Monthly Sales',
-            data: {{ sales_data | map(attribute='total_sales') | list | tojson }},
-            backgroundColor: 'rgba(52, 152, 219, 0.2)',
-            borderColor: 'rgba(52, 152, 219, 1)',
-            borderWidth: 2,
-            tension: 0.4
-        }]
-    };
-
-    // Create sales chart
-    const salesChart = new Chart(document.getElementById('salesChart'), {
+    // Performance Chart
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const chart = new Chart(ctx, {
         type: 'line',
-        data: salesData,
+        data: {
+            labels: {{ sales_data | map(attribute='month') | list | tojson }},
+            datasets: [{
+                label: 'Sales Performance',
+                data: {{ sales_data | map(attribute='total_sales') | list | tojson }},
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 2
+            }]
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '₱' + value.toLocaleString();
-                        }
-                    }
-                }
-            },
             plugins: {
                 legend: {
                     display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        padding: 10,
+                        color: '#718096'
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return '₱' + context.parsed.y.toLocaleString();
-                        }
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        padding: 10,
+                        color: '#718096'
                     }
                 }
             }
         }
+    });
+
+    // Time period buttons
+    const timeButtons = document.querySelectorAll('.time-button');
+    timeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            timeButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
     });
 });
 </script>
