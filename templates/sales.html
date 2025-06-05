@@ -14,8 +14,8 @@
     <p class="subtitle">Check out your daily sales report</p>
     <br>
 </div>
-
-    <div class="main-content">
+<div class="test-container">
+    <div class="sale-content">
         <div class="toggle-buttons">
             <button class="toggle-btn active" onclick="toggleView('daily')">Daily</button>
             <button class="toggle-btn" onclick="toggleView('monthly')">Monthly</button>
@@ -28,6 +28,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Product Name</th>
+                        <th>Price</th>
                         <th>Quantity Sold</th>
                     </tr>
                 </thead>
@@ -66,6 +67,7 @@
         <h3>Total Sales</h3>
         <div class="value">{{ total_items_sold|default(0) }} items</div>
     </div>
+</div>
 </div>
 {% endblock %}
 

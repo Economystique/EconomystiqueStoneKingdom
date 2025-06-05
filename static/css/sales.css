@@ -1,3 +1,7 @@
+.test-container {
+    display: flex;
+    flex-direction: row;
+}
 /* Content Header */
 .content-header {
     display: flex;
@@ -24,8 +28,8 @@
 }
 
 /*main*/
-.main-content {
-    background: transparent;
+.sale-content {
+    background: red;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -35,6 +39,7 @@
 
 .metrics-sidebar {
     display: flex;
+    background-color: blue;
     flex-direction: column;
     gap: 20px;
     height: 80%;
@@ -103,20 +108,6 @@
     width: auto;
 }
 
-h1 {
-    margin: 0;
-    padding: 20px 20px 0;
-}
-
-.subtitle {
-    margin: 0;
-}
-
-.page-wrapper {
-    padding: 20px;
-    margin-right: 320px; /* Space for fixed sidebar */
-}
-
 .date-filter {
     display: flex;
     align-items: center;
@@ -125,11 +116,6 @@ h1 {
 
 .date-filter .form-control {
     width: 150px;
-}
-
-.chart-container {
-    height: 300px;
-    margin: 20px 0;
 }
 
 .forecast-btn {
