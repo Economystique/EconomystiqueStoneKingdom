@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 
 def edit_database():
-    connectionPath = os.path.join("db", "inventory_db.db")
+    connectionPath = os.path.join("db", "users_db.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
@@ -30,7 +30,7 @@ def edit_database():
     #cursor.execute("ALTER TABLE ingredients DROP COLUMN 'C011'")
     
     # DELETE TABLE
-    # cursor.execute(f"DROP TABLE IF EXISTS inv_static")
+    # cursor.execute(f"DROP TABLE IF EXISTS sqlite_sequence")
     
     # EDIT TABLE NAME
     #cursor.execute("ALTER TABLE this_month RENAME TO apr")
@@ -55,38 +55,41 @@ def edit_database():
     
     # CREATE TABLE
     # cursor.execute("""
-    # CREATE TABLE IF NOT EXISTS inv_static (
-    #     inv_id TEXT PRIMARY KEY,
-    #     inv_desc TEXT,
-    #     cat TEXT,
-    #     sub_cat TEXT,
-    #     unit TEXT,
-    #     rop INTEGER
+    # CREATE TABLE IF NOT EXISTS user_data (
+    #     user_id TEXT PRIMARY KEY,
+    #     user_name TEXT,
+    #     email TEXT,
+    #     pw_hash TEXT,
+    #     creation_date DATE
     # )
     # """)
   
 
     # ADD DATA
-    data = [("Ba00001","INVa00005",36,"piece","2025-06-20","2025-06-04"),
-            ("Ba00002","INVa00006",20,"bottle","2025-10-15","2025-06-04"),
-            ("Ba00003","INVa00008",20,"pack","2025-12-10","2025-06-04"),
-            ("Ba00004","INVa00010",15,"pack","2026-06-20","2025-06-04"),\
-    ]
+    # data = [("Ba00001","INVa00005",36,"piece","2025-06-20","2025-06-04"),
+    #         ("Ba00002","INVa00006",20,"bottle","2025-10-15","2025-06-04"),
+    #         ("Ba00003","INVa00008",20,"pack","2025-12-10","2025-06-04"),
+    #         ("Ba00004","INVa00010",15,"pack","2026-06-20","2025-06-04"),\
+    # ]
     
     # UUID Generation
-    # uid1 =str(uuid.uuid4())
+    # user_name = "admin"
+    # uid1 =str(uuid.uuid5(uuid.NAMESPACE_DNS, user_name))
     
-    # PW Acquisition & Byte Conversion
-    # pw = "123"
+    # # PW Acquisition & Byte Conversion
+    # pw = "admin123"
     # pw_byte = pw.encode('UTF-8')
     # salt = bcrypt.gensalt()
     # pw_hash = bcrypt.hashpw(pw_byte, salt).decode('utf-8')
     
-    # data = [uid1,"kate","katelascota@gmail.com",pw_hash]
-    cursor.executemany("""
-    INSERT OR IGNORE INTO inv_dynamic (batch_id, inv_id, quantity, unit, exp_date, rec_date)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """, data)
+    # data = [uid1,"admin","economystique@gmail.com",pw_hash,"2025-06-05"]
+    
+    # ADD TO TABLE
+    
+    # cursor.execute("""
+    # INSERT OR IGNORE INTO user_data (user_id, user_name, email, pw_hash, creation_date)
+    # VALUES (?, ?, ?, ?, ?)
+    # """, data)
 
     # GET TOTAL PER YEAR
     '''cursor.execute("""
