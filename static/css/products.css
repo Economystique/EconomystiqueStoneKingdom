@@ -38,21 +38,30 @@
     border: none;
 }
 
-.btn-primary {
-    background-color: #B22222;
+.btn-category {
+    background-color: #215E7D;
     color: white;
 }
 
-.btn-primary:hover {
-    background-color: #8B0000;
+.btn-category:hover {
+    background-color: #123b50;
 }
 
-.btn-secondary {
-    background-color: #E2E8F0;
+.btn-wastage {
+    background-color: #8f2020;
+    color: white;
+}
+
+.btn-wastage:hover {
+    background-color: #6e1616;
+}
+
+.btn-restock {
+    background-color: white;
     color: #2D3748;
 }
 
-.btn-secondary:hover {
+.btn-restock:hover {
     background-color: #CBD5E0;
 }
 
@@ -64,8 +73,13 @@
     margin-bottom: 1rem;
 }
 
+.search-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .search-container {
-    flex: 1;
     max-width: 300px;
 }
 
@@ -81,19 +95,24 @@
 .search-input:focus {
     outline: none;
     border-color: #4299E1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
 }
 
 /* Inventory Table */
 .inventory-table {
+    background-color: white;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
 }
 
 .inventory-table th {
-    background-color: #F7FAFC;
-    color: #4A5568;
+    background-color: #839FA9;
+    color: white;
     font-weight: 600;
     text-align: left;
     padding: 0.75rem 1rem;
@@ -107,7 +126,7 @@
 }
 
 .inventory-table tbody tr:hover {
-    background-color: #F7FAFC;
+    background-color: #e7f4f8;
 }
 
 /* Table Actions */
@@ -148,8 +167,7 @@
 
 /* Content Area */
 .content {
-    background-color: white;
+    background-color: transparent;
     border-radius: 0.5rem;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 } 

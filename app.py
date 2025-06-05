@@ -262,8 +262,68 @@ def products():
             'quantity': '20,711',
             'rop': '500'
         },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        },
+        {
+            'sku': 'PT008',
+            'product_name': 'Cat Food',
+            'category': 'Miscellaneous',
+            'brand': 'FelineFuel',
+            'quantity': '20,711',
+            'rop': '500'
+        }
     ]
-    return render_template('products.html', products=dummy_products)
+    
+    # Extract categories
+    categories = sorted(set(product['category'] for product in dummy_products))
+    
+    return render_template('products.html', products=dummy_products, categories=categories)
 
 @app.route('/sales')
 @login_required
