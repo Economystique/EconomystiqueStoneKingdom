@@ -2,123 +2,82 @@
 
 {% block title %}Sales - Economystique{% endblock %}
 
-{% block header_title %}Sales Management{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sales.css') }}">
+{% endblock %}
+
+<!--{% block header_title %}Sales Management{% endblock %}-->
 
 {% block content %}
-<div class="sales-container">
-    <!-- Sales Overview Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Sales Overview</h2>
-            <div class="date-filter">
-                <label for="startDate">From:</label>
-                <input type="date" id="startDate" class="form-control">
-                <label for="endDate">To:</label>
-                <input type="date" id="endDate" class="form-control">
-                <button class="btn btn-primary" onclick="filterSales()">Filter</button>
-            </div>
-        </div>
-        <div class="chart-container">
-            <canvas id="salesChart"></canvas>
-        </div>
-    </div>
+<h1>Sales Report</h1>
+<div class="content-header">
+    <p class="subtitle">Check out your daily sales report</p>
+    <br>
+</div>
 
-    <!-- Sales List Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Sales History</h2>
-            <button class="btn btn-primary" onclick="exportSales()">
-                <i class="fas fa-download"></i> Export
-            </button>
+    <div class="main-content">
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" onclick="toggleView('daily')">Daily</button>
+            <button class="toggle-btn" onclick="toggleView('monthly')">Monthly</button>
+            <button class="toggle-btn" onclick="toggleView('yearly')">Yearly</button>
         </div>
+
         <div class="table-responsive">
             <table class="table" id="salesTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(this, 0)">Date <i class="fas fa-sort"></i></th>
-                        <th onclick="sortTable(this, 1)">Product <i class="fas fa-sort"></i></th>
-                        <th onclick="sortTable(this, 2)">Quantity <i class="fas fa-sort"></i></th>
-                        <th onclick="sortTable(this, 3)">Total Amount <i class="fas fa-sort"></i></th>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Quantity Sold</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sale in sales_data %}
                     <tr>
-                        <td>{{ sale.date }}</td>
+                        <td>{{ sale.product_id }}</td>
                         <td>{{ sale.product_name }}</td>
-                        <td>{{ sale.quantity }}</td>
-                        <td>{{ "₱{:,.2f}".format(sale.total_amount) }}</td>
+                        <td>{{ sale.price }}</td>
+                        <td>{{ sale.quantity_sold }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+        </div>
     </div>
 
-    <!-- Sales Forecast Button -->
-    <button class="btn btn-primary forecast-btn" onclick="window.location.href='{{ url_for('sales_forecast') }}'">
-        <i class="fas fa-chart-line"></i> View Sales Forecast
-    </button>
+<div class="metrics-sidebar">
+    <div class="metric-card">
+        <h3>Total Sales</h3>
+        <div class="value">₱{{ "{:,.2f}".format(total_sales|default(0)) }}</div>
+    </div>
+    <div class="metric-card">
+        <h3>Total Orders</h3>
+        <div class="value">{{ total_orders|default(0) }}</div>
+    </div>
+    <div class="metric-card">
+        <h3>Profit</h3>
+        <div class="value">₱{{ "{:,.2f}".format(profit|default(0)) }}</div>
+    </div>
+    <div class="metric-card">
+        <h3>Total Sales</h3>
+        <div class="value">{{ total_items_sold|default(0) }} items</div>
+    </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.sales-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.date-filter {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.date-filter .form-control {
-    width: 150px;
-}
-
-.chart-container {
-    height: 300px;
-    margin: 20px 0;
-}
-
-.forecast-btn {
-    align-self: flex-end;
-}
-
-@media (max-width: 768px) {
-    .date-filter {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .date-filter .form-control {
-        width: 100%;
-    }
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize date filters with last 30 days
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-    
-    document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
-    document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
-    
     // Initialize sales chart
     const salesData = {
-        labels: {{ sales_data | map(attribute='date') | list | tojson }},
+        labels: {{ sales_data | map(attribute='product_name') | list | tojson }},
         datasets: [{
-            label: 'Daily Sales',
-            data: {{ sales_data | map(attribute='total_amount') | list | tojson }},
+            label: 'Sales by Product',
+            data: {{ sales_data | map(attribute='quantity_sold') | list | tojson }},
             backgroundColor: 'rgba(52, 152, 219, 0.2)',
             borderColor: 'rgba(52, 152, 219, 1)',
             borderWidth: 2,
@@ -135,19 +94,13 @@ document.addEventListener('DOMContentLoaded', function() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '₱' + value.toLocaleString();
-                        }
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
                     }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return '₱' + context.parsed.y.toLocaleString();
-                        }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
@@ -155,36 +108,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-async function filterSales() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
+function toggleView(period) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    // Add active class to clicked button
+    document.querySelector(`.toggle-btn[onclick*="${period}"]`).classList.add('active');
     
-    try {
-        const response = await window.app.fetchData('/api/sales/filter', {
-            method: 'POST',
-            body: JSON.stringify({ startDate, endDate })
-        });
-        
-        if (response.success) {
-            location.reload();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while filtering sales data.');
-    }
+    // Here you would typically fetch and update the data based on the selected period
+    fetch(`/api/sales/${period}`)
+        .then(response => response.json())
+        .then(data => {
+            // Update table and chart with new data
+            updateTableAndChart(data);
+        })
+        .catch(error => console.error('Error:', error));
 }
 
-function exportSales() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const url = `/api/sales/export?startDate=${startDate}&endDate=${endDate}`;
-    window.location.href = url;
-}
-
-function sortTable(header, columnIndex) {
-    const table = header.closest('table');
-    const type = columnIndex === 3 ? 'number' : 'string';
-    window.app.sortTable(table, columnIndex, type);
+function updateTableAndChart(data) {
+    // Update table and chart with new data
+    // This function would be implemented based on your data structure
 }
 </script>
 {% endblock %} 

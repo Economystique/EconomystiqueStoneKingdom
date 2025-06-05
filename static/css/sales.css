@@ -1,0 +1,149 @@
+/* Content Header */
+.content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.content-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/*main*/
+.main-content {
+    background: transparent;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.metrics-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 80%;
+    width: 20%;
+}
+
+.metric-card {
+    background: #ffff;
+    border: 0.5px solid black;
+    border-radius: 10px;
+    padding: 2px;
+    height: 200px;
+    width: 313px;
+}
+
+.metric-card h3 {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.metric-card .value {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.toggle-buttons {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: #f5f7f9;
+    border-radius: 8px 8px 0 0;
+}
+
+.toggle-btn {
+    padding: 8px 24px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.toggle-btn.active {
+    background: #fff;
+}
+
+.table-responsive {
+    background-color: white;
+    flex: 1;
+    height: 40%;
+    width: auto;
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 1;
+}
+
+.chart-container {
+    background-color: white;
+    height: 40%;
+    width: auto;
+}
+
+h1 {
+    margin: 0;
+    padding: 20px 20px 0;
+}
+
+.subtitle {
+    margin: 0;
+}
+
+.page-wrapper {
+    padding: 20px;
+    margin-right: 320px; /* Space for fixed sidebar */
+}
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-filter .form-control {
+    width: 150px;
+}
+
+.chart-container {
+    height: 300px;
+    margin: 20px 0;
+}
+
+.forecast-btn {
+    align-self: flex-end;
+}
+
+@media (max-width: 768px) {
+    .date-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-filter .form-control {
+        width: 100%;
+    }
+}
+

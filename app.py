@@ -328,22 +328,116 @@ def products():
 @app.route('/sales')
 @login_required
 def sales():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+#   conn = get_db_connection()
+#   cursor = conn.cursor()
 
     # Get sales data
-    cursor.execute("""
-        SELECT s.*,
-               p.name as product_name
-        FROM sales s
-        JOIN products p ON s.product_id = p.id
-        ORDER BY s.date DESC
-    """)
-    sales_data = cursor.fetchall()
+#   cursor.execute("""
+#       SELECT s.*,
+#               p.name as product_name
+#        FROM sales s
+#        JOIN products p ON s.product_id = p.id
+#        ORDER BY s.date DESC
+#    """)
+#    sales_data = cursor.fetchall()
     
-    conn.close()
+#    conn.close()
     
-    return render_template('sales.html', sales_data=sales_data)
+ # Dummy data for sales
+    dummy_sales = [
+        {
+            'product_id': 'PT001',
+            'product_name': 'Chopao',
+            'price': 100,
+            'quantity_sold': '10'
+        },
+        {
+            'product_id': 'PT002',
+            'product_name': 'Bottle Water',
+            'price': 100,
+            'quantity_sold': '20'
+        },
+        {
+            'product_id': 'PT003',
+            'product_name': 'Butter',
+            'price': 100,
+            'quantity_sold': '10'
+        },
+        {
+            'product_id': 'PT004',
+            'product_name': 'Ice Cream',
+            'price': 100,
+            'quantity_sold': '30'
+        },
+        {
+            'product_id': 'PT005',
+            'product_name': 'Sanitary Pads',
+            'price': 100,
+            'quantity_sold': '20'
+        },
+        {
+            'product_id': 'PT006',
+            'product_name': 'Detergent',
+            'price': 100,
+            'quantity_sold': '40'
+        },
+        {
+            'product_id': 'PT007',
+            'product_name': 'Notebook',
+            'price': 100,
+            'quantity_sold': '30'
+        },
+        {
+            'product_id': 'PT008',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '50'   
+        },
+        {
+            'product_id': 'PT009',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '40'
+        },
+        {
+            'product_id': 'PT010',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '60'
+        },
+        {
+            'product_id': 'PT011',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '50'
+        },
+        {
+            'product_id': 'PT012',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '70'
+        },
+        {
+            'product_id': 'PT013',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '60'
+        },
+        {
+            'product_id': 'PT014',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '80'
+        },
+        {
+            'product_id': 'PT015',
+            'product_name': 'Cat Food',
+            'price': 100,
+            'quantity_sold': '10'
+        }
+    ]
+
+    return render_template('sales.html', sales_data=dummy_sales)
 
 @app.route('/pos')
 @login_required

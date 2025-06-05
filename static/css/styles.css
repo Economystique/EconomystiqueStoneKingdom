@@ -23,7 +23,7 @@ html, body {
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: red;
+    background-color: #E8E6E6;
     color: #2d3748;
     display: flex;
     flex-direction: column;
