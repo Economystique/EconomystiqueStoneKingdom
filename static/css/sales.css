@@ -1,6 +1,7 @@
 .test-container {
     display: flex;
     flex-direction: row;
+    gap: 20px;
 }
 /* Content Header */
 .content-header {
@@ -29,7 +30,16 @@
 
 /*FIX YOUR NAMING CONVENTION!!!!*/
 .sale-content {
-    background: red;
+    background: transparent;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.table-and-chart {
+    background: white;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -39,19 +49,20 @@
 
 .metrics-sidebar {
     display: flex;
-    background-color: blue;
+    background-color: transparent;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
     height: 80%;
     width: 20%;
+    padding-top: 39px;
 }
 
 .metric-card {
     background: #ffff;
-    border: 0.5px solid black;
+    border: 0.5px solid #b1b1b1;
     border-radius: 10px;
     padding: 2px;
-    height: 200px;
+    height: 165px;
     width: 313px;
 }
 
@@ -69,53 +80,47 @@
 
 .toggle-buttons {
     display: flex;
-    gap: 10px;
-    padding: 10px;
-    background: #f5f7f9;
+    background: #e8e6e6;
     border-radius: 8px 8px 0 0;
+    border: 1.5px solid #89a3ad;
+    width: 267px;
+    margin-bottom: 2px;
 }
 
 .toggle-btn {
-    padding: 8px 24px;
+    padding: 12px 24px;
     border: none;
     background: transparent;
-    border-radius: 6px;
+    border-radius: 8px 8px 0 0;
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .toggle-btn.active {
-    background: #fff;
+    background: #89a3ad;
+    color: white;
 }
 
 .table-responsive {
-    background-color: white;
     flex: 1;
-    height: 40%;
+    height: 50%;
     width: auto;
+    overflow-y: auto;
+    max-height: 350px;
 }
 
-.table thead {
+.table thead th {
+    background-color: #89a3ad;
+    color: white;
     position: sticky;
     top: 0;
-    background: #f8f9fa;
     z-index: 1;
 }
 
 .chart-container {
     background-color: white;
-    height: 40%;
+    height: 350px;
     width: auto;
-}
-
-.date-filter {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.date-filter .form-control {
-    width: 150px;
 }
 
 .forecast-btn {

@@ -184,7 +184,7 @@ body {
 .main-content {
     flex: 1;
     position: absolute;
-    background-color: black;
+    background-color: transparent;
     margin-left: 259px;  /* Match exactly the sidebar width */
     margin-top: 45px;    /* Match exactly the header height */
     padding: 1rem;
