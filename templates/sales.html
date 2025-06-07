@@ -29,8 +29,8 @@
                         <tr>
                             <th>ID</th>
                             <th>Product Name</th>
-                            <th>Price</th>
                             <th>Quantity Sold</th>
+                            <th>Price</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,8 +38,8 @@
                         <tr>
                             <td>{{ sale.product_id }}</td>
                             <td>{{ sale.product_name }}</td>
-                            <td>{{ sale.price }}</td>
                             <td>{{ sale.quantity_sold }}</td>
+                            <td>{{ sale.price }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -62,12 +62,12 @@
         <div class="value">{{ total_orders|default(0) }}</div>
     </div>
     <div class="metric-card">
-        <h3>Profit</h3>
-        <div class="value">₱{{ "{:,.2f}".format(profit|default(0)) }}</div>
-    </div>
-    <div class="metric-card">
         <h3>Total Sales</h3>
         <div class="value">{{ total_items_sold|default(0) }} items</div>
+    </div>
+    <div class="metric-card">
+        <h3>Profit</h3>
+        <div class="value">₱{{ "{:,.2f}".format(profit|default(0)) }}</div>
     </div>
 </div>
 </div>
