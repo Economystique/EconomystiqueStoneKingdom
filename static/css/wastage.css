@@ -1,4 +1,4 @@
-/* Inventory Page Specific Styles */
+/* Wastage Page Specific Styles */
 
 /* Content Header */
 .content-header {
@@ -38,17 +38,6 @@
     border: none;
 }
 
-.btn-category {
-    background-color: transparent;
-    color: #215E7D;
-    border: 1px solid #215E7D;
-}
-
-.btn-category:hover {
-    background-color: #215E7D;
-    color: white;
-}
-
 .btn-wastage {
     background-color: #8f2020;
     color: white;
@@ -58,70 +47,25 @@
     background-color: #6e1616;
 }
 
-.btn-restock {
-    background-color: #215E7D;
-    color: white;
-}
-
-.btn-restock:hover {
-    background-color: #123b50;
-}
-
-/*drop down (All Categories)*/
-.dropdown {
-        position: relative;
-        display: inline-block;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-        border-radius: 4px;
-    }
-
-    .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-        cursor: pointer;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #f1f1f1;
-    }
-
-    .show {
-        display: block;
-    }
-
-    .active-category {
-        background-color: #e9ecef;
-    }
-
 /* Table Toolbar */
-.table-toolbar {
+.wastage-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
 }
 
-.search-section {
+.wastage-search-section {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.search-container {
+.wastage-search-container {
     max-width: 300px;
 }
 
-.search-input {
+.wastage-search-input {
     width: 100%;
     padding: 0.5rem 1rem;
     border: 1px solid #E2E8F0;
@@ -130,25 +74,92 @@
     transition: all 0.2s;
 }
 
-.search-input:focus {
+.wastage-search-input:focus {
     outline: none;
     border-color: #4299E1;
 }
 
-.action-buttons {
+.wastage-action-buttons {
     display: flex;
     gap: 1rem;
 }
 
-/* Inventory Table */
-.inventory-table {
+/* Wastage Table */
+.wastage-table {
     background-color: white;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
 }
 
-.inventory-table th {
+.wastage-table td,
+.wastage-table th {
+    white-space: normal; /* allow line breaks */
+    word-wrap: break-word;
+    word-break: break-word;
+    vertical-align: middle; /* aligns content to the top */
+    padding: 8px; 
+}
+
+/* Make Inventory ID column smaller */
+.wastage-table th:nth-child(1),
+.wastage-table td:nth-child(1) {
+    width: 10%;
+    max-width: 150px;
+    text-align: center;
+    white-space: nowrap; /* prevents long IDs from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wastage-table th:nth-child(2),
+.wastage-table td:nth-child(2) {
+    width: 16%;
+    max-width: 200px;
+    text-align: center;
+    white-space: nowrap; 
+    text-overflow: ellipsis;
+}
+
+.wastage-table th:nth-child(3),
+.wastage-table td:nth-child(3) {
+    width: 10%;
+    max-width: 150px;
+    text-align: center;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wastage-table th:nth-child(4),
+.wastage-table td:nth-child(4) {
+    width: 14%;
+    max-width: 200px;
+    text-align: center;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Optionally control the width specifically for the Remarks column */
+.wastage-table thead th:nth-child(5),
+.wastage-table tbody td:nth-child(5) {
+    width: 20%; 
+    max-width: 200px; 
+}
+
+/* Center table headers horizontally */
+.wastage-table thead th {
+    text-align: center;
+}
+
+/* Center all table body cells horizontally too */
+.wastage-table tbody td {
+    text-align: center;
+    vertical-align: middle; /* keep it vertically centered */
+}
+
+.wastage-table th {
     background-color: #839FA9;
     color: white;
     font-weight: 600;
@@ -157,25 +168,14 @@
     border-bottom: 2px solid #E2E8F0;
 }
 
-.inventory-table td {
+.wastage-table td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #E2E8F0;
     color: #2D3748;
 }
 
-.inventory-table tbody tr:hover {
+.wastage-table tbody tr:hover {
     background-color: #e7f4f8;
-}
-
-/* Center table headers horizontally */
-.inventory-table thead th {
-    text-align: center;
-}
-
-/* Center all table body cells horizontally too */
-.inventory-table tbody td {
-    text-align: center;
-    vertical-align: middle; /* keep it vertically centered */
 }
 
 /* Table Actions */
@@ -207,7 +207,7 @@
 
 /* Responsive Table */
 @media (max-width: 1024px) {
-    .inventory-table {
+    .wastage-table {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
@@ -219,4 +219,11 @@
     background-color: transparent;
     border-radius: 0.5rem;
     padding: 1.5rem;
-} 
+}
+
+/* Wastage Container */
+.wastage-container {
+    background-color: transparent;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}

@@ -439,6 +439,152 @@ def sales():
 
     return render_template('sales.html', sales_data=dummy_sales)
 
+@app.route('/wastage')
+@login_required
+def wastage():
+
+    #Dummy data for wastage
+    dummy_wastage = [
+        {
+            'inventory_id': 'IN001',
+            'product_name': 'Will to live',
+            'quantity': '100',
+            'unit': 'my life',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'wasting my life away'
+        },
+        {
+            'inventory_id': 'IN002',
+            'product_name': 'Mental stability',
+            'quantity': '100',
+            'unit': 'per brain cells',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Im losing it bro'
+        },
+        {
+            'inventory_id': 'IN003',
+            'product_name': 'Chopao',
+            'quantity': '10',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Spoilage'
+        },
+        {
+            'inventory_id': 'IN004',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN005',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN006',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN007',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN008',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN009',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN010',
+            'product_name': 'Cat Food',
+            'quantity': '25',
+            'unit': 'pcs',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Item/s expired'
+        },
+        {
+            'inventory_id': 'IN011',
+            'product_name': 'Kim Ongchangco',
+            'quantity': '35',
+            'unit': 'per head',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'bro is too old'
+        },
+        {
+            'inventory_id': 'IN012',
+            'product_name': 'Pixel Megatron I',
+            'quantity': '1',
+            'unit': 'cat',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'bro is not even 1 yr old but is already too fat'
+        },
+        {
+            'inventory_id': 'IN013',
+            'product_name': 'Patato',
+            'quantity': '1',
+            'unit': 'kilo',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Patata? Patoto?'
+        },
+        {
+            'inventory_id': 'IN014',
+            'product_name': 'Tomato',
+            'quantity': '1',
+            'unit': 'kilo',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Tomayto or tomatoe? hmmmm...'
+        },
+        {
+            'inventory_id': 'IN015',
+            'product_name': 'Elsa',
+            'quantity': '1',
+            'unit': 'n/a',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Let it gooooo let it gooooo'
+        },
+        {
+            'inventory_id': 'IN016',
+            'product_name': 'Michael Jackson',
+            'quantity': '69',
+            'unit': 'dead',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'hee hee'
+        },
+        {
+            'inventory_id': 'IN017',
+            'product_name': 'Emoglobin',
+            'quantity': '1',
+            'unit': 'alpha',
+            'wastage date': 'May 01, 2025',
+            'remarks': 'Cause tonoigh will be the noigh that i was born fer yew aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa lorem ipsum hehehe'
+        }
+    ]
+
+    return render_template('wastage.html', wastage_data=dummy_wastage)
+
 @app.route('/pos')
 @login_required
 def pos():
