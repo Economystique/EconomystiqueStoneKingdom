@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 
 def edit_database():
-    connectionPath = os.path.join("db", "users_db.db")
+    connectionPath = os.path.join("db", "wastage_db.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
@@ -12,16 +12,7 @@ def edit_database():
     #cursor.execute("ALTER TABLE products_on_hand ADD COLUMN image BLOB")
     
     # EDIT CELL
-    '''cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",("13-05-25","C004"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(760,"C002"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(820,"C003"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(750,"C004"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(850,"C005"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(760,"C006"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(780,"C007"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(900,"C008"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(370,"C009"))
-    cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",(40,"C010"))'''
+    # cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",("13-05-25","C004"))  
 
     # DELETE ENTRY
     #cursor.execute("DELETE FROM ingredients WHERE inventory_id = 'IN014'")
@@ -30,40 +21,80 @@ def edit_database():
     #cursor.execute("ALTER TABLE ingredients DROP COLUMN 'C011'")
     
     # DELETE TABLE
-    # cursor.execute(f"DROP TABLE IF EXISTS sqlite_sequence")
+    # cursor.execute("DROP TABLE IF EXISTS sales_now")
     
     # EDIT TABLE NAME
     #cursor.execute("ALTER TABLE this_month RENAME TO apr")
     
-    # ADD BLOB IN COLUMN
-    """product_id = "C010"
-    image_path = "img/C010.png"
-    
-    def convert_to_binary(filename):
-        with open(filename, 'rb') as file:
-            return file.read()
-    
-    try:
-        image_data = convert_to_binary(image_path)
-        cursor.execute("UPDATE products_on_hand SET image = ? WHERE product_id = ?", (image_data, product_id))
-        connection.commit()
-        print(f"Image added successfully to product_id: {product_id}")
-    except Exception as e:
-        print(f"Failed to update image: {e}")
-    finally:
-        connection.close()"""
-    
-    # CREATE TABLE
+    # Wastage
     # cursor.execute("""
-    # CREATE TABLE IF NOT EXISTS user_data (
-    #     user_id TEXT PRIMARY KEY,
-    #     user_name TEXT,
-    #     email TEXT,
-    #     pw_hash TEXT,
-    #     creation_date DATE
+    # CREATE TABLE IF NOT EXISTS wastage_record (
+    #     inv_id TEXT PRIMARY KEY,
+    #     inv_desc TEXT,
+    #     quantity REAL,
+    #     unit TEXT,
+    #     remark TEXT,
+    #     dec_date DATE
     # )
     # """)
-  
+    
+    # sales
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS sales_this_year (
+    #     inv_id TEXT PRIMARY KEY,
+    #     inv_desc TEXT,
+    #     quantity_sold INTEGER,
+    #     price REAL,
+    #     sales_total REAL ALWAYS GENERATED AS (quantity_sold * price)STORED
+    # )
+    # """)
+    
+    # inv_dynamic
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS inv_dynamic (
+    #     actual_id TEXT PRIMARY KEY,
+    #     batch_id TEXT,
+    #     inv_id TEXT,
+    #     quantity INTEGER,
+    #     unit TEXT,
+    #     exp_date DATE,
+    #     rec_date DATE
+    # )
+    # """)
+    
+    # restock_cart
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS restock_cart (
+    #     inv_id TEXT PRIMARY KEY,
+    #     inv_name TEXT,
+    #     quantity INTEGER,
+    #     unit TEXT,
+    #     rop INTEGER,
+    #     exp_date DATE,
+    #     rec_date DATE
+    # )
+    # """)
+    
+    # batch_record
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS batch_record (
+    #     batch_id TEXT PRIMARY KEY,
+    #     rec_date DATE
+    # )
+    # """)
+
+    # batches
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS BATCHA00001 (
+    #     inv_id TEXT PRIMARY KEY,
+    #     inv_desc TEXT,
+    #     quantity INTEGER,
+    #     unit TEXT,
+    #     rop INTEGER,
+    #     exp_date DATE,
+    #     rec_date DATE
+    # )
+    # """)
 
     # ADD DATA
     # data = [("Ba00001","INVa00005",36,"piece","2025-06-20","2025-06-04"),
@@ -91,6 +122,24 @@ def edit_database():
     # VALUES (?, ?, ?, ?, ?)
     # """, data)
 
+    # ADD BLOB IN COLUMN
+    """product_id = "C010"
+    image_path = "img/C010.png"
+    
+    def convert_to_binary(filename):
+        with open(filename, 'rb') as file:
+            return file.read()
+    
+    try:
+        image_data = convert_to_binary(image_path)
+        cursor.execute("UPDATE products_on_hand SET image = ? WHERE product_id = ?", (image_data, product_id))
+        connection.commit()
+        print(f"Image added successfully to product_id: {product_id}")
+    except Exception as e:
+        print(f"Failed to update image: {e}")
+    finally:
+        connection.close()"""
+    
     # GET TOTAL PER YEAR
     '''cursor.execute("""
         INSERT INTO year_total (product_id, product_name, price, quantity_sold)
