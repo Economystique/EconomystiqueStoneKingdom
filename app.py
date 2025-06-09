@@ -4,6 +4,7 @@ import json
 import bcrypt
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from functools import wraps
+from collections import defaultdict
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -196,134 +197,171 @@ def dashboard():
 @app.route('/products')
 @login_required
 def products():
-    # Dummy data for design preview
-    dummy_products = [
-        {
-            'sku': 'PT001',
-            'product_name': 'Chopao',
-            'category': 'Food',
-            'brand': 'Zentra',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT002',
-            'product_name': 'Bottle Water',
-            'category': 'Beverage',
-            'brand': 'SAHUR!',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT003',
-            'product_name': 'Butter',
-            'category': 'Dairy',
-            'brand': 'VitaNest',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT004',
-            'product_name': 'Ice Cream',
-            'category': 'FrozenFood',
-            'brand': 'Sunryze',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT005',
-            'product_name': 'Sanitary Pads',
-            'category': 'Hygiene',
-            'brand': 'VelvoCare',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT006',
-            'product_name': 'Detergent',
-            'category': 'Home Supplies',
-            'brand': 'Nimbus2000',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT007',
-            'product_name': 'Notebook',
-            'category': 'Stationery',
-            'brand': 'Buzzbi',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        },
-        {
-            'sku': 'PT008',
-            'product_name': 'Cat Food',
-            'category': 'Miscellaneous',
-            'brand': 'FelineFuel',
-            'quantity': '20,711',
-            'rop': '500'
-        }
-    ]
+    conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+    cursor = conn.cursor()
+    
+    # From Static
+    cursor.execute("""
+        SELECT inv_id, inv_desc, cat, sub_cat, unit, rop
+        FROM inv_static
+    """
+    )
+    invStatic = cursor.fetchall()
+    
+    # From Dynamic    
+    cursor.execute("""
+        SELECT inv_id, quantity FROM inv_dynamic
+    """)
+    invDynamic = cursor.fetchall()
+    conn.close()
+    
+     # Sum quantities from inv_dynamic by inv_id
+    quantity_map = defaultdict(float)
+    for inv_id, quantity in invDynamic:
+        quantity_map[inv_id] += quantity
+    
+    # Combine data
+    merged_data = []
+    for inv_id, inv_desc, cat, sub_cat, unit, rop in invStatic:
+        total_qty = quantity_map.get(inv_id, 0)
+        merged_data.append({
+            "inv_id": inv_id,
+            "inv_desc": inv_desc,
+            "cat": cat,
+            "sub_cat": sub_cat,
+            "quantity": total_qty,
+            "rop": rop,
+            "unit": unit
+        })
+    
+    # # Dummy data for design preview
+    # dummy_products = [
+    #     {
+    #         'sku': 'PT001',
+    #         'product_name': 'Chopao',
+    #         'category': 'Food',
+    #         'brand': 'Zentra',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT002',
+    #         'product_name': 'Bottle Water',
+    #         'category': 'Beverage',
+    #         'brand': 'SAHUR!',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT003',
+    #         'product_name': 'Butter',
+    #         'category': 'Dairy',
+    #         'brand': 'VitaNest',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT004',
+    #         'product_name': 'Ice Cream',
+    #         'category': 'FrozenFood',
+    #         'brand': 'Sunryze',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT005',
+    #         'product_name': 'Sanitary Pads',
+    #         'category': 'Hygiene',
+    #         'brand': 'VelvoCare',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT006',
+    #         'product_name': 'Detergent',
+    #         'category': 'Home Supplies',
+    #         'brand': 'Nimbus2000',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT007',
+    #         'product_name': 'Notebook',
+    #         'category': 'Stationery',
+    #         'brand': 'Buzzbi',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     },
+    #     {
+    #         'sku': 'PT008',
+    #         'product_name': 'Cat Food',
+    #         'category': 'Miscellaneous',
+    #         'brand': 'FelineFuel',
+    #         'quantity': '20,711',
+    #         'rop': '500'
+    #     }
+    # ]
     
     # Extract categories
-    categories = sorted(set(product['category'] for product in dummy_products))
+    categories = sorted(set(product['cat'] for product in merged_data))
     
-    return render_template('products.html', products=dummy_products, categories=categories)
+    return render_template('products.html', products=merged_data, categories=categories)
 
 @app.route('/sales')
 @login_required

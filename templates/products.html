@@ -50,24 +50,26 @@
         <table class="inventory-table">
             <thead>
                 <tr>
-                    <th>SKU</th>
+                    <th>Inventory ID</th>
                     <th>Product Name</th>
-                    <th>Brand</th>
                     <th>Category</th>
-                    <th>Qty</th>
+                    <th>Subcategory</th>
+                    <th>Quantity</th>
                     <th>ROP</th>
+                    <th>Unit</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for product in products %}
-                <tr data-category="{{ product.category }}">
-                    <td>{{ product.sku }}</td>
-                    <td>{{ product.product_name }}</td>
-                    <td>{{ product.brand }}</td>
-                    <td>{{ product.category }}</td>
+                <tr data-category="{{ product.cat }}">
+                    <td>{{ product.inv_id }}</td>
+                    <td>{{ product.inv_desc }}</td>
+                    <td>{{ product.cat }}</td>
+                    <td>{{ product.sub_cat }}</td>
                     <td>{{ product.quantity }}</td>
                     <td>{{ product.rop }}</td>
+                    <td>{{ product.unit }}</td>
                     <td class="actions">
                         <button class="action-btn edit" title="Edit">✏️</button>
                         <button class="action-btn delete" title="Delete">🗑️</button>

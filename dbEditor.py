@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 
 def edit_database():
-    connectionPath = os.path.join("db", "wastage_db.db")
+    connectionPath = os.path.join("db", "inventory_db.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
@@ -97,10 +97,10 @@ def edit_database():
     # """)
 
     # ADD DATA
-    # data = [("Ba00001","INVa00005",36,"piece","2025-06-20","2025-06-04"),
-    #         ("Ba00002","INVa00006",20,"bottle","2025-10-15","2025-06-04"),
-    #         ("Ba00003","INVa00008",20,"pack","2025-12-10","2025-06-04"),
-    #         ("Ba00004","INVa00010",15,"pack","2026-06-20","2025-06-04"),\
+    # data1 = [("ITa00001","Ba00001","INVa00005",36,"piece","2025-06-20","2025-06-04"),
+    #         ("ITa00002","Ba00002","INVa00006",20,"bottle","2025-10-15","2025-06-04"),
+    #         ("ITa00003","Ba00003","INVa00008",20,"pack","2025-12-10","2025-06-04"),
+    #         ("ITa00004","Ba00004","INVa00010",15,"pack","2026-06-20","2025-06-04")
     # ]
     
     # UUID Generation
@@ -116,11 +116,10 @@ def edit_database():
     # data = [uid1,"admin","economystique@gmail.com",pw_hash,"2025-06-05"]
     
     # ADD TO TABLE
-    
-    # cursor.execute("""
-    # INSERT OR IGNORE INTO user_data (user_id, user_name, email, pw_hash, creation_date)
-    # VALUES (?, ?, ?, ?, ?)
-    # """, data)
+    # cursor.executemany("""
+    # INSERT OR IGNORE INTO inv_dynamic (actual_id, batch_id, inv_id, quantity, unit, exp_date, rec_date)
+    # VALUES (?, ?, ?, ?, ?, ?, ?)
+    # """, data1)
 
     # ADD BLOB IN COLUMN
     """product_id = "C010"
