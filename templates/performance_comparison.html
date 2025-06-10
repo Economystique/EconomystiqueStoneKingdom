@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Comparison - Economystique{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/performance_comparison.css') }}">
+{% endblock %}
+
+<!-- {% block header_title %}Performance Comparison{% endblock %} --> 
+
+{% block content %}
+<h1>Compare Performance</h1>
+<div class="content-header">
+    <p class="subtitle">Monthly Sales Comparison</p>
+</div>
+
+<div class="container-whole">
+    <div class="data-container">
+        <div class="tab-container">
+            <div class="tab-header">
+                <button class="tab-btn active">Months</button>
+                <button class="tab-btn" disabled>Years</button>
+            </div>
+
+            <!-- Dropdown to select month & year -->
+            <div class="dropdown-container">
+                <label for="month">Month:</label>
+                <select id="month">
+                    {% for m in months %}
+                    <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="year">Year:</label>
+                <select id="year">
+                    {% for y in years %}
+                    <option value="{{ y }}">{{ y }}</option>
+                    {% endfor %}
+                </select>
+
+                <button onclick="addToChart()">+</button>
+            </div>
+
+            <!-- Chart container -->
+            <div class="bar-container">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side panel with months list -->
+    <div class="table-months-container">
+        <table id="monthYearTable">
+            <thead>
+                <tr>
+                    <th>Months</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Will be dynamically filled -->
+            </tbody>
+        </table>
+        <button onclick="clearChart()" style="background-color: darkred; color: white; padding: 10px; margin-top: 10px;">Clear</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let chart;
+let chartData = {};
+let colorMap = {};
+let colors = ['#406882', '#74A5C1', '#9DD6DF', '#B6D7A8', '#D9EAD3', '#F6B26B', '#E06666'];
+let colorIndex = 0;
+
+function getColorForYear(year) {
+    if (!colorMap[year]) {
+        colorMap[year] = colors[colorIndex % colors.length];
+        colorIndex++;
+    }
+    return colorMap[year];
+}
+
+function addToChart() {
+    const month = document.getElementById('month').value;
+    const year = document.getElementById('year').value;
+    const key = `${month} ${year}`;
+
+    if (chartData[key]) return;
+
+    fetch(`/get_performance_data?month=${month}&year=${year}`)
+        .then(res => res.json())
+        .then(data => {
+            const color = getColorForYear(year);
+            const monthIndex = chart.data.labels.indexOf(month);
+            const valuesSum = data.values.reduce((a, b) => a + b, 0); // Sum of all products
+
+            const dataset = {
+                label: `${year}`,
+                backgroundColor: color,
+                data: Array(12).fill(0), // One value for each month
+                stack: 'Sales'
+            };
+            dataset.data[monthIndex] = valuesSum;
+
+            chart.data.datasets.push(dataset);
+            chart.update();
+
+            chartData[key] = true;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${key}</td>`;
+            document.querySelector("#monthYearTable tbody").appendChild(row);
+        });
+}
+
+function clearChart() {
+    chart.data.datasets = [];
+    chart.update();
+    chartData = {};
+    document.querySelector("#monthYearTable tbody").innerHTML = "";
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('barChart').getContext('2d');
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Sales Comparison'
+                },
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

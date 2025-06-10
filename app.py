@@ -477,6 +477,38 @@ def sales():
 
     return render_template('sales.html', sales_data=dummy_sales)
 
+@app.route('/performance_comparison')
+@login_required
+def performance_comparison():
+
+    # Dummy data for performance comparison
+    months = ['January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December']
+    years = ['2022', '2023', '2024', '2025']
+    return render_template('performance_comparison.html', months=months, years=years)
+
+#Dummy LOGIC
+@app.route('/get_performance_data')
+@login_required
+def get_performance_data():
+    month = request.args.get('month')
+    year = request.args.get('year')
+
+    # Simulated product data (same products as /sales)
+    all_products = [
+        'Chopao', 'Bottle Water', 'Butter', 'Ice Cream', 'Sanitary Pads',
+        'Detergent', 'Notebook', 'Cat Food'
+    ]
+
+    # Dummy logic to assign values (varies slightly by month/year)
+    import random
+    random.seed(hash(month + year))  # same results for same inputs
+
+    labels = all_products
+    values = [random.randint(5, 20) * 100 for _ in labels]  # Sales amount in pesos
+
+    return jsonify({'labels': labels, 'values': values})
+
 @app.route('/wastage')
 @login_required
 def wastage():
@@ -622,6 +654,8 @@ def wastage():
     ]
 
     return render_template('wastage.html', wastage_data=dummy_wastage)
+
+    return render_template('performance_comparison.html')
 
 @app.route('/pos')
 @login_required

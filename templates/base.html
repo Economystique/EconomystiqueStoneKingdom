@@ -30,7 +30,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link">
+                                <a href="{{ url_for('performance_comparison') }}" class="nav-link {% if request.endpoint == 'performance_comparison' %}active{% endif %}">
                                     <span class="nav-icon">☰</span>
                                     Performance Comparison
                                 </a>
