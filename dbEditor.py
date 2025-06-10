@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 
 def edit_database():
-    connectionPath = os.path.join("db", "inventory_db.db")
+    connectionPath = os.path.join("db/salesdb/daily/sales_d2025", "jul_2025.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
@@ -22,9 +22,16 @@ def edit_database():
     
     # DELETE TABLE
     # cursor.execute("DROP TABLE IF EXISTS sales_now")
+    # for i in range(6, 10): 
+    #     table_name = f"d{i}"
+    #     cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
     
     # EDIT TABLE NAME
     #cursor.execute("ALTER TABLE this_month RENAME TO apr")
+    # for i in range(1, 10):  # d1 to d9
+    #     old_name = f"d{i}"
+    #     new_name = f"d{str(i).zfill(2)}"  # zero-pads single digits to 2 digits
+    #     cursor.execute(f"ALTER TABLE {old_name} RENAME TO {new_name}")
     
     # Wastage
     # cursor.execute("""
@@ -39,15 +46,29 @@ def edit_database():
     # """)
     
     # sales
-    # cursor.execute("""
-    # CREATE TABLE IF NOT EXISTS sales_this_year (
-    #     inv_id TEXT PRIMARY KEY,
-    #     inv_desc TEXT,
-    #     quantity_sold INTEGER,
-    #     price REAL,
-    #     sales_total REAL ALWAYS GENERATED AS (quantity_sold * price)STORED
-    # )
-    # """)
+    for i in range(1, 10):  # d01-d09
+        table_name = f"d0{i}"
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {table_name} (
+                inv_id TEXT PRIMARY KEY,
+                inv_desc TEXT,
+                quantity_sold INTEGER,
+                price REAL,
+                sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+            )
+    """)
+        
+    for i in range(10, 31):  # d10-d30
+        table_name = f"d{i}"
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {table_name} (
+                inv_id TEXT PRIMARY KEY,
+                inv_desc TEXT,
+                quantity_sold INTEGER,
+                price REAL,
+                sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+            )
+        """)
     
     # inv_dynamic
     # cursor.execute("""
