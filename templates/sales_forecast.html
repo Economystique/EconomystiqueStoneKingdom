@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Forecast - Economystique{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sales_forecast.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Sales Forecast</h1>
+<div class="content-header">
+    <p class="subtitle">Get insights into your future sales trends</p>
+</div>
+
+<div class="sales-forecast-container">
+    <div class="sales-forecast-header">
+        <!-- div for the dropdowns for each product-->
+        <div class="sales-forecast-header">
+            <form method="GET" action="{{ url_for('sales_forecast') }}">
+                <label for="product">Select Product:</label>
+                <select name="product" id="product">
+                    {% for product in products %}
+                        <option value="{{ product.id }}" {% if product.id == selected_product_id %}selected{% endif %}>
+                            {{ product.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+    
+                <label for="time_range">Select Time Range:</label>
+                <select name="time_range" id="time_range">
+                    <option value="7" {% if time_range == 7 %}selected{% endif %}>Next 7 days</option>
+                    <option value="30" {% if time_range == 30 %}selected{% endif %}>Next 30 days</option>
+                    <option value="90" {% if time_range == 90 %}selected{% endif %}>Next 3 months</option>
+                </select>
+    
+                <button type="submit">Generate Forecast</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="sales-forecast-graph">
+        <!-- div for the graph -->
+        <canvas id="forecastChart"></canvas>
+    </div>
+
+    <div class="sales-forecast-assesment">
+        <!-- div for the assesment of the forecast-->
+        {% if forecast_data %}
+        <h3>Assessment</h3>
+        <p><strong>Product:</strong> {{ selected_product.name }}</p>
+        <p><strong>Estimated Total Sales:</strong> {{ forecast_summary.total_sales }}</p>
+        <p><strong>Average Daily Sales:</strong> {{ forecast_summary.avg_sales }}</p>
+        <p><strong>Trend:</strong> 
+            {% if forecast_summary.trend == 'increasing' %}
+                📈 Increasing demand
+            {% elif forecast_summary.trend == 'decreasing' %}
+                📉 Decreasing demand
+            {% else %}
+                ➡️ Stable
+            {% endif %}
+        </p>
+        {% else %}
+            <p class="no-data">Please select a product and time range to view forecast.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+<script>
+    {% if forecast_data %}
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    const forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ forecast_data.dates | tojson }},
+            datasets: [{
+                label: 'Forecasted Sales',
+                data: {{ forecast_data.sales | tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: '#4bc0c0',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Sales'
+                    }
+                }
+            },
+            responsive: true,
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}
