@@ -1,0 +1,163 @@
+/* Global layout */
+.container-whole {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 10px;
+    background-color: transparent;
+}
+
+/* Left-side content container */
+.data-container {
+    flex: 1;
+    background-color: transparent;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Tab styling */
+.tab-container {
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+}
+
+.tab-header {
+    display: flex;
+    margin-bottom: 2px;
+    background-color: transparent;
+}
+
+.tab-btn {
+    display: flex;
+    border: 1px solid #89A3AD;
+    background-color: #e8e6e6;
+    color: black;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    padding: 12px 24px;
+    margin-bottom: 2px;
+}
+
+.tab-btn.active {
+    background-color: #89A3AD;
+    border: 1px solid #89A3AD;
+    color: white;
+}
+
+/* Dropdown styling */
+.dropdown-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background-color: #89A3AD;
+    height: 80px;
+    padding: 20px;
+    color: white;
+}
+
+.dropdown-container select,
+.dropdown-container button {
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: 1px solid #ced9dd;
+    background-color: #ced9dd;
+    font-size: 14px;
+}
+
+.dropdown-container button {
+    background-color: #406882;
+    color: white;
+    font-weight: bold;
+    border: none;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
+    font-size: 20px;
+    padding: 0;
+    text-align: center;
+}
+
+/* Chart container */
+.bar-container {
+    background-color: white;
+    padding: 20px;
+}
+
+/* Table container on the right */
+.table-months-container {
+    position: relative;
+    width: 300px;
+    background-color: white;
+    padding: 10px;
+    height: 705px;
+    top: 67px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#monthYearTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+#monthYearTable thead th {
+    background-color: #1f4d66;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 16px;
+}
+
+#monthYearTable tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* Clear button */
+.table-months-container button {
+    padding: 10px;
+    background-color: darkred;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: auto;
+    width: 100%;
+}
+
+.table-months-container button:hover {
+    background-color: #a30000;
+}
+
+/* Title & Subtitle */
+.content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.content-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}

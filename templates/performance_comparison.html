@@ -6,8 +6,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/performance_comparison.css') }}">
 {% endblock %}
 
-<!-- {% block header_title %}Performance Comparison{% endblock %} --> 
-
 {% block content %}
 <h1>Compare Performance</h1>
 <div class="content-header">
@@ -22,7 +20,6 @@
                 <button class="tab-btn" disabled>Years</button>
             </div>
 
-            <!-- Dropdown to select month & year -->
             <div class="dropdown-container">
                 <label for="month">Month:</label>
                 <select id="month">
@@ -41,39 +38,32 @@
                 <button onclick="addToChart()">+</button>
             </div>
 
-            <!-- Chart container -->
             <div class="bar-container">
                 <canvas id="barChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Side panel with months list -->
     <div class="table-months-container">
         <table id="monthYearTable">
-            <thead>
-                <tr>
-                    <th>Months</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Will be dynamically filled -->
-            </tbody>
+            <thead><tr><th>Months</th></tr></thead>
+            <tbody></tbody>
         </table>
         <button onclick="clearChart()" style="background-color: darkred; color: white; padding: 10px; margin-top: 10px;">Clear</button>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
 <script>
 let chart;
-let chartData = {};
+let chartData = {}; // { "January 2025": total, ... }
 let colorMap = {};
-let colors = ['#406882', '#74A5C1', '#9DD6DF', '#B6D7A8', '#D9EAD3', '#F6B26B', '#E06666'];
 let colorIndex = 0;
+const colors = ['#406882', '#74A5C1', '#9DD6DF', '#B6D7A8', '#D9EAD3', '#F6B26B', '#E06666'];
+const monthsOrder = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
 
 function getColorForYear(year) {
     if (!colorMap[year]) {
@@ -81,6 +71,31 @@ function getColorForYear(year) {
         colorIndex++;
     }
     return colorMap[year];
+}
+
+function rebuildChartData() {
+    const uniqueMonths = Object.keys(chartData)
+        .map(k => k.split(" ")[0])
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .sort((a, b) => monthsOrder.indexOf(a) - monthsOrder.indexOf(b));
+
+    const years = [...new Set(Object.keys(chartData).map(k => k.split(" ")[1]))];
+
+    chart.data.labels = uniqueMonths;
+    chart.data.datasets = years.map(year => {
+        const color = getColorForYear(year);
+        const data = uniqueMonths.map(month => {
+            const key = `${month} ${year}`;
+            return chartData[key] || 0;
+        });
+        return {
+            label: year,
+            backgroundColor: color,
+            data: data
+        };
+    });
+
+    chart.update();
 }
 
 function addToChart() {
@@ -93,22 +108,9 @@ function addToChart() {
     fetch(`/get_performance_data?month=${month}&year=${year}`)
         .then(res => res.json())
         .then(data => {
-            const color = getColorForYear(year);
-            const monthIndex = chart.data.labels.indexOf(month);
-            const valuesSum = data.values.reduce((a, b) => a + b, 0); // Sum of all products
-
-            const dataset = {
-                label: `${year}`,
-                backgroundColor: color,
-                data: Array(12).fill(0), // One value for each month
-                stack: 'Sales'
-            };
-            dataset.data[monthIndex] = valuesSum;
-
-            chart.data.datasets.push(dataset);
-            chart.update();
-
-            chartData[key] = true;
+            const valuesSum = data.values.reduce((a, b) => a + b, 0);
+            chartData[key] = valuesSum;
+            rebuildChartData();
 
             const row = document.createElement('tr');
             row.innerHTML = `<td>${key}</td>`;
@@ -117,9 +119,10 @@ function addToChart() {
 }
 
 function clearChart() {
+    chart.data.labels = [];
     chart.data.datasets = [];
-    chart.update();
     chartData = {};
+    chart.update();
     document.querySelector("#monthYearTable tbody").innerHTML = "";
 }
 
@@ -128,32 +131,38 @@ document.addEventListener('DOMContentLoaded', function () {
     chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June',
-                     'July', 'August', 'September', 'October', 'November', 'December'],
+            labels: [],
             datasets: []
         },
-        options: {
+            options: {
             responsive: true,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Monthly Sales Comparison'
-                },
-                legend: {
-                    position: 'top'
-                }
+                legend: { position: 'top' },
+                title: { display: true }
             },
             scales: {
                 x: {
-                    stacked: true
+                    stacked: false,
+                    ticks: { autoSkip: false }
                 },
                 y: {
-                    stacked: true,
+                    stacked: false,
                     beginAtZero: true
                 }
-            }
+            },
         }
+    });
+
+    document.querySelector("#monthYearTable tbody").addEventListener('dblclick', function (e) {
+        const row = e.target.closest('tr');
+        if (!row) return;
+
+        const label = row.innerText.trim(); // e.g. "October 2025"
+        delete chartData[label];
+        rebuildChartData();
+        row.remove();
     });
 });
 </script>
+
 {% endblock %}
