@@ -85,11 +85,16 @@
 }
 
 /* Wastage Table */
+.table-container{
+    height: 100%;
+    overflow: auto;
+}
 .wastage-table {
     background-color: white;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
+    overflow: auto;
 }
 
 .wastage-table td,
@@ -108,7 +113,6 @@
     max-width: 150px;
     text-align: center;
     white-space: nowrap; /* prevents long IDs from wrapping */
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -127,7 +131,7 @@
     max-width: 150px;
     text-align: center;
     white-space: nowrap; 
-    overflow: hidden;
+    overflow: auto;
     text-overflow: ellipsis;
 }
 
@@ -137,7 +141,7 @@
     max-width: 200px;
     text-align: center;
     white-space: nowrap; 
-    overflow: hidden;
+    overflow: auto;
     text-overflow: ellipsis;
 }
 
@@ -223,6 +227,8 @@
 
 /* Wastage Container */
 .wastage-container {
+    margin-top: 0.75rem;
+    height: 85%;
     background-color: transparent;
     border-radius: 0.5rem;
     padding: 1.5rem;
