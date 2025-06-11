@@ -358,27 +358,38 @@ def sales_forecast():
 
     actual_data = []
     forecast_data_full_line = []
-    current_month = 6  # June (0-based index)
+    current_month = 6  # June (index 6, so forecast starts from July)
+
+    sales_trend_message = ""
 
     if selected_product:
-        for i in range(12):
-            if i < current_month:
-                actual_data.append(random.randint(100, 200))
-            else:
-                actual_data.append(None)
-            forecast_data_full_line.append(random.randint(150, 250))  # full-year forecast
+        for i in range(11):
+            actual_data.append(None if i >= current_month else random.randint(100, 200))
+            forecast_data_full_line.append(random.randint(150, 250))
 
-    else:
-        actual_data = []
-        forecast_data_full_line = []
-        month_labels = []
+        # Forecast trend analysis for next month only
+        if current_month + 1 < 12:
+            forecast_current = forecast_data_full_line[current_month]       
+            forecast_next = forecast_data_full_line[current_month + 1]     
+
+            if forecast_current and forecast_next:
+                diff = forecast_next - forecast_current
+                pct_change = (diff / forecast_current) * 100
+                trend = "INCREASE" if diff > 0 else "DECREASE"
+                next_month_name = month_labels[current_month]
+
+                sales_trend_message = (
+                    f"Sales are expected to <strong>{trend}</strong> in <strong>{next_month_name}</strong> "
+                    f"by <strong>{abs(pct_change):.1f}%</strong> based on forecasted values."
+                )
 
     return render_template('sales_forecast.html',
                            products=products,
                            selected_product_id=product_id,
                            labels=month_labels,
                            actual_data=actual_data,
-                           forecast_data_full_line=forecast_data_full_line)
+                           forecast_data_full_line=forecast_data_full_line,
+                           sales_trend_message=sales_trend_message)
 
 @app.route('/performance_comparison')
 @login_required

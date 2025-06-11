@@ -32,7 +32,15 @@
     <div class="canvas-container">
         <canvas id="forecastChart"></canvas>
     </div>
+
+    <!-- sales analysis -->
+    {% if sales_trend_message %}
+    <div class="mt-4 p-4 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 shadow">
+        {{ sales_trend_message | safe }}
+    </div>
+    {% endif %}
 </div>
+
 {% endblock %}
 
 {% block extra_js %}

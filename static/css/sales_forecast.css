@@ -23,3 +23,26 @@
     margin-top: 1rem;
 }
 
+/* Container */
+.container-whole {
+    background-color: transparent;
+}
+
+/* Dropdown */
+.dropdown-container {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: flex-end;
+    background-color: transparent;
+}
+
+/*chart*/
+.canvas-container {
+    background-color: white;
+}
+
+
+
