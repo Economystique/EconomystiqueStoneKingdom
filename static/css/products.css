@@ -111,6 +111,12 @@
     margin-bottom: 1rem;
 }
 
+.table-container{
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+}
+
 .search-section {
     display: flex;
     align-items: center;
@@ -170,6 +176,9 @@
 /* Center table headers horizontally */
 .inventory-table thead th {
     text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 5;
 }
 
 /* Center all table body cells horizontally too */
