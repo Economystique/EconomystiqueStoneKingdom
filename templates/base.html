@@ -70,7 +70,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link">
+                                <a href="{{ url_for('sales_forecast') }}" class="nav-link {% if request.endpoint == 'sales_forecast' %}active{% endif %}">
                                     <span class="nav-icon">📊</span>
                                     Sales Forecast
                                 </a>

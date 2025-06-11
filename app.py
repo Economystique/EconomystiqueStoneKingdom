@@ -8,6 +8,7 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import random
 import torch
 from transformers import pipeline, GPTNeoForCausalLM, GPT2Tokenizer
 import webview
@@ -339,6 +340,14 @@ def sales():
 
     return render_template('sales.html', sales_data=dummy_sales)
 
+@app.route('/sales_forecast')
+@login_required
+def sales_forecast(product_id days):
+
+    #dummy
+
+    return render_template('sales_forecast.html')
+
 @app.route('/performance_comparison')
 @login_required
 def performance_comparison():
@@ -615,41 +624,6 @@ def checkout():
         conn.close()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/sales_forecast', methods=['POST'])
-@login_required
-def sales_forecast():
-    data = request.get_json()
-    product_id = data.get('product_id')
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # Get historical sales data
-    cursor.execute("""
-        SELECT date, quantity
-        FROM sales
-        WHERE product_id = ?
-        ORDER BY date
-    """, (product_id,))
-    sales_history = cursor.fetchall()
-    
-    if not sales_history:
-        conn.close()
-        return jsonify({'error': 'No sales history found'}), 404
-    
-    # Convert to pandas DataFrame
-    df = pd.DataFrame(sales_history, columns=['date', 'quantity'])
-    df['date'] = pd.to_datetime(df['date'])
-    df.set_index('date', inplace=True)
-    
-    # Simple forecasting using moving average
-    forecast = df['quantity'].rolling(window=7).mean().iloc[-1]
-
-    conn.close()
-    return jsonify({
-        'forecast': round(forecast, 2),
-        'history': df['quantity'].tolist()
-    })
 def on_loaded():
     webview.windows[0].gui.window.showMaximized()
 
