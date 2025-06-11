@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 
 def edit_database():
-    connectionPath = os.path.join("db/salesdb/daily/sales_d2025", "jan_2025.db")
+    connectionPath = os.path.join("db", "inventory_db.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
@@ -138,10 +138,64 @@ def edit_database():
     # """)
 
     # ADD DATA
-    data1 = [("INVa00001","Bimoli Cooking Oil 500 ml",2,135, 270),
-             ("INVa00001","Bimoli Cooking Oil 500 ml",2,135, 270),
-            
+    data = [
+        ("INVa00001", "Bimoli Cooking Oil 500 ml", "Cooking", "Cooking Oil", "pack", 30),
+        ("INVa00002", "Silver Swan Soy Souce 500 ml","Cooking", "Soy Sauce", "pack", 30),
+        ("INVa00003", "Lucky Me! Pancit Canton Chili Mansi 50 g", "Easy Prep", "Instant Noodles", "pack", 30),
+        ("INVa00004", "Lucky Me! Pancit Canton Extra Hot 50 g", "Easy Prep", "Instant Noodles", "pack", 30),
+        ("INVa00005", "Bounty Fresh Eggs L", "Eggs & Dairy", "Egg", "piece", 36),
+        ("INVa00006", "Coca Cola Coke 1.5 L", "Beverages", "Soft Drinks", "bottle", 20),
+        ("INVa00007", "Rebisco Crackers 30 g", "Snacks", "Instant Noodles", "pack", 50),
+        ("INVa00008", "Oreo Cookies 45 g", "Snacks", "Biscuits", "pack", 50),
+        ("INVa00009", "Piattos Sour Cream Onion 90g", "Snacks", "Chips", "pack", 30),
+        ("INVa00010", "Surf Powder Lavender 150 g", "Cleaning", "Laundry", "pack", 15),
+        ("INVa00011", "Argentina Corned Beef 150 g", "Cooking", "Canned Goods", "can", 20),
+        ("INVa00012", "555 Sardines in Tomato Sauce 155 g", "Cooking", "Canned Goods", "can", 20),
+        ("INVa00013", "Purefoods Hotdog Regular 1 kg", "Easy Prep", "Frozen Goods", "pack", 10),
+        ("INVa00014", "Magnolia Cheezee 165 g", "Eggs & Dairy", "Cheese", "pack", 10),
+        ("INVa00015", "Bear Brand Powdered Milk 320 g", "Eggs & Dairy", "Milk", "pack", 15),
+        ("INVa00016", "Milo Chocolate Drink 220 g", "Beverages", "Powdered Drinks", "pack", 10),
+        ("INVa00017", "Nescafe Classic 100 g", "Beverages", "Coffee", "jar", 8),
+        ("INVa00018", "Zesto Orange Juice 250 ml", "Beverages", "Juice", "tetra", 40),
+        ("INVa00019", "Tang Pineapple Powder Drink 25 g", "Beverages", "Powdered Drinks", "sachet", 50),
+        ("INVa00020", "Lifebuoy Antibacterial Soap 90 g", "Personal Care", "Soap", "bar", 30),
+        ("INVa00021", "Head & Shoulders Shampoo 170 ml", "Personal Care", "Shampoo", "bottle", 15),
+        ("INVa00022", "Colgate Toothpaste 150 ml", "Personal Care", "Toothpaste", "tube", 25),
+        ("INVa00023", "Modess Regular Pads 8s", "Personal Care", "Sanitary", "pack", 20),
+        ("INVa00024", "Safeguard Body Wash 400 ml", "Personal Care", "Soap", "bottle", 10),
+        ("INVa00025", "Tide Powder Detergent 500 g", "Cleaning", "Laundry", "pack", 20),
+        ("INVa00026", "Domex Toilet Cleaner 500 ml", "Cleaning", "Bathroom", "bottle", 10),
+        ("INVa00027", "Mr. Muscle Glass Cleaner 500 ml", "Cleaning", "Surface Cleaner", "bottle", 12),
+        ("INVa00028", "Joy Dishwashing Liquid 495 ml", "Cleaning", "Kitchen", "bottle", 15),
+        ("INVa00029", "Scotch Brite Sponge", "Cleaning", "Kitchen", "piece", 20),
+        ("INVa00030", "Gardenia Classic Bread Loaf", "Bakery", "Bread", "pack", 25),
+        ("INVa00031", "Marby Tasty Bread", "Bakery", "Bread", "pack", 25),
+        ("INVa00032", "Fita Biscuits 33 g", "Snacks", "Biscuits", "pack", 40),
+        ("INVa00033", "Nova Multigrain Snacks 78 g", "Snacks", "Chips", "pack", 30),
+        ("INVa00034", "Nagaraya Garlic Cracker Nuts 160 g", "Snacks", "Nuts", "pack", 20),
+        ("INVa00035", "Cloud 9 Classic Chocolate Bar", "Snacks", "Chocolates", "piece", 35),
+        ("INVa00036", "C2 Apple 500 ml", "Beverages", "Tea Drinks", "bottle", 30),
+        ("INVa00037", "Selecta Super Thick Vanilla 1.5L", "Easy Prep", "Frozen Goods", "tub", 8),
+        ("INVa00038", "Nestlé All Purpose Cream 250 ml", "Cooking", "Baking", "pack", 20),
+        ("INVa00039", "Maya All Purpose Flour 1 kg", "Cooking", "Baking", "pack", 10),
+        ("INVa00040", "Brown Sugar 1 kg", "Cooking", "Baking", "pack", 15),
+        ("INVa00041", "Ajinomoto Vetsin 250 g", "Cooking", "Seasoning", "pack", 25),
+        ("INVa00042", "Datu Puti Vinegar 1 L", "Cooking", "Condiments", "bottle", 25),
+        ("INVa00043", "Datu Puti Soy Sauce 1 L", "Cooking", "Condiments", "bottle", 25),
+        ("INVa00044", "Lucky Me! Beef Mami 55 g", "Easy Prep", "Instant Noodles", "pack", 40),
+        ("INVa00045", "Quickchow Chicken 50 g", "Easy Prep", "Instant Noodles", "pack", 40),
+        ("INVa00046", "Alaska Evaporated Milk 370 ml", "Eggs & Dairy", "Milk", "can", 25),
+        ("INVa00047", "Yakult Probiotic Drink 80 ml", "Beverages", "Probiotic", "bottle", 50),
+        ("INVa00048", "Chippy BBQ 110 g", "Snacks", "Chips", "pack", 30),
+        ("INVa00049", "Ligo Sardines Green 155 g", "Cooking", "Canned Goods", "can", 20),
+        ("INVa00050", "Energizer AA Battery 2s", "Personal Care", "Essentials", "pack", 10)
     ]
+    
+    # ADD TO TABLE
+    cursor.executemany("""
+    INSERT OR IGNORE INTO inv_static (inv_id, inv_desc, cat, sub_cat, unit, rop)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, data)
     
     # UUID Generation
     # user_name = "admin"
@@ -155,11 +209,7 @@ def edit_database():
     
     # data = [uid1,"admin","economystique@gmail.com",pw_hash,"2025-06-05"]
     
-    # ADD TO TABLE
-    # cursor.executemany("""
-    # INSERT OR IGNORE INTO inv_dynamic (actual_id, batch_id, inv_id, quantity, unit, exp_date, rec_date)
-    # VALUES (?, ?, ?, ?, ?, ?, ?)
-    # """, data1)
+    
 
     # ADD BLOB IN COLUMN
     # product_id = "C010"
