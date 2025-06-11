@@ -45,11 +45,16 @@
     </div>
 
     <div class="table-months-container">
-        <table id="monthYearTable">
-            <thead><tr><th>Months</th></tr></thead>
-            <tbody></tbody>
-        </table>
-        <button onclick="clearChart()" style="background-color: darkred; color: white; padding: 10px; margin-top: 10px;">Clear</button>
+        <div class="table-inner-container">
+            <table id="monthYearTable">
+                <thead><tr>
+                    <div class="table-head-container"><th>Months</th></div></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="clear-button-container">
+            <button onclick="clearChart()" style="background-color: darkred; color: white; padding: 10px; margin-top: 10px;">Clear</button>
+        </div>
     </div>
 </div>
 {% endblock %}
