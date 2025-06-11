@@ -107,6 +107,9 @@
 
 #monthYearTable thead th {
     background-color: #1f4d66;
+    margin-top: 5px;
+    position: flex ;
+    z-index: 5;
     color: white;
     padding: 10px;
     text-align: center;
@@ -119,9 +122,13 @@
     text-align: center;
     cursor: pointer;
 }
+.table-inner-container{
+    overflow: auto;
+    display: flex;
+}
 
-/* Clear button */
 .table-months-container button {
+    
     padding: 10px;
     background-color: darkred;
     color: white;
@@ -131,6 +138,14 @@
     cursor: pointer;
     margin-top: auto;
     width: 100%;
+}
+
+/* Clear button */
+.clear-button-container {
+    z-index: 5;
+    width: 100%;
+    margin-bottom: 5px;
+    position: flex;
 }
 
 .table-months-container button:hover {
