@@ -340,13 +340,45 @@ def sales():
 
     return render_template('sales.html', sales_data=dummy_sales)
 
-@app.route('/sales_forecast')
+@app.route('/sales_forecast', methods=['GET'])
 @login_required
-def sales_forecast(product_id days):
+def sales_forecast():
+    product_id = request.args.get('product', type=int)
 
-    #dummy
+    products = [
+        {'id': 1, 'name': 'Chocolate Cake'},
+        {'id': 2, 'name': 'Red Velvet'},
+        {'id': 3, 'name': 'Cheesecake'}
+    ]
 
-    return render_template('sales_forecast.html')
+    selected_product = next((p for p in products if p['id'] == product_id), None)
+
+    month_labels = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December']
+
+    actual_data = []
+    forecast_data_full_line = []
+    current_month = 6  # June (0-based index)
+
+    if selected_product:
+        for i in range(12):
+            if i < current_month:
+                actual_data.append(random.randint(100, 200))
+            else:
+                actual_data.append(None)
+            forecast_data_full_line.append(random.randint(150, 250))  # full-year forecast
+
+    else:
+        actual_data = []
+        forecast_data_full_line = []
+        month_labels = []
+
+    return render_template('sales_forecast.html',
+                           products=products,
+                           selected_product_id=product_id,
+                           labels=month_labels,
+                           actual_data=actual_data,
+                           forecast_data_full_line=forecast_data_full_line)
 
 @app.route('/performance_comparison')
 @login_required
