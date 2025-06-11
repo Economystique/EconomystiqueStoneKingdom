@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 
 def edit_database():
-    connectionPath = os.path.join("db/salesdb", "sales_yearly.db")
+    connectionPath = os.path.join("db/salesdb/daily/sales_d2025", "jan_2025.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
@@ -138,11 +138,10 @@ def edit_database():
     # """)
 
     # ADD DATA
-    # data1 = [("ITa00001","Ba00001","INVa00005",36,"piece","2025-06-20","2025-06-04"),
-    #         ("ITa00002","Ba00002","INVa00006",20,"bottle","2025-10-15","2025-06-04"),
-    #         ("ITa00003","Ba00003","INVa00008",20,"pack","2025-12-10","2025-06-04"),
-    #         ("ITa00004","Ba00004","INVa00010",15,"pack","2026-06-20","2025-06-04")
-    # ]
+    data1 = [("INVa00001","Bimoli Cooking Oil 500 ml",2,135, 270),
+             ("INVa00001","Bimoli Cooking Oil 500 ml",2,135, 270),
+            
+    ]
     
     # UUID Generation
     # user_name = "admin"
@@ -163,57 +162,22 @@ def edit_database():
     # """, data1)
 
     # ADD BLOB IN COLUMN
-    """product_id = "C010"
-    image_path = "img/C010.png"
+    # product_id = "C010"
+    # image_path = "img/C010.png"
     
-    def convert_to_binary(filename):
-        with open(filename, 'rb') as file:
-            return file.read()
+    # def convert_to_binary(filename):
+    #     with open(filename, 'rb') as file:
+    #         return file.read()
     
-    try:
-        image_data = convert_to_binary(image_path)
-        cursor.execute("UPDATE products_on_hand SET image = ? WHERE product_id = ?", (image_data, product_id))
-        connection.commit()
-        print(f"Image added successfully to product_id: {product_id}")
-    except Exception as e:
-        print(f"Failed to update image: {e}")
-    finally:
-        connection.close()"""
-    
-    # GET TOTAL PER YEAR
-    '''cursor.execute("""
-        INSERT INTO year_total (product_id, product_name, price, quantity_sold)
-        SELECT 
-            product_id, 
-            product_name, 
-            price, 
-            SUM(quantity_sold)
-        FROM (
-            SELECT * FROM jan
-            UNION ALL
-            SELECT * FROM feb
-            UNION ALL
-            SELECT * FROM mar
-            UNION ALL
-            SELECT * FROM may
-            UNION ALL
-            SELECT * FROM jun
-            UNION ALL
-            SELECT * FROM jul
-            UNION ALL
-            SELECT * FROM aug
-            UNION ALL
-            SELECT * FROM sep
-            UNION ALL
-            SELECT * FROM oct
-            UNION ALL
-            SELECT * FROM nov
-            UNION ALL
-            SELECT * FROM dec
-        ) 
-        GROUP BY product_id
-        ON CONFLICT(product_id) DO UPDATE SET quantity_sold=excluded.quantity_sold;
-        """)'''
+    # try:
+    #     image_data = convert_to_binary(image_path)
+    #     cursor.execute("UPDATE products_on_hand SET image = ? WHERE product_id = ?", (image_data, product_id))
+    #     connection.commit()
+    #     print(f"Image added successfully to product_id: {product_id}")
+    # except Exception as e:
+    #     print(f"Failed to update image: {e}")
+    # finally:
+    #     connection.close()
     
     connection.commit()
     connection.close()
