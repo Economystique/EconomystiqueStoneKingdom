@@ -4,12 +4,147 @@
 
 {% block header_title %}Point of Sale{% endblock %}
 
+{% block extra_css %}
+<style>
+    body {
+        font-family: 'Fira Code', monospace;
+        background-color: #fdfdfd;
+    }
+    .pos-container {
+        display: flex;
+        gap: 1rem;
+        height: calc(100vh - var(--header-height) - 40px);
+        padding: 1rem;
+    }
+    .products-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .search-bar {
+        margin-bottom: 1rem;
+    }
+    .search-bar input {
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        width: 100%;
+        border: 1px solid #ccc;
+    }
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1rem;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+    .product-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.2s ease-in-out;
+    }
+    .product-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .product-image {
+        width: 100%;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fafafa;
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    .product-image img {
+        max-height: 100%;
+        object-fit: contain;
+    }
+    .product-info h3 {
+        font-size: 1rem;
+        font-weight: bold;
+        margin: 0.25rem 0;
+    }
+    .product-info .price {
+        color: #2c7a7b;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    .product-info .stock {
+        font-size: 0.75rem;
+        color: #777;
+    }
+    .cart-section {
+        width: 400px;
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+    }
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .cart-items {
+        flex-grow: 1;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    .cart-summary {
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+    }
+    .cart-summary div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .btn-checkout {
+        background: #2c7a7b;
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .btn-checkout:hover {
+        background: #285e61;
+    }
+    @media (max-width: 768px) {
+        .pos-container {
+            flex-direction: column;
+        }
+        .cart-section {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="pos-container">
-    <!-- Products Grid -->
     <div class="products-section">
         <div class="search-bar">
-            <input type="text" class="form-control" id="searchProducts" placeholder="Search products...">
+            <input type="text" id="searchProducts" placeholder="Search products...">
         </div>
         <div class="products-grid">
             {% for product in products %}
@@ -18,9 +153,7 @@
                     {% if product.image %}
                     <img src="{{ url_for('static', filename='img/products/' + product.image) }}" alt="{{ product.name }}">
                     {% else %}
-                    <div class="no-image">
-                        <i class="fas fa-box"></i>
-                    </div>
+                    <span style="font-size: 2rem; color: #ccc;">🧁</span>
                     {% endif %}
                 </div>
                 <div class="product-info">
@@ -33,351 +166,20 @@
         </div>
     </div>
 
-    <!-- Cart Section -->
     <div class="cart-section">
         <div class="cart-header">
-            <h2>Shopping Cart</h2>
-            <button class="btn btn-danger" onclick="clearCart()">
-                <i class="fas fa-trash"></i> Clear Cart
-            </button>
+            <h2 style="margin: 0">Cart</h2>
+            <button onclick="clearCart()">🗑️</button>
         </div>
         <div class="cart-items" id="cartItems">
-            <!-- Cart items will be added here dynamically -->
+            <!-- Items added via JS -->
         </div>
         <div class="cart-summary">
-            <div class="subtotal">
-                <span>Subtotal:</span>
-                <span id="subtotal">₱0.00</span>
-            </div>
-            <div class="tax">
-                <span>Tax (12%):</span>
-                <span id="tax">₱0.00</span>
-            </div>
-            <div class="total">
-                <span>Total:</span>
-                <span id="total">₱0.00</span>
-            </div>
-            <button class="btn btn-primary btn-checkout" onclick="checkout()">
-                <i class="fas fa-cash-register"></i> Checkout
-            </button>
+            <div><span>Subtotal</span><span id="subtotal">₱0.00</span></div>
+            <div><span>Tax (12%)</span><span id="tax">₱0.00</span></div>
+            <div style="font-weight:bold;"><span>Total</span><span id="total">₱0.00</span></div>
+            <button class="btn-checkout" onclick="checkout()">Checkout</button>
         </div>
     </div>
 </div>
 {% endblock %}
-
-{% block extra_css %}
-<style>
-.pos-container {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 20px;
-    height: calc(100vh - var(--header-height) - 40px);
-}
-
-.products-section {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.search-bar {
-    padding: 10px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-}
-
-.product-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.product-image {
-    height: 150px;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.product-image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover;
-}
-
-.no-image {
-    font-size: 48px;
-    color: #ccc;
-}
-
-.product-info {
-    padding: 15px;
-}
-
-.product-info h3 {
-    margin: 0 0 10px 0;
-    font-size: 16px;
-}
-
-.price {
-    font-weight: bold;
-    color: var(--primary-color);
-    margin: 0;
-}
-
-.stock {
-    color: #666;
-    font-size: 14px;
-    margin: 5px 0 0 0;
-}
-
-.cart-section {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-}
-
-.cart-header {
-    padding: 20px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.cart-items {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.cart-item-info {
-    flex: 1;
-}
-
-.cart-item-name {
-    font-weight: 500;
-}
-
-.cart-item-price {
-    color: #666;
-    font-size: 14px;
-}
-
-.cart-item-quantity {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.cart-item-quantity button {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ddd;
-    background: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.cart-item-quantity button:hover {
-    background-color: #f8f9fa;
-}
-
-.cart-summary {
-    padding: 20px;
-    border-top: 1px solid #ddd;
-}
-
-.subtotal,
-.tax,
-.total {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.total {
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-}
-
-.btn-checkout {
-    width: 100%;
-    padding: 15px;
-    font-size: 18px;
-}
-
-@media (max-width: 1200px) {
-    .pos-container {
-        grid-template-columns: 1fr 350px;
-    }
-}
-
-@media (max-width: 992px) {
-    .pos-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr auto;
-    }
-
-    .cart-section {
-        height: 400px;
-    }
-}
-</style>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-let cart = [];
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize search functionality
-    const searchInput = document.getElementById('searchProducts');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const productCards = document.querySelectorAll('.product-card');
-        
-        productCards.forEach(card => {
-            const productName = card.querySelector('h3').textContent.toLowerCase();
-            card.style.display = productName.includes(searchTerm) ? 'block' : 'none';
-        });
-    });
-});
-
-function addToCart(productId, name, price, stock) {
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        if (existingItem.quantity < stock) {
-            existingItem.quantity++;
-            existingItem.total = existingItem.quantity * price;
-        } else {
-            alert('Not enough stock available.');
-            return;
-        }
-    } else {
-        cart.push({
-            id: productId,
-            name: name,
-            price: price,
-            quantity: 1,
-            total: price,
-            stock: stock
-        });
-    }
-    
-    updateCartDisplay();
-}
-
-function updateQuantity(index, change) {
-    const item = cart[index];
-    const newQuantity = item.quantity + change;
-    
-    if (newQuantity > 0 && newQuantity <= item.stock) {
-        item.quantity = newQuantity;
-        item.total = item.quantity * item.price;
-        updateCartDisplay();
-    } else if (newQuantity === 0) {
-        cart.splice(index, 1);
-        updateCartDisplay();
-    }
-}
-
-function updateCartDisplay() {
-    const cartItems = document.getElementById('cartItems');
-    cartItems.innerHTML = '';
-    
-    cart.forEach((item, index) => {
-        const itemElement = document.createElement('div');
-        itemElement.className = 'cart-item';
-        itemElement.innerHTML = `
-            <div class="cart-item-info">
-                <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">₱${item.price.toLocaleString('en-PH', {minimumFractionDigits: 2})}</div>
-            </div>
-            <div class="cart-item-quantity">
-                <button onclick="updateQuantity(${index}, -1)">-</button>
-                <span>${item.quantity}</span>
-                <button onclick="updateQuantity(${index}, 1)">+</button>
-            </div>
-            <div class="cart-item-total">₱${item.total.toLocaleString('en-PH', {minimumFractionDigits: 2})}</div>
-        `;
-        cartItems.appendChild(itemElement);
-    });
-    
-    // Update summary
-    const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-    const tax = subtotal * 0.12;
-    const total = subtotal + tax;
-    
-    document.getElementById('subtotal').textContent = `₱${subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
-    document.getElementById('tax').textContent = `₱${tax.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
-    document.getElementById('total').textContent = `₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
-}
-
-function clearCart() {
-    if (cart.length > 0 && confirm('Are you sure you want to clear the cart?')) {
-        cart = [];
-        updateCartDisplay();
-    }
-}
-
-async function checkout() {
-    if (cart.length === 0) {
-        alert('Cart is empty.');
-        return;
-    }
-    
-    try {
-        const response = await window.app.fetchData('/api/checkout', {
-            method: 'POST',
-            body: JSON.stringify({
-                cart_items: cart
-            })
-        });
-        
-        if (response.success) {
-            alert('Checkout successful!');
-            cart = [];
-            updateCartDisplay();
-            location.reload();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred during checkout.');
-    }
-}
-</script>
-{% endblock %} 

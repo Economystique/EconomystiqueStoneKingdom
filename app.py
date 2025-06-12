@@ -574,16 +574,32 @@ def wastage():
 @app.route('/pos')
 @login_required
 def pos():
-    conn = get_db_connection()
-    cursor = conn.cursor()
- 
-    # Get available products
-    cursor.execute("SELECT * FROM products WHERE stock > 0 ORDER BY name")
-    products = cursor.fetchall()
-    
-    conn.close()
+    products = [
+        {
+            "id": 1,
+            "name": "Chocolate Cake",
+            "price": 350.00,
+            "stock": 15,
+            "image": "choco_cake.jpg"
+        },
+        {
+            "id": 2,
+            "name": "Ube Macapuno",
+            "price": 400.00,
+            "stock": 8,
+            "image": "ube_macapuno.jpg"
+        },
+        {
+            "id": 3,
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        }
+    ]
     
     return render_template('pos.html', products=products)
+
 
 @app.route('/account')
 @login_required
