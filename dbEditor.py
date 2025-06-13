@@ -21,7 +21,7 @@ def edit_database():
     # cursor.execute("DELETE FROM inv_dynamic WHERE actual_id = 'ITa00004'")
 
     # DELETE COLUMN
-    #cursor.execute("ALTER TABLE ingredients DROP COLUMN 'C011'")
+    # cursor.execute("ALTER TABLE ingredients DROP COLUMN 'C011'")
 
     # DELETE TABLE
     # cursor.execute("DROP TABLE IF EXISTS Ba00000")
@@ -74,15 +74,15 @@ def edit_database():
     # """)
     
     # wastage
-    data_wastage=[
-        ("INVa00031","Marby Tasty Bread","7","pack","Expired","2025-06-13"),
-        ("INVa00048","Chippy BBQ 110 g","5","pack","Deflated, compromised packaging","2025-06-13"),
-        ("INVa00006","Coca Cola Coke 1.5 L","2","bottle","Leaking bottle","2025-06-13"),
-    ]
-    cursor.executemany("""
-    INSERT OR IGNORE INTO wastage_record (inv_id, inv_desc, quantity, unit, remark, dec_date)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """, data_wastage)
+    # data_wastage=[
+    #     ("INVa00031","Marby Tasty Bread","7","pack","Expired","2025-06-13"),
+    #     ("INVa00048","Chippy BBQ 110 g","5","pack","Deflated, compromised packaging","2025-06-13"),
+    #     ("INVa00006","Coca Cola Coke 1.5 L","2","bottle","Leaking bottle","2025-06-13"),
+    # ]
+    # cursor.executemany("""
+    # INSERT OR IGNORE INTO wastage_record (inv_id, inv_desc, quantity, unit, remark, dec_date)
+    # VALUES (?, ?, ?, ?, ?, ?)
+    # """, data_wastage)
     
     # data__inv_dynamic = [
     #     ("ITa00001", "Ba00001", "INVa00001", 17, "pack", "2025-09-18", "2025-06-01"),
