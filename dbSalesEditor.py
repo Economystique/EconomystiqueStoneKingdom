@@ -92,7 +92,7 @@ def edit_database():
     #             sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
     #         )
     # """)
-    
+
     # inv_dynamic
     # cursor.execute("""
     # CREATE TABLE IF NOT EXISTS inv_dynamic (
@@ -105,7 +105,7 @@ def edit_database():
     #     rec_date DATE
     # )
     # """)
-    
+
     # restock_cart
     # cursor.execute("""
     # CREATE TABLE IF NOT EXISTS restock_cart (
