@@ -78,6 +78,21 @@ def edit_database():
     #     ("INVa00031","Marby Tasty Bread","7","pack","Expired","2025-06-13"),
     #     ("INVa00048","Chippy BBQ 110 g","5","pack","Deflated, compromised packaging","2025-06-13"),
     #     ("INVa00006","Coca Cola Coke 1.5 L","2","bottle","Leaking bottle","2025-06-13"),
+    #     ("INVa00001", "Bimoli Cooking Oil 500 ml", "3", "pack", "Broken seal", "2025-06-12"),
+    #     ("INVa00008", "Oreo Cookies 45 g", "4", "pack", "Expired", "2025-06-10"),
+    #     ("INVa00030", "Gardenia Classic Bread Loaf", "6", "pack", "Mold growth", "2025-06-09"),
+    #     ("INVa00024", "Safeguard Body Wash 400 ml", "2", "bottle", "Cracked bottle", "2025-06-07"),
+    #     ("INVa00034", "Nagaraya Garlic Cracker Nuts 160 g", "3", "pack", "Stale product", "2025-06-06"),
+    #     ("INVa00044", "Lucky Me! Beef Mami 55 g", "8", "pack", "Improper storage", "2025-06-05"),
+    #     ("INVa00005", "Bounty Fresh Eggs L", "12", "piece", "Spoiled", "2025-06-04"),
+    #     ("INVa00012", "555 Sardines in Tomato Sauce 155 g", "5", "can", "Rusty can", "2025-06-03"),
+    #     ("INVa00038", "Nestlé All Purpose Cream 250 ml", "2", "pack", "Expired", "2025-06-02"),
+    #     ("INVa00015", "Bear Brand Powdered Milk 320 g", "1", "pack", "Torn packaging", "2025-06-01"),
+    #     ("INVa00027", "Mr. Muscle Glass Cleaner 500 ml", "1", "bottle", "Cracked bottle", "2025-05-31"),
+    #     ("INVa00042", "Datu Puti Vinegar 1 L", "2", "bottle", "Leaking cap", "2025-05-30"),
+    #     ("INVa00047", "Yakult Probiotic Drink 80 ml", "6", "bottle", "Spoiled due to no refrigeration", "2025-05-28"),
+    #     ("INVa00045", "Quickchow Chicken 50 g", "7", "pack", "Expired", "2025-05-26"),
+    #     ("INVa00011", "Argentina Corned Beef 150 g", "2", "can", "Dented and bloated", "2025-05-25")
     # ]
     # cursor.executemany("""
     # INSERT OR IGNORE INTO wastage_record (inv_id, inv_desc, quantity, unit, remark, dec_date)
