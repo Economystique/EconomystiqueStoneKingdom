@@ -28,17 +28,23 @@
         </form>
     </div>
 
-    <!--chart-->
-    <div class="canvas-container">
-        <canvas id="forecastChart"></canvas>
-    </div>
+    <div class="data-container">
+        <!--chart-->
+        <div class="second-container">
+            <div class="canvas-container">
+                <canvas id="forecastChart"></canvas>
+            </div>
+        </div>
 
-    <!-- sales analysis -->
-    {% if sales_trend_message %}
-    <div class="mt-4 p-4 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 shadow">
-        {{ sales_trend_message | safe }}
+        <!-- sales analysis -->
+        <div class="if-container">
+            {% if sales_trend_message %}
+            <div class="assessmet-container">
+                {{ sales_trend_message | safe }}
+            </div>
+            {% endif %}
+        </div>
     </div>
-    {% endif %}
 </div>
 
 {% endblock %}

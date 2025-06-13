@@ -71,22 +71,54 @@
     text-align: center;
 }
 
+/*data (chart and assessment)*/
+.data-container {
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center children horizontally */
+    gap: 10px; 
+    border-radius: 8px;
+}
 
-/*chart*/
+/* chart container */
+.second-container {
+    padding: 25px;
+    background-color: white;
+    width: 100%;
+    max-width: 5000px;
+    display: flex;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+/* canvas wrapper */
 .canvas-container {
     background-color: white;
-    padding: 20px;
-    height: 700px;
-    width: auto;
+    height: 600px;
+    width: 100%;
+    max-width: 1300px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
 }
 
 #forecastChart {
-    width: 85% !important;
-    height: 85% !important;
+    width: 100% !important;
+    height: 100% !important;
     display: block;
     position: relative;
 }
 
-
-
+/*Assessment*/
+.if-container {
+    background-color: #365B6D;
+    padding: 30px;
+    color: white;
+    width: 100%;
+    max-width: 1800px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.5rem;
+}
 

@@ -376,12 +376,16 @@ def sales_forecast():
                 diff = forecast_next - forecast_current
                 pct_change = (diff / forecast_current) * 100
                 trend = "INCREASE" if diff > 0 else "DECREASE"
+                trend_color = "#3fd55b" if diff > 0 else "red"
                 next_month_name = month_labels[current_month + 1]
 
                 sales_trend_message = (
-                    f"Sales are expected to <strong>{trend}</strong> in <strong>{next_month_name}</strong> "
-                    f"by <strong>{abs(pct_change):.1f}%</strong> based on forecasted values."
+                    f"Sales are expected to <strong><span style='color: {trend_color};'>{trend}</span></strong> "
+                    f"in <strong>{next_month_name}</strong> by "
+                    f"<strong><span style='color: {trend_color};'>{abs(pct_change):.1f}%</span></strong> "
+                    f"based on forecasted values."
                 )
+
 
     return render_template('sales_forecast.html',
                            products=products,
