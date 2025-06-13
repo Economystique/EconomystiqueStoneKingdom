@@ -237,7 +237,6 @@ def products():
     
     # Extract categories
     categories = sorted(set(product['cat'] for product in merged_data))
-    
     return render_template('products.html', products=merged_data, categories=categories)
 
 #for manage button in inventory/products
@@ -411,7 +410,6 @@ def performance_comparison():
     years = ['2022', '2023', '2024', '2025']
     return render_template('performance_comparison.html', months=months, years=years)
 
-#Dummy LOGIC
 @app.route('/get_performance_data')
 @login_required
 def get_performance_data():
@@ -436,150 +434,26 @@ def get_performance_data():
 @app.route('/wastage')
 @login_required
 def wastage():
-
-    #Dummy data for wastage
-    dummy_wastage = [
+    conn = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT inv_id, inv_desc, quantity, unit, dec_date, remark FROM wastage_record
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Convert rows (tuples) into list of dicts
+    wastage_record = [
         {
-            'inventory_id': 'IN001',
-            'product_name': 'Will to live',
-            'quantity': '100',
-            'unit': 'my life',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'wasting my life away'
-        },
-        {
-            'inventory_id': 'IN002',
-            'product_name': 'Mental stability',
-            'quantity': '100',
-            'unit': 'per brain cells',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Im losing it bro'
-        },
-        {
-            'inventory_id': 'IN003',
-            'product_name': 'Chopao',
-            'quantity': '10',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Spoilage'
-        },
-        {
-            'inventory_id': 'IN004',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN005',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN006',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN007',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN008',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN009',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN010',
-            'product_name': 'Cat Food',
-            'quantity': '25',
-            'unit': 'pcs',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Item/s expired'
-        },
-        {
-            'inventory_id': 'IN011',
-            'product_name': 'Kim Ongchangco',
-            'quantity': '35',
-            'unit': 'per head',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'bro is too old'
-        },
-        {
-            'inventory_id': 'IN012',
-            'product_name': 'Pixel Megatron I',
-            'quantity': '1',
-            'unit': 'cat',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'bro is not even 1 yr old but is already too fat'
-        },
-        {
-            'inventory_id': 'IN013',
-            'product_name': 'Patato',
-            'quantity': '1',
-            'unit': 'kilo',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Patata? Patoto?'
-        },
-        {
-            'inventory_id': 'IN014',
-            'product_name': 'Tomato',
-            'quantity': '1',
-            'unit': 'kilo',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Tomayto or tomatoe? hmmmm...'
-        },
-        {
-            'inventory_id': 'IN015',
-            'product_name': 'Elsa',
-            'quantity': '1',
-            'unit': 'n/a',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Let it gooooo let it gooooo'
-        },
-        {
-            'inventory_id': 'IN016',
-            'product_name': 'Michael Jackson',
-            'quantity': '69',
-            'unit': 'dead',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'hee hee'
-        },
-        {
-            'inventory_id': 'IN017',
-            'product_name': 'Emoglobin',
-            'quantity': '1',
-            'unit': 'alpha',
-            'wastage date': 'May 01, 2025',
-            'remarks': 'Cause tonoigh will be the noigh that i was born fer yew aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa lorem ipsum hehehe'
-        }
+            'inv_id': row[0],
+            'inv_desc': row[1],
+            'quantity': row[2],
+            'unit': row[3],
+            'dec_date': row[4],
+            'remark': row[5]
+        } for row in rows
     ]
-
-    return render_template('wastage.html', wastage_data=dummy_wastage)
-
-    return render_template('performance_comparison.html')
+    return render_template('wastage.html', wastage_data=wastage_record)
 
 @app.route('/pos')
 @login_required
