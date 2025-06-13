@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Manage - Economystique{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/manage.css') }}">
+{% endblock %}
+
+<!-- {% block header_title %}Manage{% endblock %} --> 
+
+{% block content %}
+<h1>Manage Products</h1>
+<div class="content-header">
+    <p class="subtitle">Manage your inventory fast, and efficient</p>
+    <br>
+</div>
+
+<!--for tabs-->
+<div class="tab-container">
+    <button class="tab-btn active" data-target="restock">Restock Product</button>
+    <button class="tab-btn" data-target="add-new">Add New Product</button>
+</div class>
+
+<!-- ─────────────── TAB: RESTOCK ─────────────── -->
+<div class="whole-container-tab">
+    <div class="content-container" id="restock">
+        <div class="restock-container">
+            <div class="adding-section">
+                <!--forms for adding-->
+                <div class="form-group">
+                    <div class="form-product">
+                        <label>Inventory ID/Name</label>
+                        <br>
+                        <select>
+                            <option value="">Select a product</option>
+                        </select>
+                    </div>
+                    <br><br>
+                    <div class="form-quantity">
+                        <label>Quantity</label>
+                        <br>
+                        <input type="number" placeholder="Enter quantity">
+                    </div>
+                    <br><br>
+                    <div class="form-date">
+                        <label>Expiration Date</label>
+                        <br>
+                        <input type="date">
+                    </div>
+                </div>
+            </div>
+            <div class="table-section">
+                <!--for table reflection of added-->
+            </div>
+        </div>
+    </div>
+
+    <!--for add and clear all buttons-->
+    <div class="action-buttons-one">
+        <button class="btn btn-add">Add</button>
+        <button class="btn btn-clear">Clear All</button>
+    </div>
+
+    <!--for confirm and cancel buttons-->
+    <div class="action-buttons-two">
+        <button class="btn btn-confirm">Confirm</button>
+        <button class="btn btn-cancel">Cancel</button>
+    </div>
+
+</div>
+
+    <!-- ─────────────── TAB: ADD NEW ─────────────── -->
+
+{% endblock %}
+
+{% block extra_js %}
+<!--js-->
+{% endblock %}

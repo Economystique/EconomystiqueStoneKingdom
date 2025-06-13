@@ -239,6 +239,12 @@ def products():
     categories = sorted(set(product['cat'] for product in merged_data))
     return render_template('products.html', products=merged_data, categories=categories)
 
+#for manage button in inventory/products
+@app.route('/manage')
+def manage():
+    #add here
+    return render_template('manage.html')
+
 @app.route('/sales')
 @login_required
 def sales():

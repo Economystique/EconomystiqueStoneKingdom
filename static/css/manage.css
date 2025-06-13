@@ -1,0 +1,124 @@
+/* Content Header */
+.content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.content-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/*TABS*/
+.tab-container {
+    display: flex;
+    background-color: transparent;
+}
+
+.tab-btn {
+    display: flex;
+    border: 1px solid #89A3AD;
+    background-color: #e8e6e6;
+    color: black;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    margin-right: 2px;
+    padding: 12px 24px;
+    margin-bottom: 2px;
+}
+
+.tab-btn.active {
+    background-color: #89A3AD;
+    border: 1px solid #89A3AD;
+    color: white;
+}
+
+/* ─────────────── TAB: RESTOCK ───────────────*/
+.whole-container-tab {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5px;
+    background-color: pink;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    padding: 10px;
+    background-color: red;
+    height: 500px;
+}
+
+.content-container {
+    display: flex;
+    padding: 10px;
+    background-color: white;
+    height: 500px;
+}
+
+.restock-container {
+    display: flex;
+    flex: 1; /* takes full width of .content-container */
+    height: 100%; /* matches the 500px height */
+    gap: 10px;
+}
+
+.adding-section,
+.table-section {
+    flex: 1; /* each takes 50% */
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    height: 100%; /* full height of restock-container */
+}
+
+.form-group select,
+.form-group input[type="number"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px; /* rounded corners */
+    background-color: #f9f9f9;
+    font-size: 14px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    transition: border 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    border-color: #2b5b64;
+    outline: none;
+    background-color: #fff;
+}
+
+.action-buttons-one {
+    flex: 1;
+    background-color: blue;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.action-buttons-two {
+    flex: 1;
+    background-color: blue;
+    border-radius: 10px;
+    padding: 20px;
+}
