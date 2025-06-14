@@ -49,30 +49,90 @@
                     </div>
                 </div>
             </div>
+            <!--for table reflection of added-->
             <div class="table-section">
-                <!--for table reflection of added-->
+                <div class="table-wrapper">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Inventory ID</th>
+                                <th>Inventory Description</th>
+                                <th>Quantity</th>
+                                <th>Expiration Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample row, can be dynamically filled -->
+                            <tr>
+                                <td>INV001</td>
+                                <td>Chocolate Cake Mix</td>
+                                <td>10</td>
+                                <td>2025-08-15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-
     <!--for add and clear all buttons-->
-    <div class="action-buttons-one">
-        <button class="btn btn-add">Add</button>
-        <button class="btn btn-clear">Clear All</button>
-    </div>
+        <div class="action-buttons-one">
+            <button class="btn btn-add">Add</button>
+            <button class="btn btn-clear">Clear All</button>
+        </div>
 
-    <!--for confirm and cancel buttons-->
-    <div class="action-buttons-two">
-        <button class="btn btn-confirm">Confirm</button>
-        <button class="btn btn-cancel">Cancel</button>
-    </div>
-
+        <!--for confirm and cancel buttons-->
+        <div class="action-buttons-two">
+            <button class="btn btn-confirm">Confirm</button>
+            <button class="btn btn-cancel">Cancel</button>
+        </div>
 </div>
 
-    <!-- ─────────────── TAB: ADD NEW ─────────────── -->
+<!-- ─────────────── TAB: ADD NEW ─────────────── -->
+ <br><br><br><br>
+ <div class="whole-container-tab">
+    <div class="content-container" id="add-new">
+        <p>This is the Add New Product tab.</p>
+    </div>
+ </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <!--js-->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const contentContainers = document.querySelectorAll(".content-container");
+
+        const actionButtonsOne = document.querySelector(".action-buttons-one");
+        const actionButtonsTwo = document.querySelector(".action-buttons-two");
+
+        tabButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                // Remove active from all buttons
+                tabButtons.forEach(btn => btn.classList.remove("active"));
+                // Hide all content containers
+                contentContainers.forEach(container => container.style.display = "none");
+
+                // Activate clicked button
+                button.classList.add("active");
+                const targetId = button.getAttribute("data-target");
+                const targetContainer = document.getElementById(targetId);
+                targetContainer.style.display = "block";
+
+                // Show buttons only if restock is selected
+                const showRestock = (targetId === "restock");
+                actionButtonsOne.style.display = showRestock ? "flex" : "none";
+                actionButtonsTwo.style.display = showRestock ? "flex" : "none";
+            });
+        });
+
+        // On load, only show buttons for the active tab
+        const defaultTarget = document.querySelector(".tab-btn.active").getAttribute("data-target");
+        const showRestock = (defaultTarget === "restock");
+        actionButtonsOne.style.display = showRestock ? "flex" : "none";
+        actionButtonsTwo.style.display = showRestock ? "flex" : "none";
+    });
+</script>
 {% endblock %}
