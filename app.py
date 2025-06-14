@@ -248,102 +248,29 @@ def manage():
 @app.route('/sales')
 @login_required
 def sales():
+    conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
+    cursor = conn.cursor()
     
- # Dummy data for sales
-    dummy_sales = [
+    # From Static
+    cursor.execute("""
+        SELECT inv_id, inv_desc, quantity_sold, price, sales_total
+        FROM sales_today
+    """
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    
+    today_sales = [
         {
-            'product_id': 'PT001',
-            'product_name': 'Chopao',
-            'price': 100,
-            'quantity_sold': '10'
-        },
-        {
-            'product_id': 'PT002',
-            'product_name': 'Bottle Water',
-            'price': 100,
-            'quantity_sold': '20'
-        },
-        {
-            'product_id': 'PT003',
-            'product_name': 'Butter',
-            'price': 100,
-            'quantity_sold': '10'
-        },
-        {
-            'product_id': 'PT004',
-            'product_name': 'Ice Cream',
-            'price': 100,
-            'quantity_sold': '30'
-        },
-        {
-            'product_id': 'PT005',
-            'product_name': 'Sanitary Pads',
-            'price': 100,
-            'quantity_sold': '20'
-        },
-        {
-            'product_id': 'PT006',
-            'product_name': 'Detergent',
-            'price': 100,
-            'quantity_sold': '40'
-        },
-        {
-            'product_id': 'PT007',
-            'product_name': 'Notebook',
-            'price': 100,
-            'quantity_sold': '30'
-        },
-        {
-            'product_id': 'PT008',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '50'   
-        },
-        {
-            'product_id': 'PT009',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '40'
-        },
-        {
-            'product_id': 'PT010',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '60'
-        },
-        {
-            'product_id': 'PT011',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '50'
-        },
-        {
-            'product_id': 'PT012',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '70'
-        },
-        {
-            'product_id': 'PT013',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '60'
-        },
-        {
-            'product_id': 'PT014',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '80'
-        },
-        {
-            'product_id': 'PT015',
-            'product_name': 'Cat Food',
-            'price': 100,
-            'quantity_sold': '10'
-        }
+            'inv_id': row[0],
+            'inv_desc': row[1],
+            'quantity_sold': row[2],
+            'price': row[3],
+            'sales_total': row[4],
+        } for row in rows
     ]
 
-    return render_template('sales.html', sales_data=dummy_sales)
+    return render_template('sales.html', sales_data = today_sales)
 
 @app.route('/sales_forecast', methods=['GET'])
 @login_required
@@ -483,7 +410,6 @@ def pos():
     ]
     
     return render_template('pos.html', products=products)
-
 
 @app.route('/account')
 @login_required
