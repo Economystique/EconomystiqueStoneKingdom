@@ -38,10 +38,11 @@
                     <tbody>
                         {% for sale in sales_data %}
                         <tr>
-                            <td>{{ sale.product_id }}</td>
-                            <td>{{ sale.product_name }}</td>
+                            <td>{{ sale.inv_id }}</td>
+                            <td>{{ sale.inv_desc }}</td>
                             <td>{{ sale.quantity_sold }}</td>
                             <td>{{ sale.price }}</td>
+                            <td>{{ sale.sales_total }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -80,7 +81,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize sales chart
     const salesData = {
-        labels: {{ sales_data | map(attribute='product_name') | list | tojson }},
+        labels: {{ sales_data | map(attribute='inv_desc') | list | tojson }},
         datasets: [{
             label: 'Sales by Product',
             data: {{ sales_data | map(attribute='quantity_sold') | list | tojson }},
