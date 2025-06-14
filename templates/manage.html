@@ -89,12 +89,78 @@
 </div>
 
 <!-- ─────────────── TAB: ADD NEW ─────────────── -->
- <br><br><br><br>
- <div class="whole-container-tab">
-    <div class="content-container" id="add-new">
-        <p>This is the Add New Product tab.</p>
+<div class="content-container" id="add-new" style="display:none;">
+    <div class="add-new-wrapper">
+        <!-- header -->
+        <div class="add-head">
+            <span class="info-icon">ℹ️</span>
+            <h3>Inventory Information</h3>
+        </div>
+        <hr>
+
+        <!-- two‑column form grid -->
+        <div class="add-form-grid">
+            <!-- LEFT COLUMN -->
+            <div class="add-col">
+                <div class="form-row">
+                    <label>Inventory ID:</label>
+                    <span class="auto-id">Auto Generated</span>
+                </div>
+
+                <div class="form-row">
+                    <label>Inventory Description</label>
+                    <input type="text" placeholder="Enter a product description">
+                </div>
+
+                <div class="form-row">
+                    <label>Image</label>
+                    <div class="image-box">
+                        <!-- simple placeholder icon -->
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8" cy="8" r="2"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <button class="btn btn-add-img">Upload</button>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="add-col">
+                <div class="form-row">
+                    <label>Category</label>
+                    <select>
+                        <option value="">Select / Enter a new category</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>Subcategory</label>
+                    <select>
+                        <option value="">Select / Enter a new subcategory</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>Reorder Point</label>
+                    <input type="number" placeholder="Enter a quantity">
+                </div>
+
+                <div class="form-row">
+                    <label>Quantity</label>
+                    <input type="number" placeholder="Edit inventory quantity">
+                </div>
+            </div>
+        </div>
+
+        <!-- action buttons -->
+        <div class="add-actions">
+            <button class="btn btn-confirm">Confirm</button>
+            <button class="btn btn-cancel">Cancel</button>
+        </div>
     </div>
- </div>
+</div>
 
 {% endblock %}
 
