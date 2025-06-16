@@ -19,7 +19,7 @@
 <div class="tab-container">
     <button class="tab-btn active" data-target="restock">Restock Product</button>
     <button class="tab-btn" data-target="add-new">Add New Product</button>
-</div class>
+</div>
 
 <!-- ─────────────── TAB: RESTOCK ─────────────── -->
 <div class="whole-container-tab">
@@ -89,7 +89,7 @@
 </div>
 
 <!-- ─────────────── TAB: ADD NEW ─────────────── -->
-<div class="content-container" id="add-new" style="display:none;">
+<div class="content-container-add" id="add-new" style="display:none;">
     <div class="add-new-wrapper">
         <!-- header -->
         <div class="add-head">
@@ -156,8 +156,8 @@
 
         <!-- action buttons -->
         <div class="add-actions">
-            <button class="btn btn-confirm">Confirm</button>
-            <button class="btn btn-cancel">Cancel</button>
+            <button class="btn add-cancel">Cancel</button>
+            <button class="btn add-confirm">Confirm</button>
         </div>
     </div>
 </div>
@@ -169,7 +169,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const tabButtons = document.querySelectorAll(".tab-btn");
-        const contentContainers = document.querySelectorAll(".content-container");
+        const contentContainers = document.querySelectorAll("[id='restock'], [id='add-new']");
 
         const actionButtonsOne = document.querySelector(".action-buttons-one");
         const actionButtonsTwo = document.querySelector(".action-buttons-two");
