@@ -80,67 +80,147 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div class="pagination-container">
+            <ul class="pagination">
+                <li class="page-item" id="prevPageBtn"><span>&laquo;</span></li>
+                <!-- Page numbers will be injected here -->
+                <li class="page-item" id="nextPageBtn"><span>&raquo;</span></li>
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Dropdown functionality
-    const categoryBtn = document.getElementById('categoryBtn');
-    const categoryDropdown = document.getElementById('categoryDropdown');
-    const selectedCategory = document.getElementById('selectedCategory');
-    const searchInput = document.querySelector('.search-input');
-    const tableRows = document.querySelectorAll('.inventory-table tbody tr');
+document.addEventListener('DOMContentLoaded', () => {
+    /* ────────── DOM refs ────────── */
+    const categoryBtn       = document.getElementById('categoryBtn');
+    const categoryDropdown  = document.getElementById('categoryDropdown');
+    const selectedCategory  = document.getElementById('selectedCategory');
+    const searchInput       = document.querySelector('.search-input');
+    const tableRows         = Array.from(document.querySelectorAll('.inventory-table tbody tr'));
+    const pagination        = document.querySelector('.pagination');
+    const prevBtn           = document.getElementById('prevPageBtn');
+    const nextBtn           = document.getElementById('nextPageBtn');
 
-    // Toggle dropdown
-    categoryBtn.addEventListener('click', function() {
-        categoryDropdown.classList.toggle('show');
-    });
+    /* ────────── state ────────── */
+    let currentPage   = 1;
+    const rowsPerPage = 10;
+    let filteredRows  = [...tableRows];
 
-    // Close dropdown when clicking outside
-    window.addEventListener('click', function(e) {
-        if (!categoryBtn.contains(e.target)) {
-            categoryDropdown.classList.remove('show');
-        }
-    });
-
-    // Category selection
-    categoryDropdown.addEventListener('click', function(e) {
-        if (e.target.tagName === 'A') {
-            const category = e.target.getAttribute('data-category');
-            selectedCategory.textContent = e.target.textContent;
-            filterProducts(category, searchInput.value);
-            categoryDropdown.classList.remove('show');
-
-            // Update active category
-            document.querySelectorAll('.dropdown-content a').forEach(a => {
-                a.classList.remove('active-category');
+    /* ────────── helpers ────────── */
+    function createPageItem(text, page = null, isActive = false, isEllipsis = false) {
+        const li = document.createElement('li');
+        li.classList.add('page-item');
+        if (isEllipsis) {
+            li.classList.add('ellipsis');
+            li.textContent = '...';
+        } else {
+            li.classList.add('numbered');
+            li.textContent = text;
+            li.dataset.page = page;
+            if (isActive) li.classList.add('active');
+            li.addEventListener('click', () => {
+                currentPage = page;
+                showPage(currentPage);
             });
+        }
+        return li;
+    }
+
+    function buildPagination() {
+        /* wipe old */
+        pagination.querySelectorAll('.page-item.numbered, .page-item.ellipsis').forEach(e => e.remove());
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (totalPages <= 1) return;          // no pager needed
+
+        const maxVisible = 5;
+        const buffer     = 2;                 // pages shown around current
+        const start      = Math.max(2, currentPage - buffer);
+        const end        = Math.min(totalPages - 1, currentPage + buffer);
+
+        // Always show first page
+        pagination.insertBefore(createPageItem(1, 1, currentPage === 1), nextBtn);
+
+        /* leading … */
+        if (start > 2) {
+            pagination.insertBefore(createPageItem('...', null, false, true), nextBtn);
+        }
+
+        /* window */
+        for (let i = start; i <= end; i++) {
+            pagination.insertBefore(createPageItem(i, i, currentPage === i), nextBtn);
+        }
+
+        /* trailing … */
+        if (end < totalPages - 1) {
+            pagination.insertBefore(createPageItem('...', null, false, true), nextBtn);
+        }
+
+        /* last page */
+        if (totalPages > 1) {
+            pagination.insertBefore(
+                createPageItem(totalPages, totalPages, currentPage === totalPages),
+                nextBtn
+            );
+        }
+    }
+
+    function showPage(page) {
+        const start = (page - 1) * rowsPerPage;
+        const end   = start + rowsPerPage;
+
+        tableRows.forEach(r => r.style.display = 'none');
+        filteredRows.slice(start, end).forEach(r => r.style.display = '');
+
+        currentPage = page;
+        buildPagination();
+    }
+
+    /* ────────── filtering ────────── */
+    function applyFilters() {
+        const cat  = selectedCategory.textContent === 'All Categories'
+                        ? 'all' : selectedCategory.textContent;
+        const term = searchInput.value.toLowerCase();
+
+        filteredRows = tableRows.filter(row => {
+            const matchesCat   = (cat === 'all') || row.getAttribute('data-category') === cat;
+            const matchesTerm  = row.textContent.toLowerCase().includes(term);
+            return matchesCat && matchesTerm;
+        });
+
+        currentPage = 1;
+        showPage(currentPage);
+    }
+
+    /* ────────── category dropdown ────────── */
+    categoryBtn.onclick = () => categoryDropdown.classList.toggle('show');
+    window.addEventListener('click', e => {
+        if (!categoryBtn.contains(e.target)) categoryDropdown.classList.remove('show');
+    });
+    categoryDropdown.addEventListener('click', e => {
+        if (e.target.tagName === 'A') {
+            selectedCategory.textContent = e.target.textContent;
+            document.querySelectorAll('.dropdown-content a').forEach(a => a.classList.remove('active-category'));
             e.target.classList.add('active-category');
+            categoryDropdown.classList.remove('show');
+            applyFilters();
         }
     });
 
-    // Search functionality
-    searchInput.addEventListener('input', function(e) {
-        const category = selectedCategory.textContent === 'All Categories' ? 'all' : selectedCategory.textContent;
-        filterProducts(category, e.target.value);
-    });
+    /* ────────── search ────────── */
+    searchInput.addEventListener('input', applyFilters);
 
-    // Combined filter function
-    function filterProducts(category, searchTerm) {
-        searchTerm = searchTerm.toLowerCase();
-        
-        tableRows.forEach(row => {
-            const rowCategory = row.getAttribute('data-category');
-            const text = row.textContent.toLowerCase();
-            const matchesCategory = category === 'all' || rowCategory === category;
-            const matchesSearch = text.includes(searchTerm);
-            
-            row.style.display = matchesCategory && matchesSearch ? '' : 'none';
-        });
-    }
+    /* ────────── prev / next ────────── */
+    prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; showPage(currentPage);} };
+    nextBtn.onclick = () => {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage < totalPages) { currentPage++; showPage(currentPage); }
+    };
+
+    applyFilters();  
 });
 </script>
-{% endblock %} 
+{% endblock %}

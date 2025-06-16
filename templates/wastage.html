@@ -55,25 +55,118 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div class="pagination-container">
+            <ul class="pagination">
+                <li class="page-item" id="prevPageBtn"><span>&laquo;</span></li>
+                <!-- Page numbers will be injected here dynamically -->
+                <li class="page-item" id="nextPageBtn"><span>&raquo;</span></li>
+            </ul>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('wastageSearchInput');
-    const tableRows = document.querySelectorAll('.wastage-table tbody tr');
+    const tableRows = Array.from(document.querySelectorAll('.wastage-table tbody tr'));
+    const paginationContainer = document.querySelector('.pagination');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
 
-    // Search functionality
-    searchInput.addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        
-        tableRows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
+    let currentPage = 1;
+    const rowsPerPage = 13;
+    let filteredRows = [...tableRows];
+
+    function createPageItem(text, page = null, isActive = false, isEllipsis = false) {
+        const li = document.createElement('li');
+        li.classList.add('page-item');
+        if (isEllipsis) {
+            li.classList.add('ellipsis');
+            li.textContent = '...';
+        } else {
+            li.classList.add('numbered');
+            li.textContent = text;
+            li.dataset.page = page;
+            if (isActive) li.classList.add('active');
+            li.addEventListener('click', () => {
+                currentPage = page;
+                showPage(currentPage);
+            });
+        }
+        return li;
+    }
+
+    function setupPagination() {
+        document.querySelectorAll('.page-item.numbered, .page-item.ellipsis').forEach(el => el.remove());
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+        if (totalPages <= 1) return;
+
+        const maxVisible = 5;
+        const buffer = 2;
+        const start = Math.max(2, currentPage - buffer);
+        const end = Math.min(totalPages - 1, currentPage + buffer);
+
+        // Always show first page
+        paginationContainer.insertBefore(createPageItem(1, 1, currentPage === 1), nextBtn);
+
+        if (start > 2) {
+            paginationContainer.insertBefore(createPageItem('...', null, false, true), nextBtn);
+        }
+
+        for (let i = start; i <= end; i++) {
+            paginationContainer.insertBefore(createPageItem(i, i, currentPage === i), nextBtn);
+        }
+
+        if (end < totalPages - 1) {
+            paginationContainer.insertBefore(createPageItem('...', null, false, true), nextBtn);
+        }
+
+        if (totalPages > 1) {
+            paginationContainer.insertBefore(createPageItem(totalPages, totalPages, currentPage === totalPages), nextBtn);
+        }
+    }
+
+    function showPage(page) {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        tableRows.forEach(row => row.style.display = 'none');
+        filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+        currentPage = page;
+        setupPagination();
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+        }
     });
+
+    nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    });
+
+    searchInput.addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        filteredRows = tableRows.filter(row =>
+            row.textContent.toLowerCase().includes(searchTerm)
+        );
+        currentPage = 1;
+        showPage(currentPage);
+    });
+
+    showPage(currentPage);
 });
 </script>
+
 {% endblock %}
