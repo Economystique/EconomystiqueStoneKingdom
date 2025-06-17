@@ -41,6 +41,7 @@
 .btn-wastage {
     background-color: #8f2020;
     color: white;
+    font-size: 0.95rem;
 }
 
 .btn-wastage:hover {

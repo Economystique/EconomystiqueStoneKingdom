@@ -43,7 +43,7 @@
     color: #215E7D;
     border: 1px solid #215E7D;
 }
-
+    
 .btn-category:hover {
     background-color: #215E7D;
     color: white;
@@ -52,6 +52,7 @@
 .btn-wastage {
     background-color: #8f2020;
     color: white;
+    font-size: 0.95rem;
 }
 
 .btn-wastage:hover {
@@ -61,6 +62,7 @@
 .btn-restock {
     background-color: #215E7D;
     color: white;
+    font-size: 0.95rem;
 }
 
 .btn-restock:hover {
