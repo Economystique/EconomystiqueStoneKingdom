@@ -25,13 +25,13 @@
                         <ul>
                             <li>
                                 <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                                    <span class="nav-icon">☰</span>
+                                    <span class="nav-icon"> <img class="icon-img" src="/static/img/dashboardIcon.png" alt=""> </span>
                                     Dashboard
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ url_for('performance_comparison') }}" class="nav-link {% if request.endpoint == 'performance_comparison' %}active{% endif %}">
-                                    <span class="nav-icon">☰</span>
+                                    <span class="nav-icon"> <img class="icon-img" src="static/img/performanceComparisonIcon.png" alt=""> </span>
                                     Performance Comparison
                                 </a>
                             </li>
@@ -45,13 +45,13 @@
                         <ul>
                             <li>
                                 <a href="{{ url_for('products') }}" class="nav-link {% if request.endpoint == 'products' %}active{% endif %}">
-                                    <span class="nav-icon">📦</span>
+                                    <span class="nav-icon"> <img class="icon-img" src="static/img/productsIcon.png" alt=""> </span>
                                     Products
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ url_for('wastage') }}" class="nav-link {% if request.endpoint == 'wastage' %}active{% endif %}">
-                                    <span class="nav-icon">♻️</span>
+                                    <span class="nav-icon"><img class="icon-img" src="static/img/wastageIcon.png" alt=""></span>
                                     Wastage
                                 </a>
                             </li>
@@ -65,19 +65,19 @@
                         <ul>
                             <li>
                                 <a href="{{ url_for('sales') }}" class="nav-link {% if request.endpoint == 'sales' %}active{% endif %}">
-                                    <span class="nav-icon">📋</span>
+                                    <span class="nav-icon"><img class="icon-img" src="static/img/salesReportIcon.png" alt=""></span>
                                     Sales Report
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ url_for('sales_forecast') }}" class="nav-link {% if request.endpoint == 'sales_forecast' %}active{% endif %}">
-                                    <span class="nav-icon">📊</span>
+                                    <span class="nav-icon"> <img class="icon-img" src="static/img/salesForecastIcon.png" alt=""> </span>
                                     Sales Forecast
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ url_for('pos') }}" class="nav-link {% if request.endpoint == 'pos' %}active{% endif %}">
-                                    <span class="nav-icon">💰</span>
+                                    <span class="nav-icon"><img class="icon-img" src="static/img/posIcon.png" alt=""></span>
                                     POS
                                 </a>
                             </li>
@@ -89,13 +89,13 @@
                     <ul>
                         <li>
                             <a href="{{ url_for('account') }}" class="nav-link {% if request.endpoint == 'account' %}active{% endif %}">
-                                <span class="nav-icon">👤</span>
+                                <span class="nav-icon"><img class="icon-img" src="static/img/profileIcon.png" alt=""></span>
                                 Profile
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('logout') }}" class="nav-link">
-                                <span class="nav-icon">🚪</span>
+                                <span class="nav-icon"><img class="icon-img" src="static/img/logoutIcon.png" alt=""></span>
                                 Logout
                             </a>
                         </li>

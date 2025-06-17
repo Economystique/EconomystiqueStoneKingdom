@@ -176,6 +176,11 @@ body {
     text-align: center;
 }
 
+.icon-img {
+    height: 20px;
+    width: 20px;
+}
+
 /* Sidebar Footer */
 .sidebar-footer {
     padding: 1rem 0;
