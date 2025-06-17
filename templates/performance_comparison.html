@@ -12,15 +12,16 @@
     <p class="subtitle">Monthly Sales Comparison</p>
 </div>
 
+<!--for tabs-->
+<div class="tab-header">
+    <button class="tab-btn active" data-tab="months">Months</button>
+    <button class="tab-btn" data-tab="years">Years</button>
+</div>
+
 <!--=========================Monthly Tab=========================-->
-<div class="container-whole">
+<div class="container-monthly" id="monthsTab">
     <div class="data-container">
         <div class="tab-container">
-            <div class="tab-header">
-                <button class="tab-btn active">Months</button>
-                <button class="tab-btn" disabled>Years</button>
-            </div>
-
             <div class="dropdown-container">
                 <label for="month">Month:</label>
                 <select id="month">
@@ -54,124 +55,182 @@
             </table>
         </div>
         <div class="clear-button-container">
-            <button onclick="clearChart()" style="background-color: darkred; color: white; padding: 10px; margin-top: 10px;">Clear</button>
+            <button onclick="clearChart()">Clear</button>
         </div>
     </div>
 </div>
 
 <!--=========================Yearly Tab=========================-->
+<div class="container-yearly hidden" id="yearsTab">
+    <div class="data-container">
+            <div class="dropdown-container">
+                <label for="year-only">Year:</label>
+                <select id="year-only">
+                    {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+                </select>
+                <button onclick="addYearToChart()">+</button>
+            </div>
 
+            <div class="bar-container"><canvas id="lineChart"></canvas></div>
+        </div>
+
+        <div class="table-years-container">
+            <div class="table-inner-container">
+                <table id="yearTable">
+                    <thead><tr>
+                    <div class="table-head-container"><th>Years</th></div></tr></thead>
+                <tbody></tbody>
+                </table>
+            </div>
+            <div class="clear-button-container">
+                <button onclick="clearYearChart()" class="btn-clear">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
 <script>
-let chart;
-let chartData = {}; // { "January 2025": total, ... }
-let colorMap = {};
-let colorIndex = 0;
-const colors = ['#406882', '#74A5C1', '#9DD6DF', '#B6D7A8', '#D9EAD3', '#F6B26B', '#E06666'];
-const monthsOrder = ['January', 'February', 'March', 'April', 'May', 'June',
-                     'July', 'August', 'September', 'October', 'November', 'December'];
+/* ---------- ITO UNG KULAYS DITO NIYO PALITAN this shii random bruh---------- */
+const colors   = ['#406882','#74A5C1','#9DD6DF','#B6D7A8','#F6B26B','#E06666','#6d6875'];
+let  colorIdx  = 0, colorMap = {};
+const getColor = y => colorMap[y] || (colorMap[y] = colors[colorIdx++ % colors.length]);
 
-function getColorForYear(year) {
-    if (!colorMap[year]) {
-        colorMap[year] = colors[colorIndex % colors.length];
-        colorIndex++;
-    }
-    return colorMap[year];
-}
+const monthsOrder = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
 
-function rebuildChartData() {
-    const uniqueMonths = Object.keys(chartData)
-        .map(k => k.split(" ")[0])
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .sort((a, b) => monthsOrder.indexOf(a) - monthsOrder.indexOf(b));
+/* ---------- datasets ---------- */
+let monthData = {};          // key "January 2025" -> total
+let yearData  = {};          // key 2025 -> [12 monthly numbers]
 
-    const years = [...new Set(Object.keys(chartData).map(k => k.split(" ")[1]))];
+/* ---------- create charts once DOM ready ---------- */
+let barChart, lineChart;
+document.addEventListener('DOMContentLoaded', () => {
 
-    chart.data.labels = uniqueMonths;
-    chart.data.datasets = years.map(year => {
-        const color = getColorForYear(year);
-        const data = uniqueMonths.map(month => {
-            const key = `${month} ${year}`;
-            return chartData[key] || 0;
+    /* bar chart (monthly) */
+    barChart = new Chart(
+        document.getElementById('barChart'),
+        { type:'bar', data:{labels:[],datasets:[]},
+          options:{responsive:true,maintainAspectRatio:false,
+                   plugins:{legend:{position:'top'}}}}
+    );
+
+    /* line chart (yearly) */
+    lineChart = new Chart(
+        document.getElementById('lineChart'),
+        { type:'line', data:{labels:monthsOrder,datasets:[]},
+          options:{responsive:true,maintainAspectRatio:false,
+                   plugins:{legend:{position:'top'}},
+                   scales:{y:{beginAtZero:true}}}}
+    );
+
+    /* tab switching */
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            const monthsTab = document.getElementById('monthsTab');
+            const yearsTab  = document.getElementById('yearsTab');
+            if(btn.dataset.tab==='months'){
+                monthsTab.classList.remove('hidden');
+                yearsTab .classList.add   ('hidden');
+                barChart.resize();
+            }else{
+                yearsTab .classList.remove('hidden');
+                monthsTab.classList.add   ('hidden');
+                lineChart.resize();
+            }
         });
-        return {
-            label: year,
-            backgroundColor: color,
-            data: data
-        };
-    });
-
-    chart.update();
-}
-
-function addToChart() {
-    const month = document.getElementById('month').value;
-    const year = document.getElementById('year').value;
-    const key = `${month} ${year}`;
-
-    if (chartData[key]) return;
-
-    fetch(`/get_performance_data?month=${month}&year=${year}`)
-        .then(res => res.json())
-        .then(data => {
-            const valuesSum = data.values.reduce((a, b) => a + b, 0);
-            chartData[key] = valuesSum;
-            rebuildChartData();
-
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${key}</td>`;
-            document.querySelector("#monthYearTable tbody").appendChild(row);
-        });
-}
-
-function clearChart() {
-    chart.data.labels = [];
-    chart.data.datasets = [];
-    chartData = {};
-    chart.update();
-    document.querySelector("#monthYearTable tbody").innerHTML = "";
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const ctx = document.getElementById('barChart').getContext('2d');
-    chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: []
-        },
-            options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true }
-            },
-            scales: {
-                x: {
-                    stacked: false,
-                    ticks: { autoSkip: false }
-                },
-                y: {
-                    stacked: false,
-                    beginAtZero: true
-                }
-            },
-        }
-    });
-
-    document.querySelector("#monthYearTable tbody").addEventListener('dblclick', function (e) {
-        const row = e.target.closest('tr');
-        if (!row) return;
-
-        const label = row.innerText.trim(); // e.g. "October 2025"
-        delete chartData[label];
-        rebuildChartData();
-        row.remove();
     });
 });
-</script>
 
+/* ---------- MONTH TAB FUNCTIONS ---------- */
+function rebuildMonthChart(){
+    const labels=[...new Set(Object.keys(monthData).map(k=>k.split(' ')[0]))]
+                  .sort((a,b)=>monthsOrder.indexOf(a)-monthsOrder.indexOf(b));
+    const years =[...new Set(Object.keys(monthData).map(k=>k.split(' ')[1]))];
+
+    barChart.data.labels = labels;
+    barChart.data.datasets = years.map(y=>({
+        label:y,
+        backgroundColor:getColor(y),
+        data:labels.map(m=>monthData[`${m} ${y}`]||0)
+    }));
+    barChart.update();
+}
+
+function addToChart(){
+    const m = document.getElementById('month').value;
+    const y = document.getElementById('year').value;
+    const key = `${m} ${y}`;
+    if(monthData[key]) return;
+
+    fetch(`/get_performance_data?month=${m}&year=${y}`)
+      .then(r=>r.json())
+      .then(d=>{
+          monthData[key] = d.values.reduce((a,b)=>a+b,0);
+          rebuildMonthChart();
+          const tr=document.createElement('tr'); tr.innerHTML=`<td>${key}</td>`;
+          document.querySelector('#monthYearTable tbody').appendChild(tr);
+      });
+}
+
+function clearChart(){
+    monthData={};
+    rebuildMonthChart();
+    document.querySelector('#monthYearTable tbody').innerHTML='';
+}
+
+/* ---------- YEAR TAB FUNCTIONS ---------- */
+function rebuildYearChart(){
+    lineChart.data.datasets = Object.entries(yearData).map(([year,vals])=>({
+        label:year,
+        data:vals,
+        borderColor:getColor(year),
+        fill:false,
+        tension:.25
+    }));
+    lineChart.update();
+}
+
+function addYearToChart(){
+    const year=document.getElementById('year-only').value;
+    if(yearData[year]) return;
+
+    fetch(`/get_year_performance_data?year=${year}`)
+      .then(r=>r.json())
+      .then(d=>{
+          const vals = (d.monthly_totals || []).slice(0,12);
+          while(vals.length<12) vals.push(0);
+          yearData[year]=vals;
+          rebuildYearChart();
+          const tr=document.createElement('tr'); tr.innerHTML=`<td>${year}</td>`;
+          document.querySelector('#yearTable tbody').appendChild(tr);
+      });
+}
+
+function clearYearChart(){
+    yearData={};
+    rebuildYearChart();
+    document.querySelector('#yearTable tbody').innerHTML='';
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelector('#monthYearTable tbody')
+          ?.addEventListener('dblclick',e=>{
+              const r=e.target.closest('tr'); if(!r)return;
+              delete monthData[r.innerText.trim()];
+              rebuildMonthChart(); r.remove();
+          });
+
+  document.querySelector('#yearTable tbody')
+          ?.addEventListener('dblclick',e=>{
+              const r=e.target.closest('tr'); if(!r)return;
+              delete yearData[r.innerText.trim()];
+              rebuildYearChart(); r.remove();
+          });
+});
+</script>
 {% endblock %}

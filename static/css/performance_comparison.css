@@ -1,10 +1,18 @@
 /* Global layout */
-.container-whole {
+.container-monthly {
     display: flex;
     justify-content: space-between;
-    gap: 5px;
-    padding: 10px;
+    gap: 15px;
+    padding: 0px;
     background-color: transparent;
+}
+
+.container-yearly {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 0px;
+    background-color: blu   e;
 }
 
 /* Left-side content container */
@@ -12,7 +20,7 @@
     flex: 1;
     background-color: transparent;
     border-radius: 10px;
-    padding: 20px;
+    padding: 0px;
 }
 
 /* Tab styling */
@@ -24,7 +32,6 @@
 
 .tab-header {
     display: flex;
-    margin-bottom: 2px;
     background-color: transparent;
 }
 
@@ -84,6 +91,7 @@
 .bar-container {
     background-color: white;
     padding: 20px;
+
 }
 
 /* Table container on the right */
@@ -92,8 +100,18 @@
     width: 300px;
     background-color: white;
     padding: 10px;
-    height: 705px;
-    top: 67px;
+    height: 737px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.table-years-container {
+    position: relative;
+    width: 300px;
+    background-color: white;
+    padding: 10px;
+    height: 737px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -105,10 +123,25 @@
     font-size: 14px;
 }
 
+#yearTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
 #monthYearTable thead th {
     background-color: #1f4d66;
     margin-top: 5px;
-    position: flex ;
+    z-index: 5;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 16px;
+}
+
+#yearTable thead th {
+    background-color: #1f4d66;
+    margin-top: 5px;
     z-index: 5;
     color: white;
     padding: 10px;
@@ -122,13 +155,32 @@
     text-align: center;
     cursor: pointer;
 }
+
+#yearTable tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    cursor: pointer;
+}
+
 .table-inner-container{
     overflow: auto;
     display: flex;
 }
 
 .table-months-container button {
-    
+    padding: 10px;
+    background-color: darkred;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: auto;
+    width: 100%;
+}
+
+.table-years-container button {
     padding: 10px;
     background-color: darkred;
     color: white;
@@ -145,7 +197,6 @@
     z-index: 5;
     width: 100%;
     margin-bottom: 5px;
-    position: flex;
 }
 
 .table-months-container button:hover {
@@ -177,3 +228,11 @@
     margin-top: 1rem;
 }
 
+.hidden {
+    display: none !important;
+}
+
+.bar-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}

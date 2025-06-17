@@ -358,6 +358,28 @@ def get_performance_data():
 
     return jsonify({'labels': labels, 'values': values})
 
+@app.route('/get_year_performance_data')
+@login_required
+def get_year_performance_data():
+    year = request.args.get('year')
+
+    # reuse your product list
+    all_products = [
+        'Chopao', 'Bottle Water', 'Butter', 'Ice Cream', 'Sanitary Pads',
+        'Detergent', 'Notebook', 'Cat Food'
+    ]
+
+    # 12 months, deterministic per year
+    monthly_totals = []
+    import random, calendar
+    for month_idx in range(1, 13):             # 1‑12 to ha
+        random.seed(hash(f"{year}-{month_idx}"))
+        # randomd dummy sum of all product sales that month
+        month_sum = sum(random.randint(5, 20) * 100 for _ in all_products)
+        monthly_totals.append(month_sum)
+
+    return jsonify({'monthly_totals': monthly_totals})
+
 @app.route('/wastage')
 @login_required
 def wastage():
