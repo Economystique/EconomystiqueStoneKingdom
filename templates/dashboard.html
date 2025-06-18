@@ -11,14 +11,15 @@
     <div class="top-cards-row">
         <!-- Best Selling Products Card -->
         <div class="card small-card top-products">
-            <h2 class="card-title">Top Products</h2>
+            <h2 class="card-title">
+                <span class="icon"><img class="icon-img" src="static/img/topProductsIcon.png" alt=""></span>
+                Top Products
+            </h2>
             {% for product in best_sellers %}
             <div class="product-item">
                 <div class="product-info">
-                    <div class="product-stats">
-                        <span class="quantity">{{ product.rank }}</span>
-                        <span class="revenue">{{ product.name }}</span>
-                    </div>
+                    <span class="quantity">{{ product.rank }}</span>
+                    <span class="revenue">{{ product.name }}</span>
                 </div>
             </div>
             {% endfor %}
@@ -26,12 +27,15 @@
 
         <!-- Least Sold Products Card -->
         <div class="card small-card least-sold">
-            <h2 class="card-title">Least Sold Products</h2>
+            <h2 class="card-title">
+                <span class="icon"><img class="icon-img" src="static/img/leastSoldIcon.png" alt=""></span>
+                Least Sold Products
+            </h2>
             {% for product in least_products %}
             <div class="product-item">
                 <div class="product-info">
-                    <span class="product-name">{{ product.rank }}</span>
-                    <span class="quantity">{{ product.name}}</span>
+                    <span class="quantity">{{ product.rank }}</span>
+                    <span>{{ product.name}}</span>  
                 </div>
             </div>
             {% endfor %}
@@ -39,13 +43,16 @@
 
         <!-- Near Expiry Products Card -->
         <div class="card small-card near-expiry">
-            <h2 class="card-title">Near Expiry Products</h2>
+            <h2 class="card-title">
+                <span class="icon"><img class="icon-img" src="static/img/nearExpiryIcon.png" alt=""></span>
+                Near Expiry Products
+            </h2>
             {% for product in near_expiry %}
             <div class="product-item">
                 <div class="product-info">
-                    <span>{{ product.quantity }}</span>
+                    <span class="quantity">{{ product.quantity }}</span>
+                    <h4>{{ product.expiry_date }}</h4>
                     <span>{{ product.name }}</span>
-                    <h5>{{ product.expiry_date }}</h5>
                 </div>
             </div>
             {% endfor %}
@@ -77,12 +84,15 @@
 
         <!-- Critical Items Card -->
         <div class="card critical-items bottom-card">
-            <h2 class="card-title">Critical Items</h2>
+            <h2 class="card-title">
+                <span class="icon"><img class="icon-img" src="static/img/declareWastageIcon.png" alt=""></span>
+                Critical Items
+            </h2>
             {% for item in critical_items %}
             <div class="product-item"> 
                 <div class="product-info">
                     <span class="quantity">{{ item.quantity }}</span>
-                    <span class="product-name">{{ item.name }}</span>
+                    <span>{{ item.name }}</span>
                 </div>
             </div>
             {% endfor %}
@@ -90,6 +100,8 @@
     </div>
 </div>
 {% endblock %}
+
+
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
