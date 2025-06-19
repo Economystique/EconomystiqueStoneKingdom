@@ -404,6 +404,19 @@ def wastage():
     ]
     return render_template('wastage.html', wastage_data=wastage_record)
 
+#modal for declaring wastage
+@app.route('/declare_wastage', methods=['POST'])
+def declare_wastage():
+    inv_id   = request.form['inv_id']
+    quantity = float(request.form['quantity'])
+    dec_date = request.form['dec_date']
+    remark   = request.form.get('remark', '')
+
+    # add DB + inventory shit logic here u got dis kim lessgow!
+    
+    flash('Wastage recorded successfully!', 'success')
+    return redirect(url_for('wastage'))
+
 @app.route('/pos')
 @login_required
 def pos():

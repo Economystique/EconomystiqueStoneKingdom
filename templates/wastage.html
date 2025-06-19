@@ -6,8 +6,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/wastage.css') }}">
 {% endblock %}
 
-<!--{% block header_title %} Wastage {% endblock %}-->
-
 {% block content %}
 <h1>Wastage</h1>
 <div class="content-header">
@@ -23,7 +21,7 @@
             </div>
         </div>
         <div class="wastage-action-buttons">
-            <button class="btn btn-wastage">
+            <button id="openModalBtn" class="btn btn-wastage">
                 <span class="icon"><img class="icon-img" src="static/img/declareWastageIcon.png" alt=""></span>
                 Declare Wastage
             </button>
@@ -58,17 +56,80 @@
         <div class="pagination-container">
             <ul class="pagination">
                 <li class="page-item" id="prevPageBtn"><span>&laquo;</span></li>
-                <!-- Page numbers will be injected here dynamically -->
                 <li class="page-item" id="nextPageBtn"><span>&raquo;</span></li>
             </ul>
         </div>
     </div>
 </div>
+
+<!-- MODAL -->
+<div id="wastageModal" class="modal hidden">
+    <div class="modal-content">
+        <span id="closeModalBtn" class="close">&times;</span>
+        <h2 class="modal-title">Declare Wastage</h2>  
+        <div class="modal-wrapper">
+            <form id="declareWastageForm" action="{{ url_for('declare_wastage') }}" method="post">
+                <div class="form-group">
+                    <label for="inv_id">Inventory ID/Name</label>
+                    <select name="inv_id" id="inv_id" required>
+                        {% for inv in inv_data %}
+                        <option value="{{ inv.id }}">{{ inv.description }} ({{ inv.unit }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" name="quantity" id="quantity" min="0.01" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dec_date">Wastage Date</label>
+                    <input type="date" name="dec_date" id="dec_date" value="{{ current_date }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="remark">Remarks</label>
+                    <textarea name="remark" id="remark" rows="3" placeholder="Enter remarks..."></textarea>
+                </div>
+            </form>
+
+            <div class="declare-wastage-table">
+                <div class="table-wrapper">
+                    <table class="waste-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Quantity</th>
+                                <th>Date</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample row, for sample look only remove dis -->
+                            <tr>
+                                <td>INV001</td>
+                                <td>Will to live</td>
+                                <td>2025-08-15</td>
+                                <td>it's time to kys</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div
+        <div class="declare-buttons">
+            <button type="submit" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Confirm</button>
+        </div>
+    </div>
+</div>  
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Pagination + Search
     const searchInput = document.getElementById('wastageSearchInput');
     const tableRows = Array.from(document.querySelectorAll('.wastage-table tbody tr'));
     const paginationContainer = document.querySelector('.pagination');
@@ -102,15 +163,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.page-item.numbered, .page-item.ellipsis').forEach(el => el.remove());
 
         const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-
         if (totalPages <= 1) return;
 
-        const maxVisible = 5;
         const buffer = 2;
         const start = Math.max(2, currentPage - buffer);
         const end = Math.min(totalPages - 1, currentPage + buffer);
 
-        // Always show first page
         paginationContainer.insertBefore(createPageItem(1, 1, currentPage === 1), nextBtn);
 
         if (start > 2) {
@@ -125,9 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
             paginationContainer.insertBefore(createPageItem('...', null, false, true), nextBtn);
         }
 
-        if (totalPages > 1) {
-            paginationContainer.insertBefore(createPageItem(totalPages, totalPages, currentPage === totalPages), nextBtn);
-        }
+        paginationContainer.insertBefore(createPageItem(totalPages, totalPages, currentPage === totalPages), nextBtn);
     }
 
     function showPage(page) {
@@ -166,7 +222,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     showPage(currentPage);
+
+    // Modal logic
+    const modal = document.getElementById('wastageModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const declareForm = document.getElementById('declareWastageForm');
+
+    function openModal() { modal.classList.remove('hidden'); }
+    function closeModal() { modal.classList.add('hidden'); }
+
+    openModalBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    modal.addEventListener('transitionend', () => {
+        if (modal.classList.contains('hidden')) declareForm.reset();
+    });
 });
 </script>
-
 {% endblock %}

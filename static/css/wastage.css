@@ -257,3 +257,143 @@
     border-color: #215E7D;
 }
 
+/*dis the one for da modal bro c=====3*/
+/* Modal styles */
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+    }
+
+    .hidden { display: none; }
+
+    .modal-content {
+        background-color: white;
+        padding: 2rem 2.5rem;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 800px;
+        position: relative;
+        box-shadow: 0 6px 20px rgba(0,0,0,.15);
+    }
+
+    .modal-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    .modal-wrapper > * {
+    width: 40%;
+}
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        text-align: center;
+        padding-bottom: 8px;
+    }
+
+    .close {
+        position: absolute;
+        top: .75rem;
+        right: .75rem;
+        font-size: 1.75rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: .25rem;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: .5rem .75rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    #declareWastageForm input,
+    #declareWastageForm select,
+    #declareWastageForm textarea {
+        background-color: #e8e6e6;
+    }
+
+    /* table */
+.declare-wastage-table table {
+    width: 420px;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #e8e6e6;
+}
+
+.declare-wastage-table {
+    background-color: #e8e6e6;
+    width: 420px;
+    border-radius: 8px;
+    height: 320px;
+}
+
+/* Header row */
+.declare-wastage-table thead th {
+    background-color: #2c6684;
+    color: white;
+    padding:19px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Table rows */
+.declare-wastage-table tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #333;
+    font-size: 14px;
+}
+
+.waste-table td {
+    background-color: #e8e6e6;
+}
+
+    .declare-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        padding-right: 1.5rem;
+        background-color: pink;
+    }
+
+    .btn-primary {
+        background: #2c6684;
+        color: #fff;
+        padding: .6rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        
+    }
+
+    .btn-secondary {
+        border:1px solid #8f2020;
+        color: #8f2020;
+        padding: .6rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
