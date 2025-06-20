@@ -74,6 +74,10 @@
         position: relative;
         display: inline-block;
         z-index: 10;
+        background-color: transparent;
+        color: #215E7D;
+        border: 1px solid #215E7D;
+        border-radius: 0.375rem;
     }
 
     .dropdown-content {

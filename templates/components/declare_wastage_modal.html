@@ -1,0 +1,111 @@
+{% block title %}Declare Wastage - Economystique{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/wastage.css') }}"> 
+<!--linagay ko na sa wastage.css ung css nalagay ko kasi sa wastage to initially but this is needed at the products also so i had to create another file for it. 
+here is a comment for the css part of this in the wastage.css-->
+{% endblock %}
+
+{% block content %}
+<div id="wastageModal" class="modal hidden">
+    <div class="modal-content">
+        <span id="closeModalBtn" class="close">&times;</span>
+        <h2 class="modal-title">Declare Wastage</h2>  
+        <hr><br>
+
+        <div class="modal-wrapper">
+            <form id="declareWastageForm" action="{{ url_for('declare_wastage') }}" method="post">
+                <div class="form-group">
+                    <label for="inv_id">Inventory ID/Name</label>
+                    <select name="inv_id" id="inv_id" required>
+                        {% if inv_data %}
+                            {% for inv in inv_data %}
+                            <option value="{{ inv.id }}">{{ inv.description }} ({{ inv.unit }})</option>
+                            {% endfor %}
+                        {% else %}
+                            <option disabled selected>No inventory available</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" name="quantity" id="quantity" min="0.01" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dec_date">Wastage Date</label>
+                    <input type="date" name="dec_date" id="dec_date" value="{{ current_date or '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="remark">Remarks</label>
+                    <textarea name="remark" id="remark" rows="3" placeholder="Enter remarks..."></textarea>
+                </div>
+            </form>
+
+            <div class="declare-wastage-table">
+                <div class="table-wrapper">
+                    <table class="waste-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Quantity</th>
+                                <th>Date</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>INV001</td>
+                                <td>Sample</td>
+                                <td>2025-08-15</td>
+                                <td>Test</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="declare-buttons">
+            <button type="button" class="btn-secondary" id="cancelWastageBtn">Cancel</button>
+            <button type="submit" form="declareWastageForm" class="btn-primary">Confirm</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('wastageModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelWastageBtn');
+    const declareForm = document.getElementById('declareWastageForm');
+
+    function openModal() {
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    window.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+
+    modal.addEventListener('transitionend', () => {
+        if (modal.classList.contains('hidden') && declareForm) {
+            declareForm.reset();
+        }
+    });
+});
+</script>
+{% endblock %}

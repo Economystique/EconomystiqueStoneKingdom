@@ -41,7 +41,7 @@
                     Manage
                 </button>
             </form>
-            <button class="btn btn-wastage">
+            <button class="btn btn-wastage" id="openModalBtn">
                 <span class="icon"><img class="icon-img" src="static/img/declareWastageIcon.png" alt=""></span>
                 Declare Wastage
             </button>
@@ -89,6 +89,9 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL -->
+{% include 'components/declare_wastage_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
