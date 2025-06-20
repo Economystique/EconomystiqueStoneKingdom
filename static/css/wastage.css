@@ -347,6 +347,7 @@
     width: 420px;
     border-radius: 8px;
     height: 320px;
+    border: 1px solid #ccc;
 }
 
 /* Header row */
@@ -374,9 +375,6 @@
         display: flex;
         justify-content: flex-end;
         gap: 1rem;
-        padding-top: 1.5rem;
-        padding-right: 1.5rem;
-        background-color: pink;
     }
 
     .btn-primary {

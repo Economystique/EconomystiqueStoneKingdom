@@ -67,6 +67,9 @@
     <div class="modal-content">
         <span id="closeModalBtn" class="close">&times;</span>
         <h2 class="modal-title">Declare Wastage</h2>  
+        <hr>
+        <br>
+
         <div class="modal-wrapper">
             <form id="declareWastageForm" action="{{ url_for('declare_wastage') }}" method="post">
                 <div class="form-group">
@@ -106,7 +109,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Sample row, for sample look only remove dis -->
                             <tr>
                                 <td>INV001</td>
                                 <td>Will to live</td>
@@ -117,13 +119,15 @@
                     </table>
                 </div>
             </div>
-        </div
+        </div>
+
         <div class="declare-buttons">
-            <button type="submit" class="btn-secondary">Cancel</button>
-            <button type="submit" class="btn-primary">Confirm</button>
+            <button type="button" class="btn-secondary">Cancel</button>
+            <button type="submit" form="declareWastageForm" class="btn-primary">Confirm</button>
         </div>
     </div>
-</div>  
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
