@@ -1,0 +1,165 @@
+body {
+        font-family: 'Fira Code', monospace;
+        background-color: #fdfdfd;
+    }
+    .whole-container {
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+    }
+    .pos-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        height: calc(100vh - var(--header-height) - 40px);
+        padding: 1rem;
+        background-color: white;
+        border-radius: 8px;
+    }
+    .products-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .search-bar {
+        margin-bottom: 1rem;
+    }
+    .search-bar input {
+        border-radius: 8px;
+        padding: 18px;
+        width: 100%;
+        border: 2px solid #ccc;
+    }
+        .products-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(236px, 1fr));
+        gap: 1rem;
+        padding-right: 0.5rem;
+        justify-content: center; 
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        border: 3px solid #899aa3;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.2s ease-in-out;
+        width: 370px; 
+        height: 130px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        gap: 3px;
+    }
+    .product-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .product-image-large {
+        width: 40%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        background-color: #fafafa;
+        border-radius: 8px; 
+        margin-bottom: 0.75rem;
+        background-color: #e7e5e5;
+    }
+    .product-image-small {
+        width: 40%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        background-color: #fafafa;
+        border-radius: 8px; 
+        background-color: #e7e5e5;
+    }
+    .product-image img {
+        max-height: 100%;
+        object-fit: contain;
+    }
+    .product-infos {
+        display: flex;
+        flex-direction: column;
+    }
+    .product-info h3 {
+        font-size: 1rem;
+        font-weight: bold;
+        margin: 0.25rem 0;
+    }
+    .product-info .price {
+        color: #2c7a7b;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    .product-info .stock {
+        font-size: 0.75rem;
+        color: #777;
+    }
+    .cart-section {
+        width: 400px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+    }
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .cart-items {
+        flex-grow: 1;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    .cart-summary {
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+    }
+    .cart-summary div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .btn-checkout {
+        background: #2c7a7b;
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .btn-checkout:hover {
+        background: #285e61;
+    }
+    @media (max-width: 768px) {
+        .pos-container {
+            flex-direction: column;
+        }
+        .cart-section {
+            width: 100%;
+        }
+    }
+
+    /*bar code*/
+    .reflect-scanned {
+        background-color: white;
+        height: 365px;
+        border-radius: 8px;
+        border: 3px solid #899aa3;
+    }
