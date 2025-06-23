@@ -2,13 +2,16 @@ import os
 import sqlite3
 import uuid
 import bcrypt
+import random
 
 def edit_database():
-    connectionPath = os.path.join("db/salesdb", "sales_now.db")
+    connectionPath = os.path.join("db/salesdb/daily/sales_d2025", "jun_2025.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
-    # ADD COLUMN
+    # Daily
+    
+    
     
     # Barcode
     # cursor.execute("ALTER TABLE inv_static ADD COLUMN barcode TEXT")

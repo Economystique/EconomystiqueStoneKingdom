@@ -257,6 +257,7 @@ def sales():
         FROM sales_today
     """
     )
+    
     rows = cursor.fetchall()
     conn.close()
     

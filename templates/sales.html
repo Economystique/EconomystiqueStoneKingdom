@@ -79,7 +79,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize sales chart
+    // Initialize sales chart : x = time, y = total_sales
     const salesData = {
         labels: {{ sales_data | map(attribute='inv_desc') | list | tojson }},
         datasets: [{
