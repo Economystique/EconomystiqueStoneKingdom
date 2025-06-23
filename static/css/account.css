@@ -1,16 +1,8 @@
-/* ---------- Layout ---------- */
-body {
-    background:#ebeaea;
-    font-family: "Inter", Arial, sans-serif;
-}
 
 .whole-container {
-    max-width: 840px;
-    margin: 24px auto;
-    padding: 0 8px;
+    padding: 10px;
 }
 
-/* ---------- Re‑usable card shell ---------- */
 .card {
     position: relative;
     display: flex;
@@ -23,8 +15,17 @@ body {
     margin-bottom:24px;
 }
 
-.card personal-container {
-    height: 800px;
+.card.personal-container{
+    height: 350px;
+    align-items: center;
+    padding: 80px;
+}
+
+.card.business-container {
+    display: flex;
+    height: 500px;
+    align-items: center;
+    padding: 80px;
 }
 
 /* ---------- Edit button ---------- */
@@ -32,61 +33,96 @@ body {
     position:absolute;
     top:16px;
     right:16px;
-    font-size:13px;
+    font-size:17px;
     background:#fff;
-    border:1px solid #b8c0cc;
+    border:1px solid #215e7d;
     border-radius:6px;
-    padding:4px 14px;
+    padding:9px 28px;
     cursor:pointer;
     transition:background .15s ease;
+    color: #215e7d;
 }
-.edit-btn:hover { background:#f2f5f9; }
+.edit-btn:hover { 
+    background-color: #215e7d;
+    color: white;
+}
 
 /* ---------- Avatar ---------- */
 .avatar-circle {
     flex-shrink:0;
-    width:96px; height:96px;
+    width:280px; 
+    height:280px;
     border-radius:50%;
     background:#0f4e68;
-    display:flex; align-items:center; justify-content:center;
-}
-.avatar-icon {
-    width:48px; height:48px;
-    border-radius:50%;
-    background:#fff;
-    position:relative;
-}
-.avatar-icon::after {
-    content:'';
-    position:absolute; left:50%; top:65%;
-    width:36px; height:18px;
-    transform:translate(-50%,-50%);
-    border-radius:9px 9px 0 0;
-    background:#fff;
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
 }
 
 /* ---------- Logo ---------- */
-.biz-logo img {
-    width:120px;
-    height:120px;
+.biz-logo {
+    width:320px;
+    height:320px;
     object-fit:contain;
+    background-color: #215e7d
 }
 
 /* ---------- Text blocks ---------- */
-.personal-text, .biz-text {
+.personal-text{
     flex:1;
+    padding-left: 90px;
 }
+.biz-text  {
+    flex:1;
+    padding-left: 50px;
+}
+
 .section-label {
-    font-size:11px;
-    color:#6b7280;
+    font-size:20px;
+    color:#797979;
     margin-bottom:4px;
     text-transform:uppercase;
     letter-spacing:.04em;
 }
 .owner-name, .biz-name {
-    font-size:20px;
-    font-weight:600;
+    font-size:40px;
+    font-weight:500;
     margin:0 0 12px 0;
 }
-.info-line   { margin:4px 0; font-size:14px; }
-.info-label  { font-weight:600; color:#2563eb; }
+.info-line   { 
+    margin:4px 0; 
+    font-size:25px; 
+}
+.info-label  { 
+    font-weight:400; 
+    color:#215e7d; 
+}
+
+
+/* ---------- Edit ---------- */
+.editable-input {
+    background-color: #f3f4f6;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 23px;
+    height: 45px;
+}
+
+.save-btn {
+    position:absolute;
+    top:16px;
+    right:16px;
+    font-size:17px;
+    background:#fff;
+    border:1px solid #215e7d;
+    border-radius:6px;
+    padding:9px 28px;
+    cursor:pointer;
+    transition:background .15s ease;
+    color: #215e7d;
+}
+.save-btn:hover { 
+    background-color: #215e7d;
+    color: white;
+}
