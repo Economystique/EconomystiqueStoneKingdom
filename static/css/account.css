@@ -1,0 +1,92 @@
+/* ---------- Layout ---------- */
+body {
+    background:#ebeaea;
+    font-family: "Inter", Arial, sans-serif;
+}
+
+.whole-container {
+    max-width: 840px;
+    margin: 24px auto;
+    padding: 0 8px;
+}
+
+/* ---------- Re‑usable card shell ---------- */
+.card {
+    position: relative;
+    display: flex;
+    gap: 24px;
+    background:#fff;
+    border:1px solid #d8d8d8;
+    border-radius:8px;
+    padding:24px;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+    margin-bottom:24px;
+}
+
+.card personal-container {
+    height: 800px;
+}
+
+/* ---------- Edit button ---------- */
+.edit-btn {
+    position:absolute;
+    top:16px;
+    right:16px;
+    font-size:13px;
+    background:#fff;
+    border:1px solid #b8c0cc;
+    border-radius:6px;
+    padding:4px 14px;
+    cursor:pointer;
+    transition:background .15s ease;
+}
+.edit-btn:hover { background:#f2f5f9; }
+
+/* ---------- Avatar ---------- */
+.avatar-circle {
+    flex-shrink:0;
+    width:96px; height:96px;
+    border-radius:50%;
+    background:#0f4e68;
+    display:flex; align-items:center; justify-content:center;
+}
+.avatar-icon {
+    width:48px; height:48px;
+    border-radius:50%;
+    background:#fff;
+    position:relative;
+}
+.avatar-icon::after {
+    content:'';
+    position:absolute; left:50%; top:65%;
+    width:36px; height:18px;
+    transform:translate(-50%,-50%);
+    border-radius:9px 9px 0 0;
+    background:#fff;
+}
+
+/* ---------- Logo ---------- */
+.biz-logo img {
+    width:120px;
+    height:120px;
+    object-fit:contain;
+}
+
+/* ---------- Text blocks ---------- */
+.personal-text, .biz-text {
+    flex:1;
+}
+.section-label {
+    font-size:11px;
+    color:#6b7280;
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+}
+.owner-name, .biz-name {
+    font-size:20px;
+    font-weight:600;
+    margin:0 0 12px 0;
+}
+.info-line   { margin:4px 0; font-size:14px; }
+.info-label  { font-weight:600; color:#2563eb; }

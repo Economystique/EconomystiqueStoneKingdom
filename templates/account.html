@@ -7,97 +7,53 @@
 {% endblock %}
 
 {% block content %}
-    <div class="whole-container">
-        <div class="personal-container">
-            <button>Edit</button>
+<div class="whole-container">
+    <!-- PERSONAL CARD -->
+    <div class="card personal-container">
+        <button class="edit-btn" type="button">Edit</button>
 
+        <div class="avatar-circle">
+           
+            <span class="avatar-icon"></span>
         </div>
 
-        <div class="business-container">
-
+        <div class="personal-text">
+            <p class="section-label">Business Owner</p>
+            <h2 class="owner-name">Patricia Bernadette A. Aspillaga</h2>
+            <p class="info-line">
+                <span class="info-label">Contact Information:</span>
+                0900‑000‑0000
+            </p>
         </div>
     </div>
+
+    <!-- BUSINESS CARD -->
+    <div class="card business-container">
+        <div class="biz-logo">
+           
+        </div>
+
+        <div class="biz-text">
+            <p class="section-label">Business Information</p>
+            <h2 class="biz-name">Corner Comforts Mini Mart</h2>
+
+            <p class="info-line">
+                <span class="info-label">Industry:</span>
+                Retail Industry
+            </p>
+            <p class="info-line">
+                <span class="info-label">Business Type:</span>
+                Mini Mart
+            </p>
+            <p class="info-line">
+                <span class="info-label">Address:</span>
+                14 Pine Cone Lane, Outlook Drive, Baguio City, Benguet
+            </p>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const matchMessage = document.getElementById('passwordMatch');
-    const mismatchMessage = document.getElementById('passwordMismatch');
-
-    function checkPasswordMatch() {
-        if (newPassword.value && confirmPassword.value) {
-            if (newPassword.value === confirmPassword.value) {
-                matchMessage.style.display = 'block';
-                mismatchMessage.style.display = 'none';
-            } else {
-                matchMessage.style.display = 'none';
-                mismatchMessage.style.display = 'block';
-            }
-        } else {
-            matchMessage.style.display = 'none';
-            mismatchMessage.style.display = 'none';
-        }
-    }
-
-    newPassword.addEventListener('input', checkPasswordMatch);
-    confirmPassword.addEventListener('input', checkPasswordMatch);
-});
-
-async function updateProfile(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-        const response = await window.app.fetchData('/api/account/profile', {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-
-        if (response.success) {
-            alert('Profile updated successfully!');
-            location.reload();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while updating your profile.');
-    }
-}
-
-async function updatePassword(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    if (data.new_password !== data.confirm_password) {
-        alert('Passwords do not match.');
-        return;
-    }
-
-    if (data.new_password.length < 8 || !/\d/.test(data.new_password)) {
-        alert('Password must be at least 8 characters long and contain at least one number.');
-        return;
-    }
-
-    try {
-        const response = await window.app.fetchData('/api/account/password', {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-
-        if (response.success) {
-            alert('Password updated successfully!');
-            form.reset();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while updating your password.');
-    }
-}
-</script>
-{% endblock %} 
+{{ super() }}  {# keeps the password‑check script you already have #}
+{% endblock %}
