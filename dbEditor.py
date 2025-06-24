@@ -2,17 +2,61 @@ import os
 import sqlite3
 import uuid
 import bcrypt
+import random
 
 def edit_database():
-    connectionPath = os.path.join("db", "wastage_db.db")
+    connectionPath = os.path.join("db", "inventory_db.db")
     connection = sqlite3.connect(connectionPath)
     cursor = connection.cursor()
 
+    toPath = os.path.join("db/salesdb/daily/sales_d2025","aug_2025.db")
+    toConn = sqlite3.connect(toPath)
+    toCursor = toConn.cursor()
+    
+    cursor.execute("""
+        SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
+        FROM inv_static
+    """)
+    invStatic = cursor.fetchall()
+    numSales = 25
+    
+    # 1-9
+    for x in range(1,10):
+        sampled_items = random.sample(invStatic, numSales)
+        data_to_insert = []
+        for item in sampled_items:
+            inv_id = item[0]
+            inv_desc = item[1]
+            price = item[7]
+            quantity_sold = random.randint(1, 15)
+            data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+        toCursor.executemany(f"""
+            INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
+            VALUES (?, ?, ?, ?)
+            """, data_to_insert)
+    # 10-30  
+    for x in range(10,31):
+        sampled_items = random.sample(invStatic, numSales)
+        data_to_insert = []
+        for item in sampled_items:
+            inv_id = item[0]
+            inv_desc = item[1]
+            price = item[7]
+            quantity_sold = random.randint(1, 15)
+            data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+        toCursor.executemany(f"""
+            INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
+            VALUES (?, ?, ?, ?)
+            """, data_to_insert)
+    
+    toConn.commit()
+    toConn.close()
+    
     # ADD COLUMN
-    #cursor.execute("ALTER TABLE products_on_hand ADD COLUMN image BLOB")
-
-    # EDIT CELL
-    # cursor.execute("UPDATE apr SET quantity_sold = ? WHERE product_id = ?;",("13-05-25","C004"))  
+    #cursor.execute("ALTER TABLE inv_static ADD COLUMN cost REAL")
+    
+    # EDIT ENTRY
+    # cursor.execute("UPDATE inv_static SET cost = ? WHERE inv_id = ?;",(expense_data[x-1],f"INVa0000{x}"))
     
     # DELETE ENTRY
     # cursor.execute("DELETE FROM inv_dynamic WHERE actual_id = 'ITa00001'")

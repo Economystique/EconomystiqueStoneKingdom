@@ -7,97 +7,88 @@
 {% endblock %}
 
 {% block content %}
-    <div class="whole-container">
-        <div class="personal-container">
-            <button>Edit</button>
+<div class="whole-container">
 
+    <!-- PERSONAL CARD -->
+    <form id="personalForm" class="card personal-container" onsubmit="updateProfile(event)">
+        <button id="editBtn" class="edit-btn" type="button" onclick="toggleEdit()">Edit</button>
+        <button id="saveBtn" class="save-btn" type="submit" style="display: none;">Save</button>
+
+        <div class="avatar-circle">
+            <span class="avatar-icon"></span>
         </div>
 
-        <div class="business-container">
+        <div class="personal-text">
+            <p class="section-label">Business Owner</p>
+            <h2 class="owner-name" id="ownerNameText">DildongDantes</h2>
+            <input type="text" name="owner_name" id="ownerNameInput" value="DildongDantes" class="editable-input" style="display: none;">
 
+            <p class="info-line">
+                <span class="info-label">Contact Information:</span>
+                <span id="contactText">0900-000-0000</span>
+                <input type="text" name="contact" id="contactInput" value="0900-000-0000" class="editable-input" style="display: none;">
+            </p>
         </div>
-    </div>
+    </form>
+
+    <!-- BUSINESS CARD -->
+    <form id="businessForm" class="card business-container" onsubmit="updateBusiness(event)">
+        <div class="biz-logo">
+            
+        </div>
+
+        <div class="biz-text">
+            <p class="section-label">Business Information</p>
+            <h2 class="biz-name" id="bizNameText">J. RIZZ</h2>
+            <input type="text" name="biz_name" id="bizNameInput" value="J. RIZZ" class="editable-input" style="display: none;">
+
+            <p class="info-line">
+                <span class="info-label">Industry:</span>
+                <span id="industryText">Overworked, Underpaid</span>
+                <input type="text" name="industry" id="industryInput" value="Overworked, Underpaid" class="editable-input" style="display: none;">
+            </p>
+
+            <p class="info-line">
+                <span class="info-label">Business Type:</span>
+                <span id="bizTypeText">Bakery</span>
+                <input type="text" name="biz_type" id="bizTypeInput" value="Bakery" class="editable-input" style="display: none;">
+            </p>
+
+            <p class="info-line">
+                <span class="info-label">Address:</span>
+                <span id="addressText">kabaong ni Jose Rizal</span>
+                <input type="text" name="address" id="addressInput" value="kabaong ni Jose Rizal" class="editable-input" style="display: none;">
+            </p>
+        </div>
+    </form>
+
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const matchMessage = document.getElementById('passwordMatch');
-    const mismatchMessage = document.getElementById('passwordMismatch');
+function toggleEdit() {
+    const showText = (id, show) => {
+        document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
+        document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
+    };
 
-    function checkPasswordMatch() {
-        if (newPassword.value && confirmPassword.value) {
-            if (newPassword.value === confirmPassword.value) {
-                matchMessage.style.display = 'block';
-                mismatchMessage.style.display = 'none';
-            } else {
-                matchMessage.style.display = 'none';
-                mismatchMessage.style.display = 'block';
-            }
-        } else {
-            matchMessage.style.display = 'none';
-            mismatchMessage.style.display = 'none';
-        }
-    }
+    ['ownerName', 'contact', 'bizName', 'industry', 'bizType', 'address'].forEach(id => showText(id, false));
 
-    newPassword.addEventListener('input', checkPasswordMatch);
-    confirmPassword.addEventListener('input', checkPasswordMatch);
-});
-
-async function updateProfile(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    try {
-        const response = await window.app.fetchData('/api/account/profile', {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-
-        if (response.success) {
-            alert('Profile updated successfully!');
-            location.reload();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while updating your profile.');
-    }
+    document.getElementById('editBtn').style.display = 'none';
+    document.getElementById('saveBtn').style.display = 'inline-block';
 }
 
-async function updatePassword(event) {
+function updateProfile(event) {
     event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+    alert("Personal information saved!");
+    // Send to backend via fetch here if needed
+}
 
-    if (data.new_password !== data.confirm_password) {
-        alert('Passwords do not match.');
-        return;
-    }
-
-    if (data.new_password.length < 8 || !/\d/.test(data.new_password)) {
-        alert('Password must be at least 8 characters long and contain at least one number.');
-        return;
-    }
-
-    try {
-        const response = await window.app.fetchData('/api/account/password', {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-
-        if (response.success) {
-            alert('Password updated successfully!');
-            form.reset();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while updating your password.');
-    }
+function updateBusiness(event) {
+    event.preventDefault();
+    alert("Business information saved!");
+    // Send to backend via fetch here if needed
 }
 </script>
-{% endblock %} 
+{% endblock %}

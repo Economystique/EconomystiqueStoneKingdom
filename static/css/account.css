@@ -1,0 +1,128 @@
+
+.whole-container {
+    padding: 10px;
+}
+
+.card {
+    position: relative;
+    display: flex;
+    gap: 24px;
+    background:#fff;
+    border:1px solid #d8d8d8;
+    border-radius:8px;
+    padding:24px;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+    margin-bottom:24px;
+}
+
+.card.personal-container{
+    height: 350px;
+    align-items: center;
+    padding: 80px;
+}
+
+.card.business-container {
+    display: flex;
+    height: 500px;
+    align-items: center;
+    padding: 80px;
+}
+
+/* ---------- Edit button ---------- */
+.edit-btn {
+    position:absolute;
+    top:16px;
+    right:16px;
+    font-size:17px;
+    background:#fff;
+    border:1px solid #215e7d;
+    border-radius:6px;
+    padding:9px 28px;
+    cursor:pointer;
+    transition:background .15s ease;
+    color: #215e7d;
+}
+.edit-btn:hover { 
+    background-color: #215e7d;
+    color: white;
+}
+
+/* ---------- Avatar ---------- */
+.avatar-circle {
+    flex-shrink:0;
+    width:280px; 
+    height:280px;
+    border-radius:50%;
+    background:#0f4e68;
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
+}
+
+/* ---------- Logo ---------- */
+.biz-logo {
+    width:320px;
+    height:320px;
+    object-fit:contain;
+    background-color: #215e7d
+}
+
+/* ---------- Text blocks ---------- */
+.personal-text{
+    flex:1;
+    padding-left: 90px;
+}
+.biz-text  {
+    flex:1;
+    padding-left: 50px;
+}
+
+.section-label {
+    font-size:20px;
+    color:#797979;
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+}
+.owner-name, .biz-name {
+    font-size:40px;
+    font-weight:500;
+    margin:0 0 12px 0;
+}
+.info-line   { 
+    margin:4px 0; 
+    font-size:25px; 
+}
+.info-label  { 
+    font-weight:400; 
+    color:#215e7d; 
+}
+
+
+/* ---------- Edit ---------- */
+.editable-input {
+    background-color: #f3f4f6;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 23px;
+    height: 45px;
+}
+
+.save-btn {
+    position:absolute;
+    top:16px;
+    right:16px;
+    font-size:17px;
+    background:#fff;
+    border:1px solid #215e7d;
+    border-radius:6px;
+    padding:9px 28px;
+    cursor:pointer;
+    transition:background .15s ease;
+    color: #215e7d;
+}
+.save-btn:hover { 
+    background-color: #215e7d;
+    color: white;
+}

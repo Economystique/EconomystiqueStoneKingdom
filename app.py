@@ -257,6 +257,7 @@ def sales():
         FROM sales_today
     """
     )
+    
     rows = cursor.fetchall()
     conn.close()
     
@@ -423,20 +424,64 @@ def pos():
     products = [
         {
             "id": 1,
-            "name": "Chocolate Cake",
-            "price": 350.00,
-            "stock": 15,
-            "image": "choco_cake.jpg"
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
         },
         {
             "id": 2,
-            "name": "Ube Macapuno",
-            "price": 400.00,
-            "stock": 8,
-            "image": "ube_macapuno.jpg"
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
         },
         {
             "id": 3,
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        },
+        {
+            "id": 4,
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        },
+        {
+            "id": 5,
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        },
+        {
+            "id": 6,
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        },
+        {
+            "id": 7,
+            "name":
+              "Red Velvet",
+            
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        },
+        {
+            "id": 8,
+            "name": "Red Velvet",
+            "price": 375.00,
+            "stock": 12,
+            "image": None  # No image fallback
+        },
+        {
+            "id": 9,
             "name": "Red Velvet",
             "price": 375.00,
             "stock": 12,
