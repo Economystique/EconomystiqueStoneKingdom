@@ -63,6 +63,12 @@ body {
     justify-content: center;
 }
 
+.logo-img {
+    padding-top: 10px;
+    height: 53px;
+    width: 220px;
+}
+
 /* Sidebar */
 .sidebar {
     width: 259px;
@@ -180,6 +186,7 @@ body {
     height: 20px;
     width: 20px;
 }
+
 
 /* Sidebar Footer */
 .sidebar-footer {
