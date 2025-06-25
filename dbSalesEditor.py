@@ -41,11 +41,11 @@ def edit_database():
     # Sales Yearly
     # cursor.execute(f"""
     #         CREATE TABLE IF NOT EXISTS sales_y2025 (
-    #             inv_id TEXT PRIMARY KEY,
-    #             inv_desc TEXT,
-    #             quantity_sold INTEGER,
-    #             price REAL,
-    #             sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+                # inv_id TEXT PRIMARY KEY,
+                # inv_desc TEXT,
+                # quantity_sold INTEGER,
+                # price REAL,
+                # sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
     #         )
     # """)
 
@@ -87,38 +87,38 @@ def edit_database():
     
     # Sales Now
     
-    data_sales_now = [
-        ("INVa00001", "Bimoli Cooking Oil 500 ml", 2, 125),
-        ("INVa00003", "Lucky Me! Pancit Canton Chili Mansi 50 g", 5, 15),
-        ("INVa00005", "Bounty Fresh Eggs L", 6, 9),
-        ("INVa00006", "Coca Cola Coke 1.5 L", 3, 60),
-        ("INVa00008", "Oreo Cookies 45 g", 4, 18),
-        ("INVa00009", "Piattos Sour Cream Onion 90g", 3, 25),
-        ("INVa00011", "Argentina Corned Beef 150 g", 2, 45),
-        ("INVa00013", "Purefoods Hotdog Regular 1 kg", 1, 170),
-        ("INVa00015", "Bear Brand Powdered Milk 320 g", 2, 95),
-        ("INVa00016", "Milo Chocolate Drink 220 g", 1, 80),
-        ("INVa00018", "Zesto Orange Juice 250 ml", 6, 12),
-        ("INVa00019", "Tang Pineapple Powder Drink 25 g", 5, 10),
-        ("INVa00020", "Lifebuoy Antibacterial Soap 90 g", 3, 35),
-        ("INVa00022", "Colgate Toothpaste 150 ml", 2, 50),
-        ("INVa00025", "Tide Powder Detergent 500 g", 1, 65),
-        ("INVa00028", "Joy Dishwashing Liquid 495 ml", 2, 70),
-        ("INVa00030", "Gardenia Classic Bread Loaf", 3, 55),
-        ("INVa00032", "Fita Biscuits 33 g", 4, 12),
-        ("INVa00034", "Nagaraya Garlic Cracker Nuts 160 g", 2, 45),
-        ("INVa00035", "Cloud 9 Classic Chocolate Bar", 5, 10),
-        ("INVa00036", "C2 Apple 500 ml", 4, 28),
-        ("INVa00037", "Selecta Super Thick Vanilla 1.5L", 1, 210),
-        ("INVa00040", "Brown Sugar 1 kg", 2, 45),
-        ("INVa00042", "Datu Puti Vinegar 1 L", 3, 22),
-        ("INVa00047", "Yakult Probiotic Drink 80 ml", 6, 12)
-    ]
+    # data_sales_now = [
+    #     ("INVa00001", "Bimoli Cooking Oil 500 ml", 2, 125),
+    #     ("INVa00003", "Lucky Me! Pancit Canton Chili Mansi 50 g", 5, 15),
+    #     ("INVa00005", "Bounty Fresh Eggs L", 6, 9),
+    #     ("INVa00006", "Coca Cola Coke 1.5 L", 3, 60),
+    #     ("INVa00008", "Oreo Cookies 45 g", 4, 18),
+    #     ("INVa00009", "Piattos Sour Cream Onion 90g", 3, 25),
+    #     ("INVa00011", "Argentina Corned Beef 150 g", 2, 45),
+    #     ("INVa00013", "Purefoods Hotdog Regular 1 kg", 1, 170),
+    #     ("INVa00015", "Bear Brand Powdered Milk 320 g", 2, 95),
+    #     ("INVa00016", "Milo Chocolate Drink 220 g", 1, 80),
+    #     ("INVa00018", "Zesto Orange Juice 250 ml", 6, 12),
+    #     ("INVa00019", "Tang Pineapple Powder Drink 25 g", 5, 10),
+    #     ("INVa00020", "Lifebuoy Antibacterial Soap 90 g", 3, 35),
+    #     ("INVa00022", "Colgate Toothpaste 150 ml", 2, 50),
+    #     ("INVa00025", "Tide Powder Detergent 500 g", 1, 65),
+    #     ("INVa00028", "Joy Dishwashing Liquid 495 ml", 2, 70),
+    #     ("INVa00030", "Gardenia Classic Bread Loaf", 3, 55),
+    #     ("INVa00032", "Fita Biscuits 33 g", 4, 12),
+    #     ("INVa00034", "Nagaraya Garlic Cracker Nuts 160 g", 2, 45),
+    #     ("INVa00035", "Cloud 9 Classic Chocolate Bar", 5, 10),
+    #     ("INVa00036", "C2 Apple 500 ml", 4, 28),
+    #     ("INVa00037", "Selecta Super Thick Vanilla 1.5L", 1, 210),
+    #     ("INVa00040", "Brown Sugar 1 kg", 2, 45),
+    #     ("INVa00042", "Datu Puti Vinegar 1 L", 3, 22),
+    #     ("INVa00047", "Yakult Probiotic Drink 80 ml", 6, 12)
+    # ]
     
-    cursor.executemany("""
-        INSERT OR IGNORE INTO sales_today (inv_id, inv_desc, quantity_sold, price)
-        VALUES (?, ?, ?, ?)              
-    """, data_sales_now)
+    # cursor.executemany("""
+    #     INSERT OR IGNORE INTO sales_today (inv_id, inv_desc, quantity_sold, price)
+    #     VALUES (?, ?, ?, ?)              
+    # """, data_sales_now)
     
     connection.commit()
     connection.close()
