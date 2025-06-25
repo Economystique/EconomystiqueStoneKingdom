@@ -109,6 +109,7 @@ body {
     box-shadow: -16px 0 32px -16px rgba(44,62,80,0.15);
     position: relative;
     z-index: 10;
+    min-height: 600px;
 }
 
 .login-right h2 {
