@@ -78,13 +78,18 @@
 
 {% block extra_js %}
 <script>
+let salesChart = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize sales chart : x = time, y = total_sales
-    const salesData = {
-        labels: {{ sales_data | map(attribute='inv_desc') | list | tojson }},
+    // Chart initialization on page load using default Flask-injected data
+    const labels = {{ sales_data | map(attribute='inv_desc') | list | tojson }};
+    const quantities = {{ sales_data | map(attribute='quantity_sold') | list | tojson }};
+
+    const chartData = {
+        labels: labels,
         datasets: [{
             label: 'Sales by Product',
-            data: {{ sales_data | map(attribute='quantity_sold') | list | tojson }},
+            data: quantities,
             backgroundColor: 'rgba(52, 152, 219, 0.2)',
             borderColor: 'rgba(52, 152, 219, 1)',
             borderWidth: 2,
@@ -92,9 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }]
     };
 
-    const salesChart = new Chart(document.getElementById('salesChart'), {
+    const ctx = document.getElementById('salesChart');
+    salesChart = new Chart(ctx, {
         type: 'line',
-        data: salesData,
+        data: chartData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -115,25 +121,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
 function toggleView(period) {
-    // Remove active class from all buttons
+    // Highlight selected button
     document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-    // Add active class to clicked button
     document.querySelector(`.toggle-btn[onclick*="${period}"]`).classList.add('active');
-    
-    // Here you would typically fetch and update the data based on the selected period
+
+    // Fetch new data
     fetch(`/api/sales/${period}`)
         .then(response => response.json())
-        .then(data => {
-            // Update table and chart with new data
-            updateTableAndChart(data);
-        })
-        .catch(error => console.error('Error:', error));
+        .then(data => updateTableAndChart(data))
+        .catch(error => console.error('Error fetching data:', error));
 }
 
 function updateTableAndChart(data) {
-    // Update table and chart with new data
-    // This function would be implemented based on your data structure
+    // === Update Table ===
+    const tbody = document.querySelector("#salesTable tbody");
+    tbody.innerHTML = '';
+
+    data.table.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${row.inv_id}</td>
+            <td>${row.inv_desc}</td>
+            <td>${row.quantity_sold}</td>
+            <td>${row.price}</td>
+            <td>${row.sales_total}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // === Update Chart ===
+    salesChart.data.labels = data.labels;
+    salesChart.data.datasets[0].data = data.quantities;
+    salesChart.update();
 }
 </script>
 {% endblock %} 

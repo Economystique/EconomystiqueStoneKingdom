@@ -276,6 +276,46 @@ def sales():
 
     return render_template('sales.html', sales_data = today_sales)
 
+@app.route('/api/sales/<period>')
+@login_required
+def get_sales_data(period):
+    conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
+    cursor = conn.cursor()
+
+    # Map period to actual table names in your database
+    table_map = {
+        'daily': 'sales_today',
+        'monthly': 'sales_this_month',
+        'yearly': 'sales_this_year'
+    }
+
+    table_name = table_map.get(period)
+    if not table_name:
+        return jsonify({'error': 'Invalid period'}), 400
+
+    cursor.execute(f"""
+        SELECT inv_id, inv_desc, quantity_sold, price, sales_total
+        FROM {table_name}
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    result = [
+        {
+            'inv_id': row[0],
+            'inv_desc': row[1],
+            'quantity_sold': row[2],
+            'price': row[3],
+            'sales_total': row[4],
+        } for row in rows
+    ]
+
+    return jsonify({
+        'labels': [row['inv_desc'] for row in result],
+        'quantities': [row['quantity_sold'] for row in result],
+        'table': result
+    })
+
 @app.route('/sales_forecast', methods=['GET'])
 @login_required
 def sales_forecast():
