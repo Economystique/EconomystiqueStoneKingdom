@@ -26,13 +26,17 @@
                 <div class="error-message" id="errorMessage"></div>
                 <form action="{{ url_for('signup') }}" method="POST" onsubmit="return validateSignupForm()">
                     <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" class="form-control" id="username" name="username" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="password" name="password" required onkeyup="checkPasswordMatch()">
-                        <div class="password-requirements">
+                        <div class="password-requirements" id="passwordRequirements" style="color: red; display: none;">
                             Password must be at least 8 characters long and contain at least one number.
                         </div>
                     </div>
@@ -56,6 +60,14 @@
             const confirmPassword = document.getElementById('confirm_password').value;
             const matchMessage = document.getElementById('passwordMatch');
             const mismatchMessage = document.getElementById('passwordMismatch');
+            const passwordRequirements = document.getElementById('passwordRequirements');
+            // Show/hide password requirements
+            if (password.length < 8 || !/\d/.test(password)) {
+                passwordRequirements.style.display = 'block';
+            } else {
+                passwordRequirements.style.display = 'none';
+            }
+            // Password match logic
             if (password && confirmPassword) {
                 if (password === confirmPassword) {
                     matchMessage.style.display = 'block';
@@ -71,10 +83,11 @@
         }
         function validateSignupForm() {
             const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const confirmPassword = document.getElementById('confirm_password').value.trim();
             const errorMessage = document.getElementById('errorMessage');
-            if (!username || !password || !confirmPassword) {
+            if (!username || !email || !password || !confirmPassword) {
                 errorMessage.textContent = 'Please fill in all fields';
                 errorMessage.style.display = 'block';
                 return false;

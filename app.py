@@ -13,6 +13,8 @@ import torch
 from transformers import pipeline, GPTNeoForCausalLM, GPT2Tokenizer
 import webview
 import threading
+import smtplib
+from email.message import EmailMessage
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -43,17 +45,17 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        login_identifier = request.form['username']
         password = request.form['password'].encode('utf-8')
         
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT pw_hash FROM user_data WHERE user_name = ?", (username,))
+        cursor.execute("SELECT user_name, pw_hash FROM user_data WHERE user_name = ? OR email = ?", (login_identifier, login_identifier))
         result = cursor.fetchone()
 
         if result and bcrypt.checkpw(password, result['pw_hash'].encode('utf-8')):
-            session['username'] = username
+            session['username'] = result['user_name']
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -67,6 +69,7 @@ def login():
 def signup():
     if request.method == 'POST':
         username = request.form['username']
+        email = request.form['email']
         password = request.form['password'].encode('utf-8')
         confirm_password = request.form['confirm_password'].encode('utf-8')
         
@@ -77,15 +80,15 @@ def signup():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT * FROM user_data WHERE user_name = ?", (username,))
+        cursor.execute("SELECT * FROM user_data WHERE user_name = ? OR email = ?", (username, email))
         if cursor.fetchone():
-            flash('Username already exists.', 'error')
+            flash('Username or email already exists.', 'error')
             conn.close()
             return redirect(url_for('signup'))
         
         pw_hash = bcrypt.hashpw(password, bcrypt.gensalt())
-        cursor.execute("INSERT INTO user_data (user_name, pw_hash) VALUES (?, ?)",
-                      (username, pw_hash.decode('utf-8')))
+        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash) VALUES (?, ?, ?)",
+                      (username, email, pw_hash.decode('utf-8')))
         conn.commit()
         conn.close()
         
@@ -572,6 +575,50 @@ def checkout():
         conn.rollback()
         conn.close()
         return jsonify({'error': str(e)}), 500
+
+def send_recovery_email(to_email, username):
+    # Configure your SMTP server settings here
+    SMTP_SERVER = 'smtp.example.com'  # e.g., 'smtp.gmail.com'
+    SMTP_PORT = 587
+    SMTP_USER = 'your_email@example.com'
+    SMTP_PASSWORD = 'your_email_password'
+
+    msg = EmailMessage()
+    msg['Subject'] = 'Account Recovery - Economystique'
+    msg['From'] = SMTP_USER
+    msg['To'] = to_email
+    msg.set_content(f"Hello {username},\n\nYou requested a password reset for your Economystique account. If this was you, please follow the instructions provided by the administrator to reset your password.\n\nIf you did not request this, you can ignore this email.\n\nBest regards,\nEconomystique Team")
+
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        print(f"Error sending recovery email: {e}")
+        return False
+
+@app.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    email = request.form.get('recovery_email')
+    if not email:
+        flash('Please enter your email address.', 'error')
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_name FROM user_data WHERE email = ?", (email,))
+    result = cursor.fetchone()
+    if result:
+        username = result['user_name']
+        if send_recovery_email(email, username):
+            flash('A recovery email has been sent to your address.', 'success')
+        else:
+            flash('Failed to send recovery email. Please try again later.', 'error')
+    else:
+        flash('No account found with that email address.', 'error')
+    conn.close()
+    return redirect(url_for('login'))
 
 def on_loaded():
     webview.windows[0].gui.window.showMaximized()
