@@ -2,7 +2,6 @@
     --primary-color: #2c3e50;
     --secondary-color: #3498db;
     --accent-color: #e74c3c;
-    --background-color: #f5f6fa;
     --text-color: #2c3e50;
     --sidebar-width: 250px;
     --header-height: 60px;
@@ -13,13 +12,190 @@
     padding: 0;
     box-sizing: border-box;
 }
-
+    
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    display: flex;
     min-height: 100vh;
+    background: linear-gradient(120deg, #85A4A6 0%, #7896A4 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+/*containers*/
+.whole-container {
+    position: relative;
+}
+
+/* Login/Signup Split Card Layout */
+.login-wrapper {
+    display: flex;
+    flex-direction: row;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(88, 81, 81, 0.4);
+    width: 100%;
+    min-width: 1200px;
+    max-width: 1500px;
+    min-height: 500px;
+    margin: 0 auto;
+    padding: 0;
+    position: relative;
+}
+
+.logo-floating {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-20%, -50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.logo-floating img {
+    width: 2000px;
+    height: auto;
+    opacity: 100%;
+    filter: drop-shadow(0 4px 24px rgba(44,62,80,0.10));
+}
+
+.login-wrapper::before,
+.login-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 24px;
+}
+
+.login-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0.01) 90%);
+    
+}
+
+.login-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(0,0,0,0.07) 0%, rgba(0,0,0,0.01) 90%);
+}
+
+.login-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 24px 0px 0px 24px;
+    overflow: hidden;
+    background: white;
+}
+
+.login-right {
+    flex: 1;
+    background: #fff;
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 0px 24px 24px 0px;
+    background: white;
+    box-shadow: -16px 0 32px -16px rgba(44,62,80,0.15);
+    position: relative;
+    z-index: 10;
+    min-height: 600px;
+}
+
+.login-right h2 {
+    text-align: center;
+    color: #15384c;
+    font-size: 2rem;
+    margin-bottom: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 6px;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: #1a5c7a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-login:hover {
+    background: #15384c;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 15px;
+}
+
+.signup-link a {
+    color: #1a5c7a;
+    text-decoration: none;
+    font-weight: 500;
+}
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+/* Remove old login container styles */
+.login-container,
+.login-container-left,
+.login-container-right {
+    display: none !important;
+}
+
+@media (max-width: 800px) {
+    .login-wrapper {
+        flex-direction: column;
+        width: 98vw;
+        min-width: 0;
+    }
+    .login-left, .login-right {
+        flex: unset;
+        width: 100%;
+        min-width: 0;
+        padding: 24px 8px;
+    }
+    .login-left svg {
+        width: 180px;
+        height: 180px;
+    }
 }
 
 /* Sidebar Styles */
