@@ -13,6 +13,8 @@ import torch
 from transformers import pipeline, GPTNeoForCausalLM, GPT2Tokenizer
 import webview
 import threading
+import datetime
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -102,7 +104,7 @@ def logout():
 
 @app.route('/dashboard')
 @login_required
-# TEST COMMIT
+
 def dashboard():
     # Dummy data for top products
     best_sellers = [
@@ -248,6 +250,7 @@ def manage():
 @app.route('/sales')
 @login_required
 def sales():
+    # Get database connection
     conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
     cursor = conn.cursor()
     
@@ -276,9 +279,6 @@ def sales():
 @app.route('/api/sales/<period>')
 @login_required
 def get_sales_data(period):
-    conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
-    cursor = conn.cursor()
-
     # Map period to actual table names in your database
     table_map = {
         'daily': 'sales_today',
@@ -286,32 +286,114 @@ def get_sales_data(period):
         'yearly': 'sales_this_year'
     }
 
+    months = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    
+    dateTodayFull = date.today()
+    thisYear = dateTodayFull.year
+    thisMonth = dateTodayFull.month
+    thisDay = dateTodayFull.day
+    
+    month_index = thisMonth - 1
+    month_str = months[month_index]
+    
     table_name = table_map.get(period)
     if not table_name:
         return jsonify({'error': 'Invalid period'}), 400
+    
+    if period == "daily":
+        conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
+        cursor = conn.cursor()
+        
+        cursor.execute(f"""
+            SELECT inv_id, inv_desc, quantity_sold, price, sales_total
+            FROM sales_today
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        
+        result = [
+            {
+                'inv_id': row[0],
+                'inv_desc': row[1],
+                'quantity_sold': row[2],
+                'price': row[3],
+                'sales_total': row[4],
+            } for row in rows
+        ]
 
-    cursor.execute(f"""
-        SELECT inv_id, inv_desc, quantity_sold, price, sales_total
-        FROM {table_name}
-    """)
-    rows = cursor.fetchall()
-    conn.close()
+        return jsonify({
+            'labels': [row['inv_desc'] for row in result],
+            'quantities': [row['quantity_sold'] for row in result],
+            'table': result
+        })
+        
+    # Yearly
+    elif period == 'yearly':
+        pass
+    # Monthly
+    elif period == 'monthly':
+        dConn = sqlite3.connect(os.path.join(f'db/salesdb/daily/sales_d{thisYear}', f'{month_str}_{thisYear}.db')) 
+        dCursor = dConn.cursor()
+        conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
+        cursor = conn.cursor()
 
-    result = [
-        {
-            'inv_id': row[0],
-            'inv_desc': row[1],
-            'quantity_sold': row[2],
-            'price': row[3],
-            'sales_total': row[4],
-        } for row in rows
-    ]
+        # Clear old data
+        cursor.execute("DELETE FROM sales_this_month")
+        sales_aggregate = {}
 
-    return jsonify({
-        'labels': [row['inv_desc'] for row in result],
-        'quantities': [row['quantity_sold'] for row in result],
-        'table': result
-    })
+        # Summate all entries in the current month
+        for x in range(1, thisDay + 1):
+            table_name = f"d0{x}" if x < 10 else f"d{x}"
+            dCursor.execute(f"""
+                SELECT inv_id, inv_desc, SUM(quantity_sold), price
+                FROM {table_name}
+                GROUP BY inv_id
+            """)
+            temp_rows = dCursor.fetchall()
+            
+            for inv_id, inv_desc, qty_sold, price in temp_rows:
+                if inv_id not in sales_aggregate:
+                    sales_aggregate[inv_id] = [inv_desc, qty_sold, price]
+                else:
+                    sales_aggregate[inv_id][1] += qty_sold
+        dConn.close()
+        data_to_insert = [
+            (inv_id, desc, qty, price)
+            for inv_id, (desc, qty, price) in sales_aggregate.items()
+        ]
+
+        cursor.executemany("""
+            INSERT INTO sales_this_month (inv_id, inv_desc, quantity_sold, price)
+            VALUES (?, ?, ?, ?)
+        """, data_to_insert)
+        
+        # Commit Changes to database
+        conn.commit()
+        
+        # Get Monthly
+        cursor.execute("""
+            SELECT inv_id, inv_desc, quantity_sold, price, sales_total
+            FROM sales_this_month
+        """)
+        rows = cursor.fetchall()
+
+        conn.close()
+
+        result = [
+            {
+                'inv_id': row[0],
+                'inv_desc': row[1],
+                'quantity_sold': row[2],
+                'price': row[3],
+                'sales_total': row[4],
+            } for row in rows
+        ]
+
+        return jsonify({
+            'labels': [row['inv_desc'] for row in result],
+            'quantities': [row['quantity_sold'] for row in result],
+            'table': result
+        })
 
 @app.route('/sales_forecast', methods=['GET'])
 @login_required
