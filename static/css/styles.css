@@ -215,6 +215,219 @@ body {
     height: 100%;
 }
 
+/* Dashboard DESIGN Layout. I deleted the dashboard.css. for some reason it was unlinked and now every design on the dashboard is at styles. too lazy to fix this, whatever. */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.top-cards-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.card {
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.small-card {
+    height: 300px;
+}
+
+.card-title {
+    margin: 0;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.top-products .card-title {
+    background-color: #DDA853;
+}
+
+.least-sold .card-title {
+    background-color: #215E7D;
+}
+
+.near-expiry .card-title {
+    background-color: #B03052;
+}
+
+.critical-items .card-title {
+    background-color: #B03032;
+}
+
+.product-item {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.quantity {
+    background: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    min-width: 2rem;
+    text-align: center;
+}
+
+.product-name {
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1.55fr 0.755fr;
+    gap: 1.5rem;
+}
+
+.bottom-card {
+    padding: 1.5rem;
+}
+
+.performance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.performance-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.performance-title h2 {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.performance-stats {
+    background-color: transparent;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.chart-container {
+    height: 300px;
+    width: 100%;
+}
+
+.time-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.time-button, .comparison-button {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    background: white;
+    cursor: pointer;
+    color: #4a5568;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.comparison-button {
+    background-color: transparent;
+    color: #215E7D;
+    border: 1px solid #215E7D;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.comparison-button:hover {
+    background-color: #215E7D;
+    color: white;
+}
+
+.time-button.active {
+    background: #3B82F6;
+    color: white;
+    border-color: #3B82F6;
+}
+
+.critical-items {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Lists */
+ul {
+    list-style: none;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.375rem;
+}
+
+.alert-success {
+    background-color: #c6f6d5;
+    color: #2f855a;
+}
+
+.alert-error {
+    background-color: #fed7d7;
+    color: #c53030;
+}
+
+/* Grid Layout for Dashboard */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Tables */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table th {
+    font-weight: 600;
+    color: #4a5568;
+    background-color: #f7fafc;
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6,
 p, span, a, button, input, textarea, select, label, div {
