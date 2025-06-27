@@ -15,7 +15,7 @@
             <div class="login-left">
             </div>
             <div class="login-right">
-                <h2>LOGIN</h2>
+                <h2 id="form-title">LOGIN</h2>
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
@@ -24,19 +24,38 @@
                     {% endif %}
                 {% endwith %}
                 <div class="error-message" id="errorMessage"></div>
-                <form action="{{ url_for('login') }}" method="POST" onsubmit="return validateLoginForm()">
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                
+                <div id="login-form-wrapper">
+                    <form action="{{ url_for('login') }}" method="POST" onsubmit="return validateLoginForm()">
+                        <div class="form-group">
+                            <label for="username">Email or Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-login">Login</button>
+                    </form>
+                    <div class="form-group" style="text-align: right; margin-top: 10px;">
+                        <a href="#" id="forgotPasswordLink" style="font-size: 14px; color: #1a5c7a; text-decoration: underline;">Forgot password?</a>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="signup-link">
+                        Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
                     </div>
-                    <button type="submit" class="btn btn-login">Login</button>
-                </form>
-                <div class="signup-link">
-                    Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
+                </div>
+
+                <div id="forgot-password-form-wrapper" style="display: none;">
+                    <form action="{{ url_for('forgot_password') }}" method="POST" onsubmit="return validateForgotPasswordForm()">
+                        <div class="form-group">
+                            <label for="recovery_email">Enter your account email:</label>
+                            <input type="email" class="form-control" id="recovery_email" name="recovery_email" required>
+                        </div>
+                        <button type="submit" class="btn btn-login">Send Recovery Email</button>
+                    </form>
+                    <div class="form-group" style="text-align: center; margin-top: 15px;">
+                        <a href="#" id="backToLoginLink" style="font-size: 14px; color: #1a5c7a; text-decoration: none;">Back to Login</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -49,6 +68,45 @@
             if (!username || !password) {
                 errorMessage.textContent = 'Please fill in all fields';
                 errorMessage.style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+        // Forgot password link logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const backToLoginLink = document.getElementById('backToLoginLink');
+            const loginWrapper = document.getElementById('login-form-wrapper');
+            const forgotWrapper = document.getElementById('forgot-password-form-wrapper');
+            const formTitle = document.getElementById('form-title');
+
+            if (forgotLink) {
+                forgotLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loginWrapper.style.display = 'none';
+                    forgotWrapper.style.display = 'block';
+                    formTitle.textContent = 'RECOVER PASSWORD';
+                });
+            }
+
+            if (backToLoginLink) {
+                backToLoginLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loginWrapper.style.display = 'block';
+                    forgotWrapper.style.display = 'none';
+                    formTitle.textContent = 'LOGIN';
+                });
+            }
+        });
+        function validateForgotPasswordForm() {
+            const email = document.getElementById('recovery_email').value.trim();
+            if (!email) {
+                alert('Please enter your email address.');
+                return false;
+            }
+            // Simple email format check
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                alert('Please enter a valid email address.');
                 return false;
             }
             return true;
