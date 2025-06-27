@@ -18,9 +18,34 @@ def init_db():
         user_name TEXT UNIQUE NOT NULL,
         email TEXT NOT NULL,
         pw_hash TEXT NOT NULL,
+        owner_name TEXT,
+        contact TEXT,
+        biz_name TEXT,
+        industry TEXT,
+        biz_type TEXT,
+        address TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+
+    # Add new columns to existing table if they don't exist
+    def add_column_if_not_exists(table, column, column_type):
+        try:
+            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
+            print(f"Added column {column} to {table}")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" in str(e):
+                print(f"Column {column} already exists in {table}")
+            else:
+                print(f"Error adding column {column}: {e}")
+
+    # Add profile columns to existing user_data table
+    add_column_if_not_exists('user_data', 'owner_name', 'TEXT')
+    add_column_if_not_exists('user_data', 'contact', 'TEXT')
+    add_column_if_not_exists('user_data', 'biz_name', 'TEXT')
+    add_column_if_not_exists('user_data', 'industry', 'TEXT')
+    add_column_if_not_exists('user_data', 'biz_type', 'TEXT')
+    add_column_if_not_exists('user_data', 'address', 'TEXT')
 
     # Create products table
     cursor.execute('''

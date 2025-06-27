@@ -2,6 +2,10 @@
 
 {% block title %}Dashboard - Economystique{% endblock %}    
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
 <!--{% block header_title %}Welcome, Admin!{% endblock %} -->
 
 {% block content %}
@@ -67,11 +71,11 @@
                     <i class="fas fa-chart-line"></i>
                     <h2>Performance</h2>
                 </div>
-                <div class="time-controls">
+                <div class="button-controls">
                     <button class="time-button activer" data-period="D">D</button>
                     <button class="time-button" data-period="M">M</button>
                     <button class="time-button" data-period="Y">Y</button>
-                    <button class="compare-button">COMPARE</button>
+                    <button class="comparison-button">COMPARE</button>
                 </div>
             </div>
             <div class="performance-stats">
@@ -164,6 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
             timeButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
         });
+    });
+
+    // Compare button
+    const compareButton = document.querySelector('.comparison-button');
+    compareButton.addEventListener('click', function() {
+        window.location.href = '/performance_comparison';
     });
 });
 </script>
