@@ -7,7 +7,7 @@ from functools import wraps
 from collections import defaultdict
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import random
 import torch
 from transformers import pipeline, GPTNeoForCausalLM, GPT2Tokenizer
@@ -302,31 +302,36 @@ def get_sales_data(period):
     if not table_name:
         return jsonify({'error': 'Invalid period'}), 400
     
+    # Daily
     if period == "daily":
-        conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
-        cursor = conn.cursor()
+        daily_sales = []
+        labels = []
         
-        cursor.execute(f"""
-            SELECT inv_id, inv_desc, quantity_sold, price, sales_total
-            FROM sales_today
-        """)
-        rows = cursor.fetchall()
-        conn.close()
-        
-        result = [
-            {
-                'inv_id': row[0],
-                'inv_desc': row[1],
-                'quantity_sold': row[2],
-                'price': row[3],
-                'sales_total': row[4],
-            } for row in rows
-        ]
+        for i in range(9, -1, -1):  # From 9 days ago to today
+            date_check = date.today() - timedelta(days=i)
+            year = date_check.year
+            month = date_check.strftime('%b').lower()  # e.g. 'jul'
+            day = date_check.day
+            table_name = f"d0{day}" if day < 10 else f"d{day}"
+
+            try:
+                db_path = os.path.join(f'db/salesdb/daily/sales_d{year}', f'{month}_{year}.db')
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute(f"""
+                        SELECT SUM(quantity_sold * price) FROM {table_name}
+                    """)
+                    total = cursor.fetchone()[0] or 0
+            except Exception:
+                total = 0
+
+            labels.append(date_check.strftime('%b %d')) 
+            daily_sales.append(total)
 
         return jsonify({
-            'labels': [row['inv_desc'] for row in result],
-            'quantities': [row['quantity_sold'] for row in result],
-            'table': result
+            'labels': labels,
+            'quantities': daily_sales,
+            'table': []
         })
         
     # Yearly
