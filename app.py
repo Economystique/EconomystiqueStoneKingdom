@@ -87,8 +87,8 @@ def signup():
             return redirect(url_for('signup'))
         
         pw_hash = bcrypt.hashpw(password, bcrypt.gensalt())
-        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash) VALUES (?, ?, ?)",
-                      (username, email, pw_hash.decode('utf-8')))
+        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash, owner_name) VALUES (?, ?, ?, ?)",
+                      (username, email, pw_hash.decode('utf-8'), username))
         conn.commit()
         conn.close()
         
@@ -545,7 +545,71 @@ def account():
     
     conn.close()
     
-    return render_template('account.html', user_data=user_data)
+    # Convert user_data to dict for easier template access
+    user_dict = dict(user_data) if user_data else {}
+    
+    return render_template('account.html', user_data=user_dict)
+
+@app.route('/api/update_personal_profile', methods=['POST'])
+@login_required
+def update_personal_profile():
+    data = request.get_json()
+    owner_name = data.get('owner_name')
+    contact = data.get('contact')
+    
+    if not owner_name or not contact:
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Update both user_name and owner_name so the user can log in with the new username
+        cursor.execute("""
+            UPDATE user_data 
+            SET user_name = ?, owner_name = ?, contact = ?
+            WHERE user_name = ?
+        """, (owner_name, owner_name, contact, session['username']))
+        conn.commit()
+        
+        # Update the session with the new username
+        session['username'] = owner_name
+        
+        conn.close()
+        return jsonify({'success': True, 'message': 'Personal information updated successfully'})
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/update_business_profile', methods=['POST'])
+@login_required
+def update_business_profile():
+    data = request.get_json()
+    biz_name = data.get('biz_name')
+    industry = data.get('industry')
+    biz_type = data.get('biz_type')
+    address = data.get('address')
+    
+    if not all([biz_name, industry, biz_type, address]):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            UPDATE user_data 
+            SET biz_name = ?, industry = ?, biz_type = ?, address = ?
+            WHERE user_name = ?
+        """, (biz_name, industry, biz_type, address, session['username']))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Business information updated successfully'})
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return jsonify({'error': str(e)}), 500
 
 # API endpoints for AJAX calls
 @app.route('/api/add_to_cart', methods=['POST'])

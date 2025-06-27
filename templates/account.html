@@ -19,45 +19,48 @@
         </div>
 
         <div class="personal-text">
-            <p class="section-label">Business Owner</p>
-            <h2 class="owner-name" id="ownerNameText">DildongDantes</h2>
-            <input type="text" name="owner_name" id="ownerNameInput" value="DildongDantes" class="editable-input" style="display: none;">
+            <p class="section-label">{{ 'Edit profile to select title' if not user_data.owner_name else 'Business Owner' }}</p>
+            <h2 class="owner-name" id="ownerNameText">{{ user_data.owner_name or user_data.user_name }}</h2>
+            <input type="text" name="owner_name" id="ownerNameInput" value="{{ user_data.owner_name or user_data.user_name }}" class="editable-input" style="display: none;">
 
             <p class="info-line">
                 <span class="info-label">Contact Information:</span>
-                <span id="contactText">0900-000-0000</span>
-                <input type="text" name="contact" id="contactInput" value="0900-000-0000" class="editable-input" style="display: none;">
+                <span id="contactText">{{ user_data.contact or 'Edit business information' }}</span>
+                <input type="text" name="contact" id="contactInput" value="{{ user_data.contact or '' }}" class="editable-input" style="display: none;">
             </p>
         </div>
     </form>
 
     <!-- BUSINESS CARD -->
     <form id="businessForm" class="card business-container" onsubmit="updateBusiness(event)">
+        <button id="editBusinessBtn" class="edit-btn" type="button" onclick="toggleBusinessEdit()">Edit</button>
+        <button id="saveBusinessBtn" class="save-btn" type="submit" style="display: none;">Save</button>
+        
         <div class="biz-logo">
             
         </div>
 
         <div class="biz-text">
             <p class="section-label">Business Information</p>
-            <h2 class="biz-name" id="bizNameText">J. RIZZ</h2>
-            <input type="text" name="biz_name" id="bizNameInput" value="J. RIZZ" class="editable-input" style="display: none;">
+            <h2 class="biz-name" id="bizNameText">{{ user_data.biz_name or 'Edit business information' }}</h2>
+            <input type="text" name="biz_name" id="bizNameInput" value="{{ user_data.biz_name or '' }}" class="editable-input" style="display: none;">
 
             <p class="info-line">
                 <span class="info-label">Industry:</span>
-                <span id="industryText">Overworked, Underpaid</span>
-                <input type="text" name="industry" id="industryInput" value="Overworked, Underpaid" class="editable-input" style="display: none;">
+                <span id="industryText">{{ user_data.industry or 'Edit business information' }}</span>
+                <input type="text" name="industry" id="industryInput" value="{{ user_data.industry or '' }}" class="editable-input" style="display: none;">
             </p>
 
             <p class="info-line">
                 <span class="info-label">Business Type:</span>
-                <span id="bizTypeText">Bakery</span>
-                <input type="text" name="biz_type" id="bizTypeInput" value="Bakery" class="editable-input" style="display: none;">
+                <span id="bizTypeText">{{ user_data.biz_type or 'Edit business information' }}</span>
+                <input type="text" name="biz_type" id="bizTypeInput" value="{{ user_data.biz_type or '' }}" class="editable-input" style="display: none;">
             </p>
 
             <p class="info-line">
                 <span class="info-label">Address:</span>
-                <span id="addressText">kabaong ni Jose Rizal</span>
-                <input type="text" name="address" id="addressInput" value="kabaong ni Jose Rizal" class="editable-input" style="display: none;">
+                <span id="addressText">{{ user_data.address or 'Edit business information' }}</span>
+                <input type="text" name="address" id="addressInput" value="{{ user_data.address or '' }}" class="editable-input" style="display: none;">
             </p>
         </div>
     </form>
@@ -73,22 +76,116 @@ function toggleEdit() {
         document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
     };
 
-    ['ownerName', 'contact', 'bizName', 'industry', 'bizType', 'address'].forEach(id => showText(id, false));
+    ['ownerName', 'contact'].forEach(id => showText(id, false));
 
     document.getElementById('editBtn').style.display = 'none';
     document.getElementById('saveBtn').style.display = 'inline-block';
 }
 
+function toggleBusinessEdit() {
+    const showText = (id, show) => {
+        document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
+        document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
+    };
+
+    ['bizName', 'industry', 'bizType', 'address'].forEach(id => showText(id, false));
+
+    document.getElementById('editBusinessBtn').style.display = 'none';
+    document.getElementById('saveBusinessBtn').style.display = 'inline-block';
+}
+
 function updateProfile(event) {
     event.preventDefault();
-    alert("Personal information saved!");
-    // Send to backend via fetch here if needed
+    
+    const formData = {
+        owner_name: document.getElementById('ownerNameInput').value,
+        contact: document.getElementById('contactInput').value
+    };
+
+    fetch('/api/update_personal_profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the display text with new values
+            document.getElementById('ownerNameText').textContent = formData.owner_name;
+            document.getElementById('contactText').textContent = formData.contact;
+            
+            // Switch back to display mode
+            const showText = (id, show) => {
+                document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
+                document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
+            };
+
+            ['ownerName', 'contact'].forEach(id => showText(id, true));
+
+            // Show/hide buttons
+            document.getElementById('editBtn').style.display = 'inline-block';
+            document.getElementById('saveBtn').style.display = 'none';
+            
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating profile');
+    });
 }
 
 function updateBusiness(event) {
     event.preventDefault();
-    alert("Business information saved!");
-    // Send to backend via fetch here if needed
+    
+    const formData = {
+        biz_name: document.getElementById('bizNameInput').value,
+        industry: document.getElementById('industryInput').value,
+        biz_type: document.getElementById('bizTypeInput').value,
+        address: document.getElementById('addressInput').value
+    };
+
+    fetch('/api/update_business_profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the display text with new values
+            document.getElementById('bizNameText').textContent = formData.biz_name;
+            document.getElementById('industryText').textContent = formData.industry;
+            document.getElementById('bizTypeText').textContent = formData.biz_type;
+            document.getElementById('addressText').textContent = formData.address;
+            
+            // Switch back to display mode
+            const showText = (id, show) => {
+                document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
+                document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
+            };
+
+            ['bizName', 'industry', 'bizType', 'address'].forEach(id => showText(id, true));
+
+            // Show/hide buttons
+            document.getElementById('editBusinessBtn').style.display = 'inline-block';
+            document.getElementById('saveBusinessBtn').style.display = 'none';
+            
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating business information');
+    });
 }
 </script>
 {% endblock %}
