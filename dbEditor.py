@@ -5,218 +5,286 @@ import bcrypt
 import random
 
 def edit_database():
-    connectionPath = os.path.join("db", "inventory_db.db")
-    connection = sqlite3.connect(connectionPath)
-    cursor = connection.cursor()
+    # Yearly
+    months = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
 
-    wholeYear = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
-    years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
-    
+    yearly_db_path = os.path.join('db/salesdb', 'sales_yearly.db')
+    yearly_conn = sqlite3.connect(yearly_db_path)
+    yearly_cursor = yearly_conn.cursor()
+
     for year in years:
-        year_dir = f"db/salesdb/daily/sales_d{year}"
-        os.makedirs(year_dir, exist_ok=True)
-        for month in wholeYear:
-            toPath = os.path.join(f"{year_dir}",f"{month}_{year}.db")
-            toConn = sqlite3.connect(toPath)
-            toCursor = toConn.cursor()
-            if month == "feb":
-                # Create tables 1-9
-                for x in range(1,10):
-                    toCursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS d0{x} (
-                            inv_id TEXT PRIMARY KEY,
-                            inv_desc TEXT,
-                            quantity_sold INTEGER,
-                            price REAL,
-                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-                        )
-                    """
-                    )
-                # Create tables 10 - 29
-                for x in range(10,30):
-                    toCursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS d{x} (
-                            inv_id TEXT PRIMARY KEY,
-                            inv_desc TEXT,
-                            quantity_sold INTEGER,
-                            price REAL,
-                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-                        )
-                    """
-                    )
+        print(f"\nProcessing year: {year}")
+        year_table = f"sales_y{year}"
+
+        # Ensure the table exists
+        yearly_cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {year_table} (
+                inv_id TEXT PRIMARY KEY,
+                inv_desc TEXT,
+                quantity_sold INTEGER,
+                price REAL,
+                sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+            )
+        """)
+        # Optional: Clear old data
+        yearly_cursor.execute(f"DELETE FROM {year_table}")
+
+        sales_aggregate = {}
+
+        # Open the monthly database
+        monthly_db_path = os.path.join('db/salesdb/monthly', f'sales_m{year}.db')
+        if not os.path.exists(monthly_db_path):
+            print(f"Monthly DB not found: {monthly_db_path}")
+            continue
+
+        monthly_conn = sqlite3.connect(monthly_db_path)
+        monthly_cursor = monthly_conn.cursor()
+
+        for month in months:
+            try:
+                monthly_cursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {month}")
+                rows = monthly_cursor.fetchall()
+            except Exception as e:
+                print(f"Skipping {month} in {year}: {e}")
+                continue
+
+            for inv_id, inv_desc, qty_sold, price in rows:
+                if inv_id not in sales_aggregate:
+                    sales_aggregate[inv_id] = [inv_desc, qty_sold, price]
+                else:
+                    sales_aggregate[inv_id][1] += qty_sold  # accumulate quantity
+
+        monthly_conn.close()
+
+        data_to_insert = [
+            (inv_id, desc, qty, price)
+            for inv_id, (desc, qty, price) in sales_aggregate.items()
+        ]
+
+        yearly_cursor.executemany(f"""
+            INSERT INTO {year_table} (inv_id, inv_desc, quantity_sold, price)
+            VALUES (?, ?, ?, ?)
+        """, data_to_insert)
+
+        yearly_conn.commit()
+        print(f"✓ Yearly data inserted for {year}")
+
+    yearly_conn.close()
+    print("\nAll yearly summaries complete.")
+    
+    # connectionPath = os.path.join("db", "inventory_db.db")
+    # connection = sqlite3.connect(connectionPath)
+    # cursor = connection.cursor()
+
+    # wholeYear = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    # years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+    
+    # for year in years:
+    #     year_dir = f"db/salesdb/daily/sales_d{year}"
+    #     os.makedirs(year_dir, exist_ok=True)
+    #     for month in wholeYear:
+    #         toPath = os.path.join(f"{year_dir}",f"{month}_{year}.db")
+    #         toConn = sqlite3.connect(toPath)
+    #         toCursor = toConn.cursor()
+    #         if month == "feb":
+    #             # Create tables 1-9
+    #             for x in range(1,10):
+    #                 toCursor.execute(f"""
+    #                     CREATE TABLE IF NOT EXISTS d0{x} (
+    #                         inv_id TEXT PRIMARY KEY,
+    #                         inv_desc TEXT,
+    #                         quantity_sold INTEGER,
+    #                         price REAL,
+    #                         sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #                     )
+    #                 """
+    #                 )
+    #             # Create tables 10 - 29
+    #             for x in range(10,30):
+    #                 toCursor.execute(f"""
+    #                     CREATE TABLE IF NOT EXISTS d{x} (
+    #                         inv_id TEXT PRIMARY KEY,
+    #                         inv_desc TEXT,
+    #                         quantity_sold INTEGER,
+    #                         price REAL,
+    #                         sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #                     )
+    #                 """
+    #                 )
                     
-                # Insert Mock Data
-                cursor.execute("""
-                    SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
-                    FROM inv_static
-                """)
-                invStatic = cursor.fetchall()
-                numSales = 25
-                # 1-95
-                for x in range(1,10):
-                    sampled_items = random.sample(invStatic, numSales)
-                    data_to_insert = []
-                    for item in sampled_items:
-                        inv_id = item[0]
-                        inv_desc = item[1]
-                        price = item[7]
-                        quantity_sold = random.randint(1, 13)
-                        data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
-                    toCursor.executemany(f"""
-                        INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
-                        VALUES (?, ?, ?, ?)
-                        """, data_to_insert)
+    #             # Insert Mock Data
+    #             cursor.execute("""
+    #                 SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
+    #                 FROM inv_static
+    #             """)
+    #             invStatic = cursor.fetchall()
+    #             numSales = 25
+    #             # 1-95
+    #             for x in range(1,10):
+    #                 sampled_items = random.sample(invStatic, numSales)
+    #                 data_to_insert = []
+    #                 for item in sampled_items:
+    #                     inv_id = item[0]
+    #                     inv_desc = item[1]
+    #                     price = item[7]
+    #                     quantity_sold = random.randint(1, 13)
+    #                     data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+    #                 toCursor.executemany(f"""
+    #                     INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
+    #                     VALUES (?, ?, ?, ?)
+    #                     """, data_to_insert)
                     
-                # 10 and above  
-                for x in range(10,30):
-                    sampled_items = random.sample(invStatic, numSales)
-                    data_to_insert = []
-                    for item in sampled_items:
-                        inv_id = item[0]
-                        inv_desc = item[1]
-                        price = item[7]
-                        quantity_sold = random.randint(1, 13)
-                        data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
-                    toCursor.executemany(f"""
-                        INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
-                        VALUES (?, ?, ?, ?)
-                        """, data_to_insert)
+    #             # 10 and above  
+    #             for x in range(10,30):
+    #                 sampled_items = random.sample(invStatic, numSales)
+    #                 data_to_insert = []
+    #                 for item in sampled_items:
+    #                     inv_id = item[0]
+    #                     inv_desc = item[1]
+    #                     price = item[7]
+    #                     quantity_sold = random.randint(1, 13)
+    #                     data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+    #                 toCursor.executemany(f"""
+    #                     INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
+    #                     VALUES (?, ?, ?, ?)
+    #                     """, data_to_insert)
             
-            # For 31-day Months
-            elif month == "jan" or month == "mar" or month == "may" or month == "jul" or month == "aug" or month == "oct" or month == "dec":
-                # Create tables 1-9
-                for x in range(1,10):
-                    toCursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS d0{x} (
-                            inv_id TEXT PRIMARY KEY,
-                            inv_desc TEXT,
-                            quantity_sold INTEGER,
-                            price REAL,
-                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-                        )
-                    """
-                    )
-                # Create tables 10 ~ 31
-                for x in range(10,32):
-                    toCursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS d{x} (
-                            inv_id TEXT PRIMARY KEY,
-                            inv_desc TEXT,
-                            quantity_sold INTEGER,
-                            price REAL,
-                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-                        )
-                    """
-                    )
+    #         # For 31-day Months
+    #         elif month == "jan" or month == "mar" or month == "may" or month == "jul" or month == "aug" or month == "oct" or month == "dec":
+    #             # Create tables 1-9
+    #             for x in range(1,10):
+    #                 toCursor.execute(f"""
+    #                     CREATE TABLE IF NOT EXISTS d0{x} (
+    #                         inv_id TEXT PRIMARY KEY,
+    #                         inv_desc TEXT,
+    #                         quantity_sold INTEGER,
+    #                         price REAL,
+    #                         sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #                     )
+    #                 """
+    #                 )
+    #             # Create tables 10 ~ 31
+    #             for x in range(10,32):
+    #                 toCursor.execute(f"""
+    #                     CREATE TABLE IF NOT EXISTS d{x} (
+    #                         inv_id TEXT PRIMARY KEY,
+    #                         inv_desc TEXT,
+    #                         quantity_sold INTEGER,
+    #                         price REAL,
+    #                         sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #                     )
+    #                 """
+    #                 )
                     
-                # Insert Mock Data
+    #             # Insert Mock Data
                 
-                cursor.execute("""
-                    SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
-                    FROM inv_static
-                """)
-                invStatic = cursor.fetchall()
-                numSales = 25
+    #             cursor.execute("""
+    #                 SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
+    #                 FROM inv_static
+    #             """)
+    #             invStatic = cursor.fetchall()
+    #             numSales = 25
                 
-                # 1-9
-                for x in range(1,10):
-                    sampled_items = random.sample(invStatic, numSales)
-                    data_to_insert = []
-                    for item in sampled_items:
-                        inv_id = item[0]
-                        inv_desc = item[1]
-                        price = item[7]
-                        quantity_sold = random.randint(1, 13)
-                        data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
-                    toCursor.executemany(f"""
-                        INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
-                        VALUES (?, ?, ?, ?)
-                        """, data_to_insert)
+    #             # 1-9
+    #             for x in range(1,10):
+    #                 sampled_items = random.sample(invStatic, numSales)
+    #                 data_to_insert = []
+    #                 for item in sampled_items:
+    #                     inv_id = item[0]
+    #                     inv_desc = item[1]
+    #                     price = item[7]
+    #                     quantity_sold = random.randint(1, 13)
+    #                     data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+    #                 toCursor.executemany(f"""
+    #                     INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
+    #                     VALUES (?, ?, ?, ?)
+    #                     """, data_to_insert)
                     
-                # 10 and above  
-                for x in range(10,32):
-                    sampled_items = random.sample(invStatic, numSales)
-                    data_to_insert = []
-                    for item in sampled_items:
-                        inv_id = item[0]
-                        inv_desc = item[1]
-                        price = item[7]
-                        quantity_sold = random.randint(1, 13)
-                        data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
-                    toCursor.executemany(f"""
-                        INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
-                        VALUES (?, ?, ?, ?)
-                        """, data_to_insert)
-            # For 30-day Months
-            elif month == "apr" or month == "jun" or month == "sep" or month == "nov":
-                # Create tables 1-9
-                for x in range(1,10):
-                    toCursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS d0{x} (
-                            inv_id TEXT PRIMARY KEY,
-                            inv_desc TEXT,
-                            quantity_sold INTEGER,
-                            price REAL,
-                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-                        )
-                    """
-                    )
-                # Create tables 10 - 30
-                for x in range(10,31):
-                    toCursor.execute(f"""
-                        CREATE TABLE IF NOT EXISTS d{x} (
-                            inv_id TEXT PRIMARY KEY,
-                            inv_desc TEXT,
-                            quantity_sold INTEGER,
-                            price REAL,
-                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-                        )
-                    """
-                    )
+    #             # 10 and above  
+    #             for x in range(10,32):
+    #                 sampled_items = random.sample(invStatic, numSales)
+    #                 data_to_insert = []
+    #                 for item in sampled_items:
+    #                     inv_id = item[0]
+    #                     inv_desc = item[1]
+    #                     price = item[7]
+    #                     quantity_sold = random.randint(1, 13)
+    #                     data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+    #                 toCursor.executemany(f"""
+    #                     INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
+    #                     VALUES (?, ?, ?, ?)
+    #                     """, data_to_insert)
+    #         # For 30-day Months
+    #         elif month == "apr" or month == "jun" or month == "sep" or month == "nov":
+    #             # Create tables 1-9
+    #             for x in range(1,10):
+    #                 toCursor.execute(f"""
+    #                     CREATE TABLE IF NOT EXISTS d0{x} (
+    #                         inv_id TEXT PRIMARY KEY,
+    #                         inv_desc TEXT,
+    #                         quantity_sold INTEGER,
+    #                         price REAL,
+    #                         sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #                     )
+    #                 """
+    #                 )
+    #             # Create tables 10 - 30
+    #             for x in range(10,31):
+    #                 toCursor.execute(f"""
+    #                     CREATE TABLE IF NOT EXISTS d{x} (
+    #                         inv_id TEXT PRIMARY KEY,
+    #                         inv_desc TEXT,
+    #                         quantity_sold INTEGER,
+    #                         price REAL,
+    #                         sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #                     )
+    #                 """
+    #                 )
                     
-                cursor.execute("""
-                    SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
-                    FROM inv_static
-                """)
-                invStatic = cursor.fetchall()
-                numSales = 25
+    #             cursor.execute("""
+    #                 SELECT inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost 
+    #                 FROM inv_static
+    #             """)
+    #             invStatic = cursor.fetchall()
+    #             numSales = 25
                     
-                # Insert Mock Data
-                # 1-9
-                for x in range(1,10):
-                    sampled_items = random.sample(invStatic, numSales)
-                    data_to_insert = []
-                    for item in sampled_items:
-                        inv_id = item[0]
-                        inv_desc = item[1]
-                        price = item[7]
-                        quantity_sold = random.randint(1, 13)
-                        data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
-                    toCursor.executemany(f"""
-                        INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
-                        VALUES (?, ?, ?, ?)
-                        """, data_to_insert)
+    #             # Insert Mock Data
+    #             # 1-9
+    #             for x in range(1,10):
+    #                 sampled_items = random.sample(invStatic, numSales)
+    #                 data_to_insert = []
+    #                 for item in sampled_items:
+    #                     inv_id = item[0]
+    #                     inv_desc = item[1]
+    #                     price = item[7]
+    #                     quantity_sold = random.randint(1, 13)
+    #                     data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+    #                 toCursor.executemany(f"""
+    #                     INSERT OR IGNORE INTO d0{x} (inv_id, inv_desc, quantity_sold, price)
+    #                     VALUES (?, ?, ?, ?)
+    #                     """, data_to_insert)
                     
-                # 10 and above  
-                for x in range(10,31):
-                    sampled_items = random.sample(invStatic, numSales)
-                    data_to_insert = []
-                    for item in sampled_items:
-                        inv_id = item[0]
-                        inv_desc = item[1]
-                        price = item[7]
-                        quantity_sold = random.randint(1, 13)
-                        data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
-                    toCursor.executemany(f"""
-                        INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
-                        VALUES (?, ?, ?, ?)
-                        """, data_to_insert)
+    #             # 10 and above  
+    #             for x in range(10,31):
+    #                 sampled_items = random.sample(invStatic, numSales)
+    #                 data_to_insert = []
+    #                 for item in sampled_items:
+    #                     inv_id = item[0]
+    #                     inv_desc = item[1]
+    #                     price = item[7]
+    #                     quantity_sold = random.randint(1, 13)
+    #                     data_to_insert.append((inv_id, inv_desc, quantity_sold, price))
+    #                 toCursor.executemany(f"""
+    #                     INSERT OR IGNORE INTO d{x} (inv_id, inv_desc, quantity_sold, price)
+    #                     VALUES (?, ?, ?, ?)
+    #                     """, data_to_insert)
             
             
             
 
-            toConn.commit()
-            toConn.close()
+    #         toConn.commit()
+    #         toConn.close()
     
     # ADD COLUMN
     # cursor.execute("ALTER TABLE inv_static ADD COLUMN cost REAL")
@@ -543,6 +611,6 @@ def edit_database():
     # finally:
     #     connection.close()
     
-    connection.commit()
-    connection.close()
+    # connection.commit()
+    # connection.close()
 edit_database()

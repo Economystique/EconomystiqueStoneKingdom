@@ -7,7 +7,7 @@ import calendar
 
 def edit_database():
     wholeYear = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
-    years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023","2024")
+    years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023","2024", "2025")
 
     for year in years:
         year_int = int(year)
@@ -80,7 +80,7 @@ def edit_database():
             print(f"Inserted data for {month}_{year}")
 
         conn.close()
-        print(f"Finished year {year}")
+        print(f"Finished year {year}")  
     # Barcode
     # cursor.execute("ALTER TABLE inv_static ADD COLUMN barcode TEXT")
     # cursor.execute("CREATE UNIQUE INDEX idx_inv_static_barcode ON inv_static(barcode)")
