@@ -15,7 +15,9 @@
         <button id="saveBtn" class="save-btn" type="submit" style="display: none;">Save</button>
 
         <div class="avatar-circle">
-            <span class="avatar-icon"></span>
+            <img id="avatarImg" class="avatar-img" src="{{ url_for('avatar_image', username=user_data.user_name) }}" alt="Avatar">
+            <button id="avatarUploadBtn" class="avatar-upload-btn" type="button" title="Change Avatar" style="display: none;">+</button>
+            <input type="file" id="avatarInput" class="file-upload-input" accept="image/*">
         </div>
 
         <div class="personal-text">
@@ -37,7 +39,9 @@
         <button id="saveBusinessBtn" class="save-btn" type="submit" style="display: none;">Save</button>
         
         <div class="biz-logo">
-            
+            <img id="bizLogoImg" class="biz-logo-img" src="{{ url_for('biz_logo_image', username=user_data.user_name) }}" alt="Business Logo">
+            <button id="bizLogoUploadBtn" class="bizlogo-upload-btn" type="button" title="Change Logo" style="display: none;">+</button>
+            <input type="file" id="bizLogoInput" class="file-upload-input" accept="image/*">
         </div>
 
         <div class="biz-text">
@@ -70,38 +74,42 @@
 
 {% block extra_js %}
 <script>
+// Hide both plus buttons on page load
+window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('avatarUploadBtn').style.display = 'none';
+    document.getElementById('bizLogoUploadBtn').style.display = 'none';
+});
+
 function toggleEdit() {
     const showText = (id, show) => {
         document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
         document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
     };
-
     ['ownerName', 'contact'].forEach(id => showText(id, false));
-
     document.getElementById('editBtn').style.display = 'none';
     document.getElementById('saveBtn').style.display = 'inline-block';
+    // Show only avatar upload button in user profile edit mode
+    document.getElementById('avatarUploadBtn').style.display = 'flex';
+    document.getElementById('bizLogoUploadBtn').style.display = 'none';
 }
-
 function toggleBusinessEdit() {
     const showText = (id, show) => {
         document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
         document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
     };
-
     ['bizName', 'industry', 'bizType', 'address'].forEach(id => showText(id, false));
-
     document.getElementById('editBusinessBtn').style.display = 'none';
     document.getElementById('saveBusinessBtn').style.display = 'inline-block';
+    // Show only biz logo upload button in business info edit mode
+    document.getElementById('bizLogoUploadBtn').style.display = 'flex';
+    document.getElementById('avatarUploadBtn').style.display = 'none';
 }
-
 function updateProfile(event) {
     event.preventDefault();
-    
     const formData = {
         owner_name: document.getElementById('ownerNameInput').value,
         contact: document.getElementById('contactInput').value
     };
-
     fetch('/api/update_personal_profile', {
         method: 'POST',
         headers: {
@@ -112,23 +120,17 @@ function updateProfile(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update the display text with new values
             document.getElementById('ownerNameText').textContent = formData.owner_name;
             document.getElementById('contactText').textContent = formData.contact;
-            
-            // Switch back to display mode
             const showText = (id, show) => {
                 document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
                 document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
             };
-
             ['ownerName', 'contact'].forEach(id => showText(id, true));
-
-            // Show/hide buttons
             document.getElementById('editBtn').style.display = 'inline-block';
             document.getElementById('saveBtn').style.display = 'none';
-            
-            alert(data.message);
+            // Hide avatar upload button after saving
+            document.getElementById('avatarUploadBtn').style.display = 'none';
         } else {
             alert('Error: ' + data.error);
         }
@@ -138,17 +140,14 @@ function updateProfile(event) {
         alert('An error occurred while updating profile');
     });
 }
-
 function updateBusiness(event) {
     event.preventDefault();
-    
     const formData = {
         biz_name: document.getElementById('bizNameInput').value,
         industry: document.getElementById('industryInput').value,
         biz_type: document.getElementById('bizTypeInput').value,
         address: document.getElementById('addressInput').value
     };
-
     fetch('/api/update_business_profile', {
         method: 'POST',
         headers: {
@@ -159,25 +158,19 @@ function updateBusiness(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update the display text with new values
             document.getElementById('bizNameText').textContent = formData.biz_name;
             document.getElementById('industryText').textContent = formData.industry;
             document.getElementById('bizTypeText').textContent = formData.biz_type;
             document.getElementById('addressText').textContent = formData.address;
-            
-            // Switch back to display mode
             const showText = (id, show) => {
                 document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
                 document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
             };
-
             ['bizName', 'industry', 'bizType', 'address'].forEach(id => showText(id, true));
-
-            // Show/hide buttons
             document.getElementById('editBusinessBtn').style.display = 'inline-block';
             document.getElementById('saveBusinessBtn').style.display = 'none';
-            
-            alert(data.message);
+            // Hide biz logo upload button after saving
+            document.getElementById('bizLogoUploadBtn').style.display = 'none';
         } else {
             alert('Error: ' + data.error);
         }
@@ -187,5 +180,57 @@ function updateBusiness(event) {
         alert('An error occurred while updating business information');
     });
 }
+// Avatar upload
+const avatarInput = document.getElementById('avatarInput');
+const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+avatarUploadBtn.style.display = 'none';
+avatarUploadBtn.addEventListener('click', function() {
+    avatarInput.click();
+});
+avatarInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('avatar', file);
+    fetch('/api/upload_avatar', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('avatarImg').src = data.avatar_url + '?t=' + new Date().getTime();
+        } else {
+            alert('Avatar upload failed: ' + data.error);
+        }
+    })
+    .catch(() => alert('Avatar upload failed.'));
+});
+// Biz logo upload
+const bizLogoInput = document.getElementById('bizLogoInput');
+const bizLogoUploadBtn = document.getElementById('bizLogoUploadBtn');
+bizLogoUploadBtn.style.display = 'none';
+bizLogoUploadBtn.addEventListener('click', function() {
+    bizLogoInput.click();
+});
+bizLogoInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('biz_logo', file);
+    fetch('/api/upload_biz_logo', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('bizLogoImg').src = data.logo_url + '?t=' + new Date().getTime();
+        } else {
+            alert('Logo upload failed: ' + data.error);
+        }
+    })
+    .catch(() => alert('Logo upload failed.'));
+});
 </script>
 {% endblock %}
