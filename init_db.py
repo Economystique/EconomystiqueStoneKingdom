@@ -24,6 +24,8 @@ def init_db():
         industry TEXT,
         biz_type TEXT,
         address TEXT,
+        avatar_blob BLOB,
+        biz_logo_blob BLOB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
@@ -46,6 +48,8 @@ def init_db():
     add_column_if_not_exists('user_data', 'industry', 'TEXT')
     add_column_if_not_exists('user_data', 'biz_type', 'TEXT')
     add_column_if_not_exists('user_data', 'address', 'TEXT')
+    add_column_if_not_exists('user_data', 'avatar_blob', 'BLOB')
+    add_column_if_not_exists('user_data', 'biz_logo_blob', 'BLOB')
 
     # Create products table
     cursor.execute('''

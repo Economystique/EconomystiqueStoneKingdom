@@ -2,7 +2,7 @@ import os
 import sqlite3
 import json
 import bcrypt
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory, send_file
 from functools import wraps
 from collections import defaultdict
 import pandas as pd
@@ -15,10 +15,20 @@ import smtplib
 from email.message import EmailMessage
 import webview
 import threading
+import io
 
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Database connection helper
 def get_db_connection():
@@ -815,6 +825,66 @@ def on_loaded():
 
 def start_server():
     app.run(port=5000)
+
+@app.route('/api/upload_avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    if 'avatar' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['avatar']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        file_bytes = file.read()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE user_data SET avatar_blob = ? WHERE user_name = ?", (file_bytes, session['username']))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'avatar_url': url_for('avatar_image', username=session['username'])})
+    return jsonify({'error': 'Invalid file type'}), 400
+
+@app.route('/api/upload_biz_logo', methods=['POST'])
+@login_required
+def upload_biz_logo():
+    if 'biz_logo' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['biz_logo']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        file_bytes = file.read()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE user_data SET biz_logo_blob = ? WHERE user_name = ?", (file_bytes, session['username']))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'logo_url': url_for('biz_logo_image', username=session['username'])})
+    return jsonify({'error': 'Invalid file type'}), 400
+
+@app.route('/avatar_image/<username>')
+def avatar_image(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT avatar_blob FROM user_data WHERE user_name = ?", (username,))
+    row = cursor.fetchone()
+    conn.close()
+    if row and row['avatar_blob']:
+        return send_file(io.BytesIO(row['avatar_blob']), mimetype='image/png')
+    else:
+        return send_file(os.path.join('static', 'img', 'catholder.jpg'), mimetype='image/jpeg')
+
+@app.route('/biz_logo_image/<username>')
+def biz_logo_image(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT biz_logo_blob FROM user_data WHERE user_name = ?", (username,))
+    row = cursor.fetchone()
+    conn.close()
+    if row and row['biz_logo_blob']:
+        return send_file(io.BytesIO(row['biz_logo_blob']), mimetype='image/png')
+    else:
+        return send_file(os.path.join('static', 'img', 'dashboardIcon.png'), mimetype='image/png')
 
 if __name__ == '__main__':
     # Start Flask server in a separate thread

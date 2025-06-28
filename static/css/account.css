@@ -19,13 +19,17 @@
     height: 350px;
     align-items: center;
     padding: 80px;
+    padding-left: 200px;
+    background-color: #c1d5dd;
 }
 
 .card.business-container {
     display: flex;
     height: 500px;
     align-items: center;
-    padding: 80px;
+    padding: 150px;
+    padding-left: 110px;
+    background-color: #c1d5dd;
 }
 
 /* ---------- Edit button ---------- */
@@ -47,9 +51,8 @@
     color: white;
 }
 
-/* ---------- Avatar ---------- */
+/* ---------- imijis ---------- */
 .avatar-circle {
-    flex-shrink:0;
     width:280px; 
     height:280px;
     border-radius:50%;
@@ -59,18 +62,92 @@
     justify-content:center;
 }
 
-/* ---------- Logo ---------- */
+.avatar-img, .biz-logo-img {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #215E7D;
+    background: #f3f4f6;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+.biz-logo-img {
+    border-radius: 12px;
+    width: 280px;
+    height: 280px;
+}
+.avatar-upload-btn {
+    display: flex;
+    position: absolute;
+    top: 120px;
+    bottom: 10px;
+    left: 150px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #215E7D;
+    color: #fff;
+    border: none;
+    font-size: 1.5em;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.bizlogo-upload-btn {
+    display: none;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #215E7D;
+    color: #fff;
+    border: none;
+    font-size: 1.5em;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: background 0.2s;
+}
+
+.avatar-upload-btn:hover, .bizlogo-upload-btn:hover {
+    background: #14384c;
+}
+.avatar-circle, .biz-logo {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}
+.file-upload-label {
+    display: block;
+    text-align: center;
+    color: #215E7D;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+.file-upload-input {
+    display: none;
+}
+
 .biz-logo {
-    width:320px;
-    height:320px;
+    width:280px; 
+    height:280px;
     object-fit:contain;
-    background-color: #215e7d
+    background-color: #215e7d;
+    border-radius: 12px;
 }
 
 /* ---------- Text blocks ---------- */
 .personal-text{
     flex:1;
-    padding-left: 90px;
+    padding-left: 120px;
 }
 .biz-text  {
     flex:1;
