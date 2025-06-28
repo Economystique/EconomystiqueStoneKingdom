@@ -15,7 +15,8 @@ import smtplib
 from email.message import EmailMessage
 import webview
 import threading
-
+from dateutil.relativedelta import relativedelta
+import calendar
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -106,7 +107,6 @@ def logout():
 
 @app.route('/dashboard')
 @login_required
-
 def dashboard():
     # Dummy data for top products
     best_sellers = [
@@ -176,28 +176,42 @@ def dashboard():
             
         }
     ]
+    
+    daily_sales = []
+    labels = []
 
-    # Dummy data for sales performance
-    sales_data = [
-        {'month': '01', 'total_sales': 50},
-        {'month': '02', 'total_sales': 150},
-        {'month': '03', 'total_sales': 250},
-        {'month': '04', 'total_sales': 200},
-        {'month': '05', 'total_sales': 300},
-        {'month': '06', 'total_sales': 150},
-        {'month': '07', 'total_sales': 200},
-        {'month': '08', 'total_sales': 100},
-        {'month': '09', 'total_sales': 150},
-        {'month': '10', 'total_sales': 200},
-        {'month': '11', 'total_sales': 350},
-        {'month': '12', 'total_sales': 400}
-    ]
+    for i in range(9, -1, -1):
+        date_check = date.today() - timedelta(days=i)
+        year = date_check.year
+        month = date_check.strftime('%b').lower()
+        day = date_check.day
+        table_name = f"d0{day}" if day < 10 else f"d{day}"
+
+        try:
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{year}', f'{month}_{year}.db')
+            with sqlite3.connect(db_path) as dconn:
+                dcursor = dconn.cursor()
+                dcursor.execute(f"SELECT SUM(quantity_sold * price) FROM {table_name}")
+                total = dcursor.fetchone()[0] or 0
+        except Exception:
+            total = 0
+
+        labels.append(date_check.strftime('%b %d'))
+        daily_sales.append(total)
+
     return render_template('dashboard.html',
-                         sales_data=sales_data,
-                         least_products=least_products,
-                         near_expiry=near_expiry,
-                         best_sellers=best_sellers,
-                         critical_items=critical_items)
+                        labels=labels,
+                        quantities=daily_sales,
+                        least_products=least_products,
+                        near_expiry=near_expiry,
+                        best_sellers=best_sellers,
+                        critical_items=critical_items)
+    # return render_template('dashboard.html',
+                        #  sales_data=sales_data,
+                        #  least_products=least_products,
+                        #  near_expiry=near_expiry,
+                        #  best_sellers=best_sellers,
+    #                      critical_items=critical_items)
 
 @app.route('/products')
 @login_required
@@ -272,7 +286,8 @@ def sales():
             'sales_total': row[4],
         } for row in rows
     ]
-
+    
+    # Line Graph Data
     daily_sales = []
     labels = []
 
@@ -367,7 +382,7 @@ def get_sales_data(period):
             except Exception:
                 total = 0
 
-            labels.append(date_check.strftime('%b %d'))  # e.g. 'Jul 02'
+            labels.append(date_check.strftime('%b %d')) 
             daily_sales.append(total)
         return jsonify({
             'labels': labels,
@@ -436,11 +451,45 @@ def get_sales_data(period):
                 'sales_total': row[4],
             } for row in rows
         ]
+        # Generate sales totals for the last 10 months
+        monthly_sales = []
+        month_labels = []
+        today = date.today()
 
+        for i in range(9, -1, -1):
+            target_date = today - relativedelta(months=i)
+            y = target_date.year
+            m = target_date.month
+            m_str = target_date.strftime('%b').lower()
+            label = f"{m_str.capitalize()} {y}"
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{y}', f'{m_str}_{y}.db')
+            
+            month_total = 0
+            if os.path.exists(db_path):
+                try:
+                    with sqlite3.connect(db_path) as dConn:
+                        dCursor = dConn.cursor()
+                        days_in_month = calendar.monthrange(y, m)[1]
+                        for day in range(1, days_in_month + 1):
+                            tbl = f"d0{day}" if day < 10 else f"d{day}"
+                            try:
+                                dCursor.execute(f"SELECT SUM(quantity_sold * price) FROM {tbl}")
+                                val = dCursor.fetchone()[0]
+                                if val:
+                                    month_total += val
+                            except sqlite3.OperationalError:
+                                continue
+                except Exception as e:
+                    print(f"Error reading {db_path}: {e}")
+
+            month_labels.append(label)
+            monthly_sales.append(month_total)
+
+        # Return updated structure with real chart data
         return jsonify({
-            'labels': [row['inv_desc'] for row in result],
-            'quantities': [row['quantity_sold'] for row in result],
-            'table': result
+            'labels': month_labels,
+            'quantities': monthly_sales,
+            'table': result  # untouched
         })
 
 @app.route('/sales_forecast', methods=['GET'])

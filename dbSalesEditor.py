@@ -3,16 +3,84 @@ import sqlite3
 import uuid
 import bcrypt
 import random
+import calendar
 
 def edit_database():
-    connectionPath = os.path.join("db/salesdb/daily/sales_d2025", "jun_2025.db")
-    connection = sqlite3.connect(connectionPath)
-    cursor = connection.cursor()
+    wholeYear = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023","2024")
 
-    # Daily
-    
-    
-    
+    for year in years:
+        year_int = int(year)
+
+        # Create/open the database for the whole year
+        conn = sqlite3.connect(os.path.join('db/salesdb/monthly', f'sales_m{year}.db'))
+        cursor = conn.cursor()
+
+        for month_index, month in enumerate(wholeYear, start=1):
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{year}', f'{month}_{year}.db')
+            if not os.path.exists(db_path):
+                print(f"Skipping missing database: {db_path}")
+                continue
+
+            try:
+                dConn = sqlite3.connect(db_path)
+                dCursor = dConn.cursor()
+            except:
+                print(f"Error opening {db_path}")
+                continue
+
+            sales_aggregate = {}
+            days_in_month = calendar.monthrange(year_int, month_index)[1]
+
+            for day in range(1, days_in_month + 1):
+                table_name = f"d0{day}" if day < 10 else f"d{day}"
+                try:
+                    dCursor.execute(f"""
+                        SELECT inv_id, inv_desc, SUM(quantity_sold), price
+                        FROM {table_name}
+                        GROUP BY inv_id
+                    """)
+                    temp_rows = dCursor.fetchall()
+                except Exception as e:
+                    print(f"Error reading table {table_name} in {month}_{year}: {e}")
+                    continue
+
+                for inv_id, inv_desc, qty_sold, price in temp_rows:
+                    if inv_id not in sales_aggregate:
+                        sales_aggregate[inv_id] = [inv_desc, qty_sold, price]
+                    else:
+                        sales_aggregate[inv_id][1] += qty_sold
+
+            dConn.close()
+
+            # Insert into corresponding month table (e.g., jan, feb...)
+            data_to_insert = [
+                (inv_id, desc, qty, price)
+                for inv_id, (desc, qty, price) in sales_aggregate.items()
+            ]
+            
+            cursor.execute(f"""
+                        CREATE TABLE IF NOT EXISTS {month} (
+                            inv_id TEXT PRIMARY KEY,
+                            inv_desc TEXT,
+                            quantity_sold INTEGER,
+                            price REAL,
+                            sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+                        )
+                    """)
+            # Optional: clear old data from the table
+            cursor.execute(f"DELETE FROM {month}")
+            
+            cursor.executemany(f"""
+                INSERT INTO {month} (inv_id, inv_desc, quantity_sold, price)
+                VALUES (?, ?, ?, ?)
+            """, data_to_insert)
+
+            conn.commit()
+            print(f"Inserted data for {month}_{year}")
+
+        conn.close()
+        print(f"Finished year {year}")
     # Barcode
     # cursor.execute("ALTER TABLE inv_static ADD COLUMN barcode TEXT")
     # cursor.execute("CREATE UNIQUE INDEX idx_inv_static_barcode ON inv_static(barcode)")
@@ -120,6 +188,6 @@ def edit_database():
     #     VALUES (?, ?, ?, ?)              
     # """, data_sales_now)
     
-    connection.commit()
-    connection.close()
+    # connection.commit()
+    # connection.close()
 edit_database()
