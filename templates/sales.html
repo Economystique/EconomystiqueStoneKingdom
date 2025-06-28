@@ -33,17 +33,16 @@
                             <th>Price</th>
                             <th>Total</th>
                         </tr>
-                        
                     </thead>
                     <tbody>
                         {% for sale in sales_data %}
-                        <tr>
-                            <td>{{ sale.inv_id }}</td>
-                            <td>{{ sale.inv_desc }}</td>
-                            <td>{{ sale.quantity_sold }}</td>
-                            <td>{{ sale.price }}</td>
-                            <td>{{ sale.sales_total }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ sale.inv_id }}</td>
+                                <td>{{ sale.inv_desc }}</td>
+                                <td>{{ sale.quantity_sold }}</td>
+                                <td>{{ sale.price }}</td>
+                                <td>{{ sale.sales_total }}</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -81,26 +80,23 @@
 let salesChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Chart initialization on page load using default Flask-injected data
-    const labels = {{ sales_data | map(attribute='inv_desc') | list | tojson }};
-    const quantities = {{ sales_data | map(attribute='quantity_sold') | list | tojson }};
+    const labels = {{ labels | tojson }};
+    const quantities = {{ quantities | tojson }};
 
-    const chartData = {
-        labels: labels,
-        datasets: [{
-            label: 'Sales by Product',
-            data: quantities,
-            backgroundColor: 'rgba(52, 152, 219, 0.2)',
-            borderColor: 'rgba(52, 152, 219, 1)',
-            borderWidth: 2,
-            tension: 0.4
-        }]
-    };
-
-    const ctx = document.getElementById('salesChart');
+    const ctx = document.getElementById('salesChart').getContext('2d');
     salesChart = new Chart(ctx, {
         type: 'line',
-        data: chartData,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Sales by Product',
+                data: quantities,
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderColor: 'rgba(52, 152, 219, 1)',
+                borderWidth: 2,
+                tension: 0.4
+            }]
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
