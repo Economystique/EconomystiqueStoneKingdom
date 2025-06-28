@@ -153,14 +153,14 @@
 .date-picker,
 .year-dropdown,
 .flatpickr-input {
-    width: 160px;
-    height: 38px;
+    width: 150px;
+    height: 40px;
     box-sizing: border-box;
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 8px 8px 0px 0px;
     font-size: 14px;
-    margin-left: 10px;
+    margin-left: 5px;
     background-color: transparent;
     color: #333;
     cursor: pointer;
