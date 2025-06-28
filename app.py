@@ -17,6 +17,8 @@ import webview
 import threading
 from dateutil.relativedelta import relativedelta
 import calendar
+import io
+from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -215,12 +217,6 @@ def dashboard():
                         near_expiry=near_expiry,
                         best_sellers=best_sellers,
                         critical_items=critical_items)
-    # return render_template('dashboard.html',
-                        #  sales_data=sales_data,
-                        #  least_products=least_products,
-                        #  near_expiry=near_expiry,
-                        #  best_sellers=best_sellers,
-    #                      critical_items=critical_items)
 
 @app.route('/products')
 @login_required
@@ -347,18 +343,56 @@ def get_sales_data(period):
     
     # Daily
     if period == "daily":
-        
-        # For the Table
-        conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
-        cursor = conn.cursor()
-        
-        cursor.execute(f"""
-            SELECT inv_id, inv_desc, quantity_sold, price, sales_total
-            FROM sales_today
-        """)
-        rows = cursor.fetchall()
-        conn.close()
-        
+        # Parse the selected date or default to today
+        date_param = request.args.get('date')
+        try:
+            if date_param:
+                base_date = datetime.strptime(date_param, "%Y-%m-%d").date()
+            else:
+                base_date = date.today()
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
+
+        # Line Graph Data: Get sales of 10 days up to selected day
+        daily_sales = []
+        labels = []
+
+        for i in range(9, -1, -1):
+            date_check = base_date - timedelta(days=i)
+            year = date_check.year
+            month = date_check.strftime('%b').lower()
+            day = date_check.day
+            table_name = f"d0{day}" if day < 10 else f"d{day}"
+
+            try:
+                db_path = os.path.join(f'db/salesdb/daily/sales_d{year}', f'{month}_{year}.db')
+                with sqlite3.connect(db_path) as dconn:
+                    dcursor = dconn.cursor()
+                    dcursor.execute(f"SELECT SUM(quantity_sold * price) FROM {table_name}")
+                    total = dcursor.fetchone()[0] or 0
+            except Exception:
+                total = 0
+
+            labels.append(date_check.strftime('%b %d'))  # e.g. Jun 28
+            daily_sales.append(total)
+
+        # Table Data: get only from the selected day (not current)
+        target_year = base_date.year
+        target_month = base_date.strftime('%b').lower()
+        target_day = base_date.day
+        table_name = f"d0{target_day}" if target_day < 10 else f"d{target_day}"
+        try:
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{target_year}', f'{target_month}_{target_year}.db')
+            with sqlite3.connect(db_path) as tconn:
+                tcursor = tconn.cursor()
+                tcursor.execute(f"""
+                    SELECT inv_id, inv_desc, quantity_sold, price, (quantity_sold * price) AS sales_total
+                    FROM {table_name}
+                """)
+                rows = tcursor.fetchall()
+        except Exception:
+            rows = []
+
         result = [
             {
                 'inv_id': row[0],
@@ -369,30 +403,6 @@ def get_sales_data(period):
             } for row in rows
         ]
 
-        # For the Graph
-        daily_sales = []
-        labels = []
-        
-        for i in range(9, -1, -1):
-            date_check = date.today() - timedelta(days=i)
-            year = date_check.year
-            month = date_check.strftime('%b').lower()
-            day = date_check.day
-            table_name = f"d0{day}" if day < 10 else f"d{day}"
-
-            try:
-                db_path = os.path.join(f'db/salesdb/daily/sales_d{year}', f'{month}_{year}.db')
-                with sqlite3.connect(db_path) as conn:
-                    cursor = conn.cursor()
-                    cursor.execute(f"""
-                        SELECT SUM(quantity_sold * price) FROM {table_name}
-                    """)
-                    total = cursor.fetchone()[0] or 0
-            except Exception:
-                total = 0
-
-            labels.append(date_check.strftime('%b %d')) 
-            daily_sales.append(total)
         return jsonify({
             'labels': labels,
             'quantities': daily_sales,
@@ -401,9 +411,82 @@ def get_sales_data(period):
         
     # Yearly
     elif period == 'yearly':
-        pass
+        # Get year from query string or default to current year
+        selected_year = request.args.get('date', str(date.today().year))
+        try:
+            selected_year = int(selected_year)
+        except ValueError:
+            return jsonify({'error': 'Invalid year'}), 400
+
+        db_path = os.path.join('db/salesdb', 'sales_yearly.db')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # Get all available year tables
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'sales_y%'")
+        tables = [row[0] for row in cursor.fetchall()]
+
+        available_years = sorted([int(name.replace('sales_y', '')) for name in tables])
+
+        start_year = selected_year - 9
+        years_to_check = [y for y in range(start_year, selected_year + 1) if y in available_years]
+
+        yearly_sales = []
+        labels = []
+
+        for y in years_to_check:
+            table = f"sales_y{y}"
+            try:
+                cursor.execute(f"SELECT SUM(quantity_sold * price) FROM {table}")
+                total = cursor.fetchone()[0] or 0
+            except Exception:
+                total = 0
+
+            yearly_sales.append(total)
+            labels.append(str(y))
+
+        # Now get detailed sales from the selected year's table
+        result = []
+        table_name = f"sales_y{selected_year}"
+        if table_name in tables:
+            cursor.execute(f"""
+                SELECT inv_id, inv_desc, quantity_sold, price, sales_total
+                FROM {table_name}
+            """)
+            rows = cursor.fetchall()
+            result = [
+                {
+                    'inv_id': row[0],
+                    'inv_desc': row[1],
+                    'quantity_sold': row[2],
+                    'price': row[3],
+                    'sales_total': row[4],
+                } for row in rows
+            ]
+
+        conn.close()
+
+        return jsonify({
+            'labels': labels,
+            'quantities': yearly_sales,
+            'table': result,
+            'available_years': available_years  # To populate dropdown
+        })
     # Monthly
     elif period == 'monthly':
+        # Get date param or default to current date
+        date_param = request.args.get('date')
+        if date_param:
+            try:
+                target_date = datetime.strptime(date_param, "%Y-%m")
+                target_year = target_date.year
+                target_month = target_date.month
+            except ValueError:
+                return jsonify({'error': 'Invalid date format'}), 400
+        else:
+            target_date = date.today()
+            target_year = target_date.year
+            target_month = target_date.month
         dConn = sqlite3.connect(os.path.join(f'db/salesdb/daily/sales_d{thisYear}', f'{month_str}_{thisYear}.db')) 
         dCursor = dConn.cursor()
         conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
@@ -463,42 +546,54 @@ def get_sales_data(period):
         # Generate sales totals for the last 10 months
         monthly_sales = []
         month_labels = []
-        today = date.today()
+        sales_aggregate = defaultdict(lambda: [None, 0, 0])  # inv_desc, qty, price
 
         for i in range(9, -1, -1):
-            target_date = today - relativedelta(months=i)
-            y = target_date.year
-            m = target_date.month
-            m_str = target_date.strftime('%b').lower()
-            label = f"{m_str.capitalize()} {y}"
+            date_check = date(target_year, target_month, 1) - relativedelta(months=i)
+            y = date_check.year
+            m = date_check.month
+            m_str = date_check.strftime('%b').lower()
             db_path = os.path.join(f'db/salesdb/daily/sales_d{y}', f'{m_str}_{y}.db')
-            
-            month_total = 0
+            label = f"{m_str.capitalize()} {y}"
+            total = 0
+
             if os.path.exists(db_path):
                 try:
                     with sqlite3.connect(db_path) as dConn:
                         dCursor = dConn.cursor()
                         days_in_month = calendar.monthrange(y, m)[1]
                         for day in range(1, days_in_month + 1):
-                            tbl = f"d0{day}" if day < 10 else f"d{day}"
+                            table_name = f'd0{day}' if day < 10 else f'd{day}'
                             try:
-                                dCursor.execute(f"SELECT SUM(quantity_sold * price) FROM {tbl}")
-                                val = dCursor.fetchone()[0]
-                                if val:
-                                    month_total += val
+                                dCursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {table_name}")
+                                for inv_id, inv_desc, qty, price in dCursor.fetchall():
+                                    sales_aggregate[inv_id][0] = inv_desc
+                                    sales_aggregate[inv_id][1] += qty
+                                    sales_aggregate[inv_id][2] = price
+                                    total += qty * price
                             except sqlite3.OperationalError:
                                 continue
                 except Exception as e:
                     print(f"Error reading {db_path}: {e}")
 
+            monthly_sales.append(total)
             month_labels.append(label)
-            monthly_sales.append(month_total)
 
-        # Return updated structure with real chart data
+        # prepare table result
+        result = [
+            {
+                'inv_id': inv_id,
+                'inv_desc': data[0],
+                'quantity_sold': data[1],
+                'price': data[2],
+                'sales_total': data[1] * data[2]
+            } for inv_id, data in sales_aggregate.items()
+        ]
+
         return jsonify({
             'labels': month_labels,
             'quantities': monthly_sales,
-            'table': result  # untouched
+            'table': result
         })
 
 @app.route('/sales_forecast', methods=['GET'])

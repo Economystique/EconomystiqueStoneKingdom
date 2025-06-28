@@ -1,239 +1,222 @@
-{% extends "base.html" %}
+    {% extends "base.html" %}
 
-{% block title %}Dashboard - Economystique{% endblock %}    
+    {% block title %}Dashboard - Economystique{% endblock %}    
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-{% endblock %}
+    {% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    {% endblock %}
 
-<!--{% block header_title %}Welcome, Admin!{% endblock %} -->
+    <!--{% block header_title %}Welcome, Admin!{% endblock %} -->
 
-{% block content %}
-<h1>Welcome, Admin!</h1>
-<br>
-<div class="dashboard-grid">
-    <div class="top-cards-row">
-        <!-- Best Selling Products Card -->
-        <div class="card small-card top-products">
-            <h2 class="card-title">
-                <span class="icon"><img class="icon-img" src="static/img/topProductsIcon.png" alt=""></span>
-                Top Products
-            </h2>
-            {% for product in best_sellers %}
-            <div class="product-item">
-                <div class="product-info">
-                    <span class="quantity">{{ product.rank }}</span>
-                    <span class="revenue">{{ product.name }}</span>
+    {% block content %}
+    <h1>Welcome, Admin!</h1>
+    <br>
+    <div class="dashboard-grid">
+        <div class="top-cards-row">
+            <!-- Best Selling Products Card -->
+            <div class="card small-card top-products">
+                <h2 class="card-title">
+                    <span class="icon"><img class="icon-img" src="static/img/topProductsIcon.png" alt=""></span>
+                    Top Products
+                </h2>
+                {% for product in best_sellers %}
+                <div class="product-item">
+                    <div class="product-info">
+                        <span class="quantity">{{ product.rank }}</span>
+                        <span class="revenue">{{ product.name }}</span>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-
-        <!-- Least Sold Products Card -->
-        <div class="card small-card least-sold">
-            <h2 class="card-title">
-                <span class="icon"><img class="icon-img" src="static/img/leastSoldIcon.png" alt=""></span>
-                Least Sold Products
-            </h2>
-            {% for product in least_products %}
-            <div class="product-item">
-                <div class="product-info">
-                    <span class="quantity">{{ product.rank }}</span>
-                    <span>{{ product.name}}</span>  
-                </div>
-            </div>
-            {% endfor %}
-        </div>  
-
-        <!-- Near Expiry Products Card -->
-        <div class="card small-card near-expiry">
-            <h2 class="card-title">
-                <span class="icon"><img class="icon-img" src="static/img/nearExpiryIcon.png" alt=""></span>
-                Near Expiry Products
-            </h2>
-            {% for product in near_expiry %}
-            <div class="product-item">
-                <div class="product-info">
-                    <span class="quantity">{{ product.quantity }}</span>
-                    <h4>{{ product.expiry_date }}</h4>
-                    <span>{{ product.name }}</span>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="bottom-section">
-        <!-- Sales Performance Card -->
-        <div class="card bottom-card">
-            <div class="performance-header">
-                <div class="performance-title">
-                    <i class="fas fa-chart-line"></i>
-                    <h2>Performance</h2>
-                </div>
-                <div class="button-controls">
-                    <button class="time-button active"  onclick="toggleView('daily')">D</button>
-                    <button class="time-button" onclick="toggleView('monthly')">M</button>
-                    <button class="time-button" onclick="toggleView('yearly')">Y</button>
-                    <button class="comparison-button">COMPARE</button>
-                </div>
-            </div>
-            <div class="performance-stats">
-            </div>
-            <div class="chart-container">
-                <canvas id="salesChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Critical Items Card -->
-        <div class="card critical-items bottom-card">
-            <h2 class="card-title">
-                <span class="icon"><img class="icon-img" src="static/img/declareWastageIcon.png" alt=""></span>
-                Critical Items
-            </h2>
-            {% for item in critical_items %}
-            <div class="product-item"> 
-                <div class="product-info">
-                    <span class="quantity">{{ item.quantity }}</span>
-                    <span>{{ item.name }}</span>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
-<script>
-    let salesChart = null;
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const labels = {{ labels | tojson }};
-        const quantities = {{ quantities | tojson }};
-
-        const last = quantities[quantities.length - 1];
-        const secondLast = quantities[quantities.length - 2];
-        
-        let message = "No comparison available.";
-        
-        if (secondLast !== 0) {
-            const diff = last - secondLast;
-            const percent = ((diff / secondLast) * 100).toFixed(2);
             
-            if (diff > 0) {
-                message = `Sales increased by ${percent}% compared to the previous day.`;
-            } else if (diff < 0) {
-                message = `Sales decreased by ${Math.abs(percent)}% compared to the previous day.`;
-            } else {
-                message = `Sales remained the same compared to the previous day.`;
+            <!-- Least Sold Products Card -->
+            <div class="card small-card least-sold">
+                <h2 class="card-title">
+                    <span class="icon"><img class="icon-img" src="static/img/leastSoldIcon.png" alt=""></span>
+                    Least Sold Products
+                </h2>
+                {% for product in least_products %}
+                <div class="product-item">
+                    <div class="product-info">
+                        <span class="quantity">{{ product.rank }}</span>
+                        <span>{{ product.name}}</span>  
+                    </div>
+                </div>
+                {% endfor %}
+            </div>  
+
+            <!-- Near Expiry Products Card -->
+            <div class="card small-card near-expiry">
+                <h2 class="card-title">
+                    <span class="icon"><img class="icon-img" src="static/img/nearExpiryIcon.png" alt=""></span>
+                    Near Expiry Products
+                </h2>
+                {% for product in near_expiry %}
+                <div class="product-item">
+                    <div class="product-info">
+                        <span class="quantity">{{ product.quantity }}</span>
+                        <h4>{{ product.expiry_date }}</h4>
+                        <span>{{ product.name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bottom-section">
+            <!-- Sales Performance Card -->
+            <div class="card bottom-card">
+                <div class="performance-header">
+                    <div class="performance-title">
+                        <i class="fas fa-chart-line"></i>
+                        <h2>Performance</h2>
+                    </div>
+                    <div class="button-controls">
+                        <button class="time-button active"  onclick="toggleView('daily')">D</button>
+                        <button class="time-button" onclick="toggleView('monthly')">M</button>
+                        <button class="time-button" onclick="toggleView('yearly')">Y</button>
+                        <button class="comparison-button">COMPARE</button>
+                    </div>
+                </div>
+                <div class="performance-stats">
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Critical Items Card -->
+            <div class="card critical-items bottom-card">
+                <h2 class="card-title">
+                    <span class="icon"><img class="icon-img" src="static/img/declareWastageIcon.png" alt=""></span>
+                    Critical Items
+                </h2>
+                {% for item in critical_items %}
+                <div class="product-item"> 
+                    <div class="product-info">
+                        <span class="quantity">{{ item.quantity }}</span>
+                        <span>{{ item.name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block extra_js %}
+    <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+    <script>
+        let salesChart = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const labels = {{ labels | tojson }};
+            const quantities = {{ quantities | tojson }};
+
+            const last = quantities[quantities.length - 1];
+            const secondLast = quantities[quantities.length - 2];
+            
+            let message = "No comparison available.";
+            
+            if (secondLast !== 0) {
+                const diff = last - secondLast;
+                const percent = ((diff / secondLast) * 100).toFixed(2);
+                
+                if (diff > 0) {
+                    message = `Sales increased by ${percent}% compared to the previous day.`;
+                } else if (diff < 0) {
+                    message = `Sales decreased by ${Math.abs(percent)}% compared to the previous day.`;
+                } else {
+                    message = `Sales remained the same compared to the previous day.`;
+                }
             }
-        }
 
-        document.querySelector('.performance-stats').textContent = message;
+            document.querySelector('.performance-stats').textContent = message;
 
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        salesChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Sales by Product',
-                    data: quantities,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                    borderColor: 'rgba(52, 152, 219, 1)',
-                    borderWidth: 2,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)',
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sales by Product',
+                        data: quantities,
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 }
-            }
-        });
-    });
-
-
-    function toggleView(period) {
-        // Highlight selected button
-        document.querySelectorAll('.time-button').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.time-button[onclick*="${period}"]`).classList.add('active');
-
-        // Fetch new data
-        fetch(`/api/sales/${period}`)
-            .then(response => response.json())
-            .then(data => updateTableAndChart(data))
-            .catch(error => console.error('Error fetching data:', error));
-    }
-
-    function updateTableAndChart(data) {
-        // === Update Table ===
-        const tbody = document.querySelector("#salesTable tbody");
-        tbody.innerHTML = '';
-
-        data.table.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.inv_id}</td>
-                <td>${row.inv_desc}</td>
-                <td>${row.quantity_sold}</td>
-                <td>${row.price}</td>
-                <td>${row.sales_total}</td>
-            `;
-            tbody.appendChild(tr);
+            });
         });
 
-        // === Update Chart ===
-        salesChart.data.labels = data.labels;
-        salesChart.data.datasets[0].data = data.quantities;
-        salesChart.update();
+        function toggleView(period) {
+            // Highlight selected button
+            document.querySelectorAll('.time-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.time-button[onclick*="${period}"]`).classList.add('active');
 
-        // === Update Performance Stats Message ===
-        const statsElem = document.querySelector('.performance-stats');
-        statsElem.classList.remove('increase', 'decrease');
-        
-        const quantities = data.quantities;
-        const last = quantities[quantities.length - 1];
-        const secondLast = quantities[quantities.length - 2];
-
-        let message = "No comparison available.";
-
-        if (secondLast !== 0 && !isNaN(secondLast)) {
-            const diff = last - secondLast;
-            const percent = ((diff / secondLast) * 100).toFixed(2);
-
-            if (diff > 0) {
-                message = `Sales increased by ${percent}% compared to the previous period.`;
-                statsElem.classList.add('increase');
-            } else if (diff < 0) {
-                message = `Sales decreased by ${Math.abs(percent)}% compared to the previous period.`;
-                statsElem.classList.add('decrease');
-            } else {
-                message = `Sales remained the same compared to the previous period.`;
-            }
+            // Fetch new data
+            fetch(`/api/sales/${period}`)
+                .then(response => response.json())
+                .then(data => updateTableAndChart(data))
+                .catch(error => console.error('Error fetching data:', error));
         }
 
-        statsElem.textContent = message;
-    }
+        function updateTableAndChart(data) {
+            // === Update Chart ===
+            salesChart.data.labels = data.labels;
+            salesChart.data.datasets[0].data = data.quantities;
+            salesChart.update();
 
-    // Compare button
-    const compareButton = document.querySelector('.comparison-button');
-    compareButton.addEventListener('click', function() {
-        window.location.href = '/performance_comparison';
-    });
-</script>
-{% endblock %} 
+            // === Update Performance Stats Message ===
+            const statsElem = document.querySelector('.performance-stats');
+            statsElem.classList.remove('increase', 'decrease');
+            
+            const quantities = data.quantities;
+            const last = quantities[quantities.length - 1];
+            const secondLast = quantities[quantities.length - 2];
+
+            let message = "No comparison available.";
+
+            if (secondLast !== 0 && !isNaN(secondLast)) {
+                const diff = last - secondLast;
+                const percent = ((diff / secondLast) * 100).toFixed(2);
+
+                if (diff > 0) {
+                    message = `Sales increased by ${percent}% compared to the previous period.`;
+                    statsElem.classList.add('increase');
+                } else if (diff < 0) {
+                    message = `Sales decreased by ${Math.abs(percent)}% compared to the previous period.`;
+                    statsElem.classList.add('decrease');
+                } else {
+                    message = `Sales remained the same compared to the previous period.`;
+                }
+            }
+
+            statsElem.textContent = message;
+        }
+
+        // Compare button
+        const compareButton = document.querySelector('.comparison-button');
+        compareButton.addEventListener('click', function() {
+            window.location.href = '/performance_comparison';
+        });
+    </script>
+    {% endblock %} 

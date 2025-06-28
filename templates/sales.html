@@ -127,7 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    //this is for the monthpicker kasi paspecial si mm/yyyy
+    //this is for the mouthpicker kasi paspecial si mm/yyyy
+    //hahahahahaha
     flatpickr("#monthPicker", {
         plugins: [
             new monthSelectPlugin({
@@ -149,23 +150,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const yearDropdown = document.getElementById('yearDropdown');
-    if (yearDropdown && yearDropdown.options.length === 1) {
-        const currentYear = new Date().getFullYear();
-        for (let year = currentYear - 5; year <= currentYear + 5; year++) {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearDropdown.appendChild(option);
-        }
-        yearDropdown.addEventListener('change', function() {
-            if (yearDropdown.value) {
-                fetch('/api/sales/yearly?date=' + yearDropdown.value)
-                  .then(response => response.json())
-                  .then(data => updateTableAndChart(data))
-                  .catch(error => console.error('Error fetching data:', error));
+    // Fetch available years once the page loads
+    fetch('/api/sales/yearly')
+        .then(response => response.json())
+        .then(data => {
+            if (data.available_years) {
+                yearDropdown.innerHTML = '<option value="">Select Year</option>';
+                data.available_years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearDropdown.appendChild(option);
+                });
             }
-        });
-    }
+
+        })
+        .catch(err => console.error("Error loading year dropdown:", err));
+
+    yearDropdown.addEventListener('change', function () {
+        if (yearDropdown.value) {
+            fetch('/api/sales/yearly?date=' + yearDropdown.value)
+                .then(res => res.json())
+                .then(data => updateTableAndChart(data))
+                .catch(err => console.error("Error fetching yearly data:", err));
+        }
+    });
 });
 
 function toggleView(period) {
