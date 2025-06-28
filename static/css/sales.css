@@ -149,3 +149,51 @@
     }
 }
 
+/*Date picker*/
+.date-picker,
+.year-dropdown,
+.flatpickr-input {
+    width: 160px;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px 8px 0px 0px;
+    font-size: 14px;
+    margin-left: 10px;
+    background-color: transparent;
+    color: #333;
+    cursor: pointer;
+    border-color: #89a3ad;
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.date-picker:hover,
+.year-dropdown:hover,
+.flatpickr-input:hover {
+    border-color: #89a3ad;
+    background-color: #89a3ad;
+    color: white;
+}
+
+.date-picker:focus,
+.year-dropdown:focus,
+.flatpickr-input:focus {
+    outline: none;
+    border-color: #215E7D;
+    box-shadow: 0 0 0 2px rgba(33, 94, 125, 0.2);
+}
+
+.date-picker::placeholder {
+    text-align: center;
+  }
+
+.year-dropdown option {
+    background-color: white;
+    color: #333;
+}
+
+.year-dropdown option:hover {
+    background-color: #89a3ad;
+    color: white;
+}

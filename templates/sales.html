@@ -4,6 +4,8 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/sales.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 {% endblock %}
 
 <!--{% block header_title %}Sales Management{% endblock %}-->
@@ -20,6 +22,14 @@
             <button class="toggle-btn active" onclick="toggleView('daily')">Daily</button>
             <button class="toggle-btn" onclick="toggleView('monthly')">Monthly</button>
             <button class="toggle-btn" onclick="toggleView('yearly')">Yearly</button>
+            <!--day-->
+            <input type="date" id="datePickerDay" class="date-picker" style="display:inline-block;" onchange="handleDateChange()">
+            <!--month-->
+            <input type="text" id="monthPicker" class="date-picker" placeholder="MM/YYYY" autocomplete="off" style="display:none;">
+            <!--year-->
+            <select id="yearDropdown" class="year-dropdown" style="display:none;">
+                <option value="">Select Year</option>
+            </select>
         </div>
 
         <div class="table-and-chart">
@@ -76,6 +86,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script>
 let salesChart = null;
 
@@ -104,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)',
+                        color: 'rgba(0, 0, 0, 0.1)'
                     }
                 },
                 x: {
@@ -115,42 +127,162 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    //this is for the monthpicker kasi paspecial si mm/yyyy
+    flatpickr("#monthPicker", {
+        plugins: [
+            new monthSelectPlugin({
+                shorthand: true,
+                dateFormat: "Y-m",
+                altFormat: "F Y"
+            })
+        ],
+        allowInput: true,
+        onChange: function(selectedDates, dateStr, instance) {
+            if (dateStr) {
+                const activePeriod = 'monthly';
+                fetch('/api/sales/' + activePeriod + '?date=' + dateStr)
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) { updateTableAndChart(data); })
+                    .catch(function(error) { console.error('Error fetching data:', error); });
+            }
+        }
+    });
+
+    const yearDropdown = document.getElementById('yearDropdown');
+    if (yearDropdown && yearDropdown.options.length === 1) {
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearDropdown.appendChild(option);
+        }
+        yearDropdown.addEventListener('change', function() {
+            if (yearDropdown.value) {
+                fetch('/api/sales/yearly?date=' + yearDropdown.value)
+                  .then(response => response.json())
+                  .then(data => updateTableAndChart(data))
+                  .catch(error => console.error('Error fetching data:', error));
+            }
+        });
+    }
 });
 
-
 function toggleView(period) {
-    // Highlight selected button
-    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`.toggle-btn[onclick*="${period}"]`).classList.add('active');
+    document.querySelectorAll('.toggle-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    document.querySelector('.toggle-btn[onclick*="' + period + '"]').classList.add('active');
+
+    const datePickerDay = document.getElementById('datePickerDay');
+    const monthPicker = document.getElementById('monthPicker');
+    const yearDropdown = document.getElementById('yearDropdown');
+
+    if (period === 'daily') {
+        datePickerDay.style.display = 'inline-block';
+        monthPicker.style.display = 'none';
+        yearDropdown.style.display = 'none';
+        if (datePickerDay) datePickerDay.value = '';
+    } else if (period === 'monthly') {
+        datePickerDay.style.display = 'none';
+        monthPicker.style.display = 'inline-block';
+        yearDropdown.style.display = 'none';
+        if (monthPicker) monthPicker.value = '';
+    } else if (period === 'yearly') {
+        datePickerDay.style.display = 'none';
+        monthPicker.style.display = 'none';
+        yearDropdown.style.display = 'inline-block';
+        if (yearDropdown) yearDropdown.value = '';
+    }
 
     // Fetch new data
-    fetch(`/api/sales/${period}`)
-        .then(response => response.json())
-        .then(data => updateTableAndChart(data))
-        .catch(error => console.error('Error fetching data:', error));
+    fetch('/api/sales/' + period)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            updateTableAndChart(data);
+        })
+        .catch(function(error) {
+            console.error('Error fetching data:', error);
+        });
 }
 
 function updateTableAndChart(data) {
-    // === Update Table ===
+    // Update Table
     const tbody = document.querySelector("#salesTable tbody");
     tbody.innerHTML = '';
 
-    data.table.forEach(row => {
+    data.table.forEach(function(row) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${row.inv_id}</td>
-            <td>${row.inv_desc}</td>
-            <td>${row.quantity_sold}</td>
-            <td>${row.price}</td>
-            <td>${row.sales_total}</td>
-        `;
+        tr.innerHTML = '<td>' + row.inv_id + '</td>' +
+                      '<td>' + row.inv_desc + '</td>' +
+                      '<td>' + row.quantity_sold + '</td>' +
+                      '<td>' + row.price + '</td>' +
+                      '<td>' + row.sales_total + '</td>';
         tbody.appendChild(tr);
     });
 
-    // === Update Chart ===
+    // Update Chart
     salesChart.data.labels = data.labels;
     salesChart.data.datasets[0].data = data.quantities;
     salesChart.update();
+}
+
+function handleDateChange() {
+    const datePicker = document.getElementById('datePickerDay');
+    const selectedValue = datePicker.value;
+    const activePeriod = document.querySelector('.toggle-btn.active').textContent.toLowerCase();
+    
+    if (selectedValue) {
+        let dateParam;
+        
+        if (activePeriod === 'daily') {
+            dateParam = selectedValue; // YYYY-MM-DD 
+        } else if (activePeriod === 'monthly') {
+            dateParam = selectedValue; // YYYY-MM 
+        } else if (activePeriod === 'yearly') {
+            dateParam = selectedValue; // YYYY 
+        }
+        
+        // Fetch data for the selected date and period
+        fetch('/api/sales/' + activePeriod + '?date=' + dateParam)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                updateTableAndChart(data);
+            })
+            .catch(function(error) {
+                console.error('Error fetching data:', error);
+            });
+    }
+}
+
+function handleCustomDateChange() {
+    const activePeriod = document.querySelector('.toggle-btn.active').textContent.toLowerCase();
+    let dateParam = '';
+    
+    if (activePeriod === 'yearly') {
+        const yearDropdown = document.getElementById('yearDropdown');
+        if (yearDropdown.value) {
+            dateParam = yearDropdown.value;
+        }
+    }
+    
+    if (dateParam) {
+        // Fetch data for the selected date and period
+        fetch('/api/sales/' + activePeriod + '?date=' + dateParam)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                updateTableAndChart(data);
+            })
+            .catch(function(error) {
+                console.error('Error fetching data:', error);
+            });
+    }
 }
 </script>
 {% endblock %} 
