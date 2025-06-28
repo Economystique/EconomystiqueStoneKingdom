@@ -17,6 +17,7 @@ import webview
 import threading
 from dateutil.relativedelta import relativedelta
 import calendar
+import io
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
