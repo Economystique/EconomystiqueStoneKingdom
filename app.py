@@ -98,8 +98,8 @@ def signup():
             return redirect(url_for('signup'))
         
         pw_hash = bcrypt.hashpw(password, bcrypt.gensalt())
-        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash, owner_name) VALUES (?, ?, ?, ?)",
-                      (username, email, pw_hash.decode('utf-8'), username))
+        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash) VALUES (?, ?, ?)",
+                      (username, email, pw_hash.decode('utf-8')))
         conn.commit()
         conn.close()
         
@@ -262,21 +262,18 @@ def manage():
 @app.route('/sales')
 @login_required
 def sales():
-    # Get database connection
     conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
     cursor = conn.cursor()
-    
-    # From Static
+
+    # Daily Table
     cursor.execute("""
         SELECT inv_id, inv_desc, quantity_sold, price, sales_total
         FROM sales_today
-    """
-    )
-    
+    """)
     rows = cursor.fetchall()
     conn.close()
-    
-    today_sales = [
+
+    sales_data = [
         {
             'inv_id': row[0],
             'inv_desc': row[1],
@@ -286,7 +283,29 @@ def sales():
         } for row in rows
     ]
 
-    return render_template('sales.html', sales_data = today_sales)
+    daily_sales = []
+    labels = []
+
+    for i in range(9, -1, -1):
+        date_check = date.today() - timedelta(days=i)
+        year = date_check.year
+        month = date_check.strftime('%b').lower()
+        day = date_check.day
+        table_name = f"d0{day}" if day < 10 else f"d{day}"
+
+        try:
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{year}', f'{month}_{year}.db')
+            with sqlite3.connect(db_path) as dconn:
+                dcursor = dconn.cursor()
+                dcursor.execute(f"SELECT SUM(quantity_sold * price) FROM {table_name}")
+                total = dcursor.fetchone()[0] or 0
+        except Exception:
+            total = 0
+
+        labels.append(date_check.strftime('%b %d'))  # e.g. Jul 02
+        daily_sales.append(total)
+
+    return render_template('sales.html', sales_data=sales_data, labels=labels, quantities=daily_sales)
 
 @app.route('/api/sales/<period>')
 @login_required
@@ -314,13 +333,36 @@ def get_sales_data(period):
     
     # Daily
     if period == "daily":
+        
+        # For the Table
+        conn = sqlite3.connect(os.path.join('db/salesdb', 'sales_now.db'))
+        cursor = conn.cursor()
+        
+        cursor.execute(f"""
+            SELECT inv_id, inv_desc, quantity_sold, price, sales_total
+            FROM sales_today
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        
+        result = [
+            {
+                'inv_id': row[0],
+                'inv_desc': row[1],
+                'quantity_sold': row[2],
+                'price': row[3],
+                'sales_total': row[4],
+            } for row in rows
+        ]
+
+        # For the Graph
         daily_sales = []
         labels = []
         
-        for i in range(9, -1, -1):  # From 9 days ago to today
+        for i in range(9, -1, -1):
             date_check = date.today() - timedelta(days=i)
             year = date_check.year
-            month = date_check.strftime('%b').lower()  # e.g. 'jul'
+            month = date_check.strftime('%b').lower()
             day = date_check.day
             table_name = f"d0{day}" if day < 10 else f"d{day}"
 
@@ -335,13 +377,12 @@ def get_sales_data(period):
             except Exception:
                 total = 0
 
-            labels.append(date_check.strftime('%b %d')) 
+            labels.append(date_check.strftime('%b %d'))  # e.g. 'Jul 02'
             daily_sales.append(total)
-
         return jsonify({
             'labels': labels,
             'quantities': daily_sales,
-            'table': []
+            'table': result
         })
         
     # Yearly
@@ -430,7 +471,7 @@ def sales_forecast():
 
     actual_data = []
     forecast_data_full_line = []
-    current_month = 5  # June (index 6, so forecast starts from July)
+    current_month = 5 
 
     sales_trend_message = ""
 
@@ -641,71 +682,7 @@ def account():
     
     conn.close()
     
-    # Convert user_data to dict for easier template access
-    user_dict = dict(user_data) if user_data else {}
-    
-    return render_template('account.html', user_data=user_dict)
-
-@app.route('/api/update_personal_profile', methods=['POST'])
-@login_required
-def update_personal_profile():
-    data = request.get_json()
-    owner_name = data.get('owner_name')
-    contact = data.get('contact')
-    
-    if not owner_name or not contact:
-        return jsonify({'error': 'Missing required fields'}), 400
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    try:
-        # Update both user_name and owner_name so the user can log in with the new username
-        cursor.execute("""
-            UPDATE user_data 
-            SET user_name = ?, owner_name = ?, contact = ?
-            WHERE user_name = ?
-        """, (owner_name, owner_name, contact, session['username']))
-        conn.commit()
-        
-        # Update the session with the new username
-        session['username'] = owner_name
-        
-        conn.close()
-        return jsonify({'success': True, 'message': 'Personal information updated successfully'})
-    except Exception as e:
-        conn.rollback()
-        conn.close()
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/update_business_profile', methods=['POST'])
-@login_required
-def update_business_profile():
-    data = request.get_json()
-    biz_name = data.get('biz_name')
-    industry = data.get('industry')
-    biz_type = data.get('biz_type')
-    address = data.get('address')
-    
-    if not all([biz_name, industry, biz_type, address]):
-        return jsonify({'error': 'Missing required fields'}), 400
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    try:
-        cursor.execute("""
-            UPDATE user_data 
-            SET biz_name = ?, industry = ?, biz_type = ?, address = ?
-            WHERE user_name = ?
-        """, (biz_name, industry, biz_type, address, session['username']))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True, 'message': 'Business information updated successfully'})
-    except Exception as e:
-        conn.rollback()
-        conn.close()
-        return jsonify({'error': str(e)}), 500
+    return render_template('account.html', user_data=user_data)
 
 # API endpoints for AJAX calls
 @app.route('/api/add_to_cart', methods=['POST'])
