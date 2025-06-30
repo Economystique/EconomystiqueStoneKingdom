@@ -22,13 +22,17 @@
 
         <div class="personal-text">
             <p class="section-label">{{ 'Edit profile to select title' if not user_data.owner_name else 'Business Owner' }}</p>
-            <h2 class="owner-name" id="ownerNameText">{{ user_data.owner_name or user_data.user_name }}</h2>
-            <input type="text" name="owner_name" id="ownerNameInput" value="{{ user_data.owner_name or user_data.user_name }}" class="editable-input" style="display: none;">
+            <h2 class="owner-name" id="ownerNameText">{{ user_data.owner_name or 'Edit profile to set your name' }}</h2>
+            <input type="text" name="owner_name" id="ownerNameInput" value="{{ user_data.owner_name or '' }}" class="editable-input" style="display: none;">
 
             <p class="info-line">
                 <span class="info-label">Contact Information:</span>
                 <span id="contactText">{{ user_data.contact or 'Edit business information' }}</span>
                 <input type="text" name="contact" id="contactInput" value="{{ user_data.contact or '' }}" class="editable-input" style="display: none;">
+            </p>
+            <br>
+            <p class="info-line">
+                <a href="#" class="change-username-link" onclick="showChangeUsernameModal(); return false;">Change Login Username</a>
             </p>
         </div>
     </form>
@@ -69,18 +73,157 @@
         </div>
     </form>
 
+    <!-- Edit Conflict Modal -->
+    <div id="editConflictModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Please Save First</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()" class="modal-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Username Modal -->
+    <div id="changeUsernameModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Username</h3>
+                <span class="close" onclick="closeChangeUsernameModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="changeUsernameForm" onsubmit="changeUsername(event)">
+                    <div class="form-group">
+                        <label for="currentUsername">Current Username</label>
+                        <input type="text" id="currentUsername" value="{{ user_data.user_name }}" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newUsername">New Username</label>
+                        <input type="text" id="newUsername" name="new_username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Enter Password</label>
+                        <input type="password" id="confirmPassword" name="password" required>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="submit" class="modal-btn">Change Username</button>
+                        <button type="button" onclick="closeChangeUsernameModal()" class="modal-btn modal-btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// Global variable to track edit state
+let isPersonalEditing = false;
+let isBusinessEditing = false;
+
 // Hide both plus buttons on page load
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('avatarUploadBtn').style.display = 'none';
     document.getElementById('bizLogoUploadBtn').style.display = 'none';
 });
 
+function showModal(message) {
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('editConflictModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('editConflictModal').style.display = 'none';
+}
+
+function showChangeUsernameModal() {
+    document.getElementById('changeUsernameModal').style.display = 'block';
+}
+
+function closeChangeUsernameModal() {
+    document.getElementById('changeUsernameModal').style.display = 'none';
+    // Clear form
+    document.getElementById('newUsername').value = '';
+    document.getElementById('confirmPassword').value = '';
+}
+
+function changeUsername(event) {
+    event.preventDefault();
+    
+    const newUsername = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('confirmPassword').value;
+    const currentUsername = document.getElementById('currentUsername').value;
+    
+    // Basic validation
+    if (!newUsername) {
+        alert('Please enter a new username.');
+        return;
+    }
+    
+    if (newUsername.length < 3) {
+        alert('Username must be at least 3 characters long.');
+        return;
+    }
+    
+    if (newUsername === currentUsername) {
+        alert('New username must be different from current username.');
+        return;
+    }
+    
+    if (!password) {
+        alert('Please enter your password to confirm.');
+        return;
+    }
+    
+    // Send request to backend
+    fetch('/api/change_username', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            current_username: currentUsername,
+            new_username: newUsername,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Username changed successfully!');
+            closeChangeUsernameModal();
+            // Update the current username display
+            document.getElementById('currentUsername').value = newUsername;
+            // Optionally reload the page to reflect changes
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while changing username.');
+    });
+}
+
 function toggleEdit() {
+    // Check if business is currently being edited
+    if (isBusinessEditing) {
+        showModal('Please save your business information first before editing personal information.');
+        return;
+    }
+    
+    isPersonalEditing = true;
     const showText = (id, show) => {
         document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
         document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
@@ -92,7 +235,15 @@ function toggleEdit() {
     document.getElementById('avatarUploadBtn').style.display = 'flex';
     document.getElementById('bizLogoUploadBtn').style.display = 'none';
 }
+
 function toggleBusinessEdit() {
+    // Check if personal is currently being edited
+    if (isPersonalEditing) {
+        showModal('Please save your personal information first before editing business information.');
+        return;
+    }
+    
+    isBusinessEditing = true;
     const showText = (id, show) => {
         document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
         document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
@@ -104,6 +255,7 @@ function toggleBusinessEdit() {
     document.getElementById('bizLogoUploadBtn').style.display = 'flex';
     document.getElementById('avatarUploadBtn').style.display = 'none';
 }
+
 function updateProfile(event) {
     event.preventDefault();
     const formData = {
@@ -131,6 +283,8 @@ function updateProfile(event) {
             document.getElementById('saveBtn').style.display = 'none';
             // Hide avatar upload button after saving
             document.getElementById('avatarUploadBtn').style.display = 'none';
+            // Reset edit state
+            isPersonalEditing = false;
         } else {
             alert('Error: ' + data.error);
         }
@@ -140,6 +294,7 @@ function updateProfile(event) {
         alert('An error occurred while updating profile');
     });
 }
+
 function updateBusiness(event) {
     event.preventDefault();
     const formData = {
@@ -171,6 +326,8 @@ function updateBusiness(event) {
             document.getElementById('saveBusinessBtn').style.display = 'none';
             // Hide biz logo upload button after saving
             document.getElementById('bizLogoUploadBtn').style.display = 'none';
+            // Reset edit state
+            isBusinessEditing = false;
         } else {
             alert('Error: ' + data.error);
         }
@@ -180,6 +337,20 @@ function updateBusiness(event) {
         alert('An error occurred while updating business information');
     });
 }
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const editConflictModal = document.getElementById('editConflictModal');
+    const changeUsernameModal = document.getElementById('changeUsernameModal');
+    
+    if (event.target == editConflictModal) {
+        closeModal();
+    }
+    if (event.target == changeUsernameModal) {
+        closeChangeUsernameModal();
+    }
+}
+
 // Avatar upload
 const avatarInput = document.getElementById('avatarInput');
 const avatarUploadBtn = document.getElementById('avatarUploadBtn');
@@ -206,6 +377,7 @@ avatarInput.addEventListener('change', function() {
     })
     .catch(() => alert('Avatar upload failed.'));
 });
+
 // Biz logo upload
 const bizLogoInput = document.getElementById('bizLogoInput');
 const bizLogoUploadBtn = document.getElementById('bizLogoUploadBtn');

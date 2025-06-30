@@ -100,8 +100,8 @@ def signup():
             return redirect(url_for('signup'))
         
         pw_hash = bcrypt.hashpw(password, bcrypt.gensalt())
-        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash) VALUES (?, ?, ?)",
-                      (username, email, pw_hash.decode('utf-8')))
+        cursor.execute("INSERT INTO user_data (user_name, email, pw_hash, owner_name) VALUES (?, ?, ?, ?)",
+                      (username, email, pw_hash.decode('utf-8'), username))
         conn.commit()
         conn.close()
         
@@ -904,6 +904,60 @@ def checkout():
         conn.close()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/update_personal_profile', methods=['POST'])
+@login_required
+def update_personal_profile():
+    try:
+        data = request.get_json()
+        owner_name = data.get('owner_name', '').strip()
+        contact = data.get('contact', '').strip()
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Update the user's personal profile information
+        cursor.execute("""
+            UPDATE user_data 
+            SET owner_name = ?, contact = ?
+            WHERE user_name = ?
+        """, (owner_name, contact, session['username']))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Personal profile updated successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/update_business_profile', methods=['POST'])
+@login_required
+def update_business_profile():
+    try:
+        data = request.get_json()
+        biz_name = data.get('biz_name', '').strip()
+        industry = data.get('industry', '').strip()
+        biz_type = data.get('biz_type', '').strip()
+        address = data.get('address', '').strip()
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Update the user's business profile information
+        cursor.execute("""
+            UPDATE user_data 
+            SET biz_name = ?, industry = ?, biz_type = ?, address = ?
+            WHERE user_name = ?
+        """, (biz_name, industry, biz_type, address, session['username']))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'Business profile updated successfully'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 def send_recovery_email(to_email, username):
     # Configure your SMTP server settings here
     SMTP_SERVER = 'smtp.example.com'  # e.g., 'smtp.gmail.com'
@@ -947,6 +1001,59 @@ def forgot_password():
         flash('No account found with that email address.', 'error')
     conn.close()
     return redirect(url_for('login'))
+
+@app.route('/api/change_username', methods=['POST'])
+@login_required
+def api_change_username():
+    try:
+        data = request.get_json()
+        current_username = data.get('current_username')
+        new_username = data.get('new_username', '').strip()
+        password = data.get('password', '').encode('utf-8')
+        
+        # Validate inputs
+        if not new_username:
+            return jsonify({'success': False, 'error': 'Please enter a new username.'})
+        
+        if len(new_username) < 3:
+            return jsonify({'success': False, 'error': 'Username must be at least 3 characters long.'})
+        
+        if new_username == current_username:
+            return jsonify({'success': False, 'error': 'New username must be different from current username.'})
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Verify current user and password
+        cursor.execute("SELECT pw_hash FROM user_data WHERE user_name = ?", (current_username,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'Invalid current username.'})
+        
+        if not bcrypt.checkpw(password, result['pw_hash'].encode('utf-8')):
+            conn.close()
+            return jsonify({'success': False, 'error': 'Incorrect password.'})
+        
+        # Check if new username already exists
+        cursor.execute("SELECT user_name FROM user_data WHERE user_name = ?", (new_username,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({'success': False, 'error': 'Username already exists. Please choose a different username.'})
+        
+        # Update username
+        cursor.execute("UPDATE user_data SET user_name = ? WHERE user_name = ?", (new_username, current_username))
+        conn.commit()
+        
+        # Update session
+        session['username'] = new_username
+        
+        conn.close()
+        return jsonify({'success': True, 'message': 'Username changed successfully!'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def on_loaded():
     webview.windows[0].gui.window.showMaximized()
