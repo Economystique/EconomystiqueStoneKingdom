@@ -48,7 +48,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Routes
 @app.route('/')
 def index():
     if 'username' in session:
@@ -119,46 +118,6 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Top products algorithm
-    dateToday = date.today()
-    today = dateToday.day
-    thisMonth = dateToday.month
-    thisYear = dateToday.year
-    
-    dailyPath = os.path.join(f'db/salesdb/daily/sales_d{thisYear}', f'd0{today}' if today <10 else f'd{today}')
-    dailyConn = sqlite3.connect(dailyPath)
-    dailyCursor = dailyConn.cursor()
-    best_sellers = [
-        {
-            'name': 'Chopao',
-            'rank': 1,
-        },
-        {
-            'name': 'Bottle Water',
-            'rank': 2,
-        },
-        {
-            'name': 'Ice Cream',
-            'rank': 3,
-        }
-    ]
-
-    # Dummy data for least sold products
-    least_products = [
-        {
-            'name': 'Butter',
-            'rank': 1,
-        },
-        {
-            'name': 'Sanitary Pads',
-            'rank': 2,
-        },
-        {
-            'name': 'Notebook',
-            'rank': 3,
-        } 
-    ]
-
     # Dummy data for expired products
     near_expiry = [
         {'name': 'Milk', 'quantity': 45, 'expiry_date': '2024-03-15'},
@@ -221,10 +180,94 @@ def dashboard():
     return render_template('dashboard.html',
                         labels=labels,
                         quantities=daily_sales,
-                        least_products=least_products,
                         near_expiry=near_expiry,
-                        best_sellers=best_sellers,
                         critical_items=critical_items)
+
+@app.route('/api/top_least/<period>')
+@login_required
+def get_top_least_products(period):
+    from collections import defaultdict
+
+    # Get today's date
+    today = date.today()
+    thisYear = today.year
+    thisMonth = today.month
+    thisDay = today.day
+    months = ("jan", "feb", "mar", "apr", "may", "jun",
+              "jul", "aug", "sep", "oct", "nov", "dec")
+
+    def compute_percentages(rows):
+        result = []
+        total = sum(row[2] * row[3] for row in rows)
+        for row in rows:
+            product_total = row[2] * row[3]
+            percent = (product_total / total * 100) if total > 0 else 0
+            result.append({
+                'name': row[1],
+                'percentage': percent,
+                'sales_total': product_total
+            })
+        return result
+
+    product_data = []
+
+    try:
+        if period == "daily":
+            # Load from daily table
+            db_name = f"{months[thisMonth-1]}_{thisYear}.db"
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{thisYear}', db_name)
+            table = f'd0{thisDay}' if thisDay < 10 else f'd{thisDay}'
+
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {table}")
+                product_data = cursor.fetchall()
+
+        elif period == "monthly":
+            db_name = f"{months[thisMonth-1]}_{thisYear}.db"
+            db_path = os.path.join(f'db/salesdb/daily/sales_d{thisYear}', db_name)
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                for day in range(1, thisDay + 1):
+                    table = f'd0{day}' if day < 10 else f'd{day}'
+                    try:
+                        cursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {table}")
+                        product_data.extend(cursor.fetchall())
+                    except sqlite3.OperationalError:
+                        continue
+
+        elif period == "yearly":
+            db_path = os.path.join('db/salesdb', 'sales_yearly.db')
+            table = f'sales_y{thisYear}'
+
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {table}")
+                product_data = cursor.fetchall()
+
+        else:
+            return jsonify({'error': 'Invalid period'}), 400
+
+        # Aggregate data by product
+        summary = defaultdict(lambda: [None, 0, 0])  # inv_desc, qty, price
+
+        for inv_id, inv_desc, qty, price in product_data:
+            summary[inv_id][0] = inv_desc
+            summary[inv_id][1] += qty
+            summary[inv_id][2] = price
+
+        rows = [(inv_id, data[0], data[1], data[2]) for inv_id, data in summary.items()]
+        ranked = compute_percentages(rows)
+
+        ranked_sorted = sorted(ranked, key=lambda x: x['percentage'], reverse=True)
+
+        return jsonify({
+            'best_sellers': [{'name': p['name'], 'rank': i + 1} for i, p in enumerate(ranked_sorted[:3])],
+            'least_products': [{'name': p['name'], 'rank': i + 1} for i, p in enumerate(ranked_sorted[-3:][::-1])]
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/products')
 @login_required
@@ -320,7 +363,7 @@ def sales():
         except Exception:
             total = 0
 
-        labels.append(date_check.strftime('%b %d'))  # e.g. Jul 02
+        labels.append(date_check.strftime('%b %d'))
         daily_sales.append(total)
 
     return render_template('sales.html', sales_data=sales_data, labels=labels, quantities=daily_sales)
@@ -328,7 +371,6 @@ def sales():
 @app.route('/api/sales/<period>')
 @login_required
 def get_sales_data(period):
-    # Map period to actual table names in your database
     table_map = {
         'daily': 'sales_today',
         'monthly': 'sales_this_month',
@@ -351,7 +393,7 @@ def get_sales_data(period):
     
     # Daily
     if period == "daily":
-        # Parse the selected date or default to today
+        # Parse date
         date_param = request.args.get('date')
         try:
             if date_param:
@@ -361,7 +403,6 @@ def get_sales_data(period):
         except ValueError:
             return jsonify({'error': 'Invalid date format'}), 400
 
-        # Line Graph Data: Get sales of 10 days up to selected day
         daily_sales = []
         labels = []
 
@@ -381,10 +422,9 @@ def get_sales_data(period):
             except Exception:
                 total = 0
 
-            labels.append(date_check.strftime('%b %d'))  # e.g. Jun 28
+            labels.append(date_check.strftime('%b %d'))
             daily_sales.append(total)
 
-        # Table Data: get only from the selected day (not current)
         target_year = base_date.year
         target_month = base_date.strftime('%b').lower()
         target_day = base_date.day
@@ -419,7 +459,7 @@ def get_sales_data(period):
         
     # Yearly
     elif period == 'yearly':
-        # Get year from query string or default to current year
+        # Get year
         selected_year = request.args.get('date', str(date.today().year))
         try:
             selected_year = int(selected_year)
@@ -453,7 +493,6 @@ def get_sales_data(period):
             yearly_sales.append(total)
             labels.append(str(y))
 
-        # Now get detailed sales from the selected year's table
         result = []
         table_name = f"sales_y{selected_year}"
         if table_name in tables:
@@ -478,7 +517,7 @@ def get_sales_data(period):
             'labels': labels,
             'quantities': yearly_sales,
             'table': result,
-            'available_years': available_years  # To populate dropdown
+            'available_years': available_years
         })
     # Monthly
     elif period == 'monthly':
