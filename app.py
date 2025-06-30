@@ -119,7 +119,15 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Dummy data for top products
+    # Top products algorithm
+    dateToday = date.today()
+    today = dateToday.day
+    thisMonth = dateToday.month
+    thisYear = dateToday.year
+    
+    dailyPath = os.path.join(f'db/salesdb/daily/sales_d{thisYear}', f'd0{today}' if today <10 else f'd{today}')
+    dailyConn = sqlite3.connect(dailyPath)
+    dailyCursor = dailyConn.cursor()
     best_sellers = [
         {
             'name': 'Chopao',
