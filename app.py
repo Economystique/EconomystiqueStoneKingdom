@@ -32,11 +32,81 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Database connection helper
+# Month-to-Month Mapping
+month_table_map = {
+    'January': 'jan', 'February': 'feb', 'March': 'mar', 'April': 'apr',
+    'May': 'may', 'June': 'jun', 'July': 'jul', 'August': 'aug',
+    'September': 'sep', 'October': 'oct', 'November': 'nov', 'December': 'dec'
+}
+
+# Helper Functions
 def get_db_connection():
     conn = sqlite3.connect(os.path.join('db', 'users_db.db'))
     conn.row_factory = sqlite3.Row
     return conn
+
+def get_available_years():
+    db_path = os.path.join('db/salesdb', 'sales_yearly.db')
+    years = []
+
+    if not os.path.exists(db_path):
+        return years
+
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'sales_y2%'")
+        tables = cursor.fetchall()
+        for table in tables:
+            name = table[0]
+            if name.startswith("sales_y") and len(name) == 11:
+                year = name[-4:]
+                if year.isdigit():
+                    years.append(year)
+    except sqlite3.Error:
+        return []
+    finally:
+        conn.close()
+
+    return sorted(years, reverse=True)
+
+def get_month_total_from_db(year, month):
+    db_path = os.path.join('db/salesdb/monthly', f'sales_m{year}.db')
+    table_name = month_table_map.get(month)
+
+    if not os.path.exists(db_path) or not table_name:
+        return 0
+
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT SUM(sales_total) FROM {table_name}")
+        result = cursor.fetchone()
+        return result[0] if result and result[0] else 0
+    except sqlite3.Error:
+        return 0
+    finally:
+        conn.close()
+
+def get_year_totals_from_db(year):
+    db_path = os.path.join('db/salesdb/monthly', f'sales_m{year}.db')
+    if not os.path.exists(db_path):
+        return [0] * 12
+
+    totals = []
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        for table_name in month_table_map.values():
+            try:
+                cursor.execute(f"SELECT SUM(sales_total) FROM {table_name}")
+                result = cursor.fetchone()
+                totals.append(result[0] if result and result[0] else 0)
+            except sqlite3.Error:
+                totals.append(0)
+        return totals
+    finally:
+        conn.close()
 
 # Login required decorator
 def login_required(f): 
@@ -701,11 +771,8 @@ def sales_forecast():
 @app.route('/performance_comparison')
 @login_required
 def performance_comparison():
-
-    # Dummy data for performance comparison
-    months = ['January', 'February', 'March', 'April', 'May', 'June',
-              'July', 'August', 'September', 'October', 'November', 'December']
-    years = ['2022', '2023', '2024', '2025']
+    months = list(month_table_map.keys())
+    years = get_available_years()
     return render_template('performance_comparison.html', months=months, years=years)
 
 @app.route('/get_performance_data')
@@ -713,42 +780,17 @@ def performance_comparison():
 def get_performance_data():
     month = request.args.get('month')
     year = request.args.get('year')
-
-    # Simulated product data (same products as /sales)
-    all_products = [
-        'Chopao', 'Bottle Water', 'Butter', 'Ice Cream', 'Sanitary Pads',
-        'Detergent', 'Notebook', 'Cat Food'
-    ]
-
-    # Dummy logic to assign values (varies slightly by month/year)
-    import random
-    random.seed(hash(month + year))  # same results for same inputs
-
-    labels = all_products
-    values = [random.randint(5, 20) * 100 for _ in labels]  # Sales amount in pesos
-
-    return jsonify({'labels': labels, 'values': values})
+    total = get_month_total_from_db(year, month)
+    return jsonify({
+        'labels': ['Total Sales'],
+        'values': [total]
+    })
 
 @app.route('/get_year_performance_data')
 @login_required
 def get_year_performance_data():
     year = request.args.get('year')
-
-    # reuse your product list
-    all_products = [
-        'Chopao', 'Bottle Water', 'Butter', 'Ice Cream', 'Sanitary Pads',
-        'Detergent', 'Notebook', 'Cat Food'
-    ]
-
-    # 12 months, deterministic per year
-    monthly_totals = []
-    import random, calendar
-    for month_idx in range(1, 13):             # 1‑12 to ha
-        random.seed(hash(f"{year}-{month_idx}"))
-        # randomd dummy sum of all product sales that month
-        month_sum = sum(random.randint(5, 20) * 100 for _ in all_products)
-        monthly_totals.append(month_sum)
-
+    monthly_totals = get_year_totals_from_db(year)
     return jsonify({'monthly_totals': monthly_totals})
 
 @app.route('/wastage')
