@@ -112,6 +112,17 @@ body {
     color: #2d3748;
 }
 
+.datetime-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.2;
+}
+
 /* Navigation */
 .sidebar-nav {
     flex: 1;

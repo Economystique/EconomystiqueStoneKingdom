@@ -5,73 +5,77 @@ import bcrypt
 import random
 
 def edit_database():
+    pass
+    
+    # Add BLOB in inv_static
+    
     # Yearly
-    months = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
-    years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
+    # months = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    # years = ("2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
 
-    yearly_db_path = os.path.join('db/salesdb', 'sales_yearly.db')
-    yearly_conn = sqlite3.connect(yearly_db_path)
-    yearly_cursor = yearly_conn.cursor()
+    # yearly_db_path = os.path.join('db/salesdb', 'sales_yearly.db')
+    # yearly_conn = sqlite3.connect(yearly_db_path)
+    # yearly_cursor = yearly_conn.cursor()
 
-    for year in years:
-        print(f"\nProcessing year: {year}")
-        year_table = f"sales_y{year}"
+    # for year in years:
+    #     print(f"\nProcessing year: {year}")
+    #     year_table = f"sales_y{year}"
 
-        # Ensure the table exists
-        yearly_cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS {year_table} (
-                inv_id TEXT PRIMARY KEY,
-                inv_desc TEXT,
-                quantity_sold INTEGER,
-                price REAL,
-                sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
-            )
-        """)
-        # Optional: Clear old data
-        yearly_cursor.execute(f"DELETE FROM {year_table}")
+    #     # Ensure the table exists
+    #     yearly_cursor.execute(f"""
+    #         CREATE TABLE IF NOT EXISTS {year_table} (
+    #             inv_id TEXT PRIMARY KEY,
+    #             inv_desc TEXT,
+    #             quantity_sold INTEGER,
+    #             price REAL,
+    #             sales_total REAL GENERATED ALWAYS AS (quantity_sold * price) STORED
+    #         )
+    #     """)
+    #     # Optional: Clear old data
+    #     yearly_cursor.execute(f"DELETE FROM {year_table}")
 
-        sales_aggregate = {}
+    #     sales_aggregate = {}
 
-        # Open the monthly database
-        monthly_db_path = os.path.join('db/salesdb/monthly', f'sales_m{year}.db')
-        if not os.path.exists(monthly_db_path):
-            print(f"Monthly DB not found: {monthly_db_path}")
-            continue
+    #     # Open the monthly database
+    #     monthly_db_path = os.path.join('db/salesdb/monthly', f'sales_m{year}.db')
+    #     if not os.path.exists(monthly_db_path):
+    #         print(f"Monthly DB not found: {monthly_db_path}")
+    #         continue
 
-        monthly_conn = sqlite3.connect(monthly_db_path)
-        monthly_cursor = monthly_conn.cursor()
+    #     monthly_conn = sqlite3.connect(monthly_db_path)
+    #     monthly_cursor = monthly_conn.cursor()
 
-        for month in months:
-            try:
-                monthly_cursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {month}")
-                rows = monthly_cursor.fetchall()
-            except Exception as e:
-                print(f"Skipping {month} in {year}: {e}")
-                continue
+    #     for month in months:
+    #         try:
+    #             monthly_cursor.execute(f"SELECT inv_id, inv_desc, quantity_sold, price FROM {month}")
+    #             rows = monthly_cursor.fetchall()
+    #         except Exception as e:
+    #             print(f"Skipping {month} in {year}: {e}")
+    #             continue
 
-            for inv_id, inv_desc, qty_sold, price in rows:
-                if inv_id not in sales_aggregate:
-                    sales_aggregate[inv_id] = [inv_desc, qty_sold, price]
-                else:
-                    sales_aggregate[inv_id][1] += qty_sold  # accumulate quantity
+    #         for inv_id, inv_desc, qty_sold, price in rows:
+    #             if inv_id not in sales_aggregate:
+    #                 sales_aggregate[inv_id] = [inv_desc, qty_sold, price]
+    #             else:
+    #                 sales_aggregate[inv_id][1] += qty_sold  # accumulate quantity
 
-        monthly_conn.close()
+    #     monthly_conn.close()
 
-        data_to_insert = [
-            (inv_id, desc, qty, price)
-            for inv_id, (desc, qty, price) in sales_aggregate.items()
-        ]
+    #     data_to_insert = [
+    #         (inv_id, desc, qty, price)
+    #         for inv_id, (desc, qty, price) in sales_aggregate.items()
+    #     ]
 
-        yearly_cursor.executemany(f"""
-            INSERT INTO {year_table} (inv_id, inv_desc, quantity_sold, price)
-            VALUES (?, ?, ?, ?)
-        """, data_to_insert)
+    #     yearly_cursor.executemany(f"""
+    #         INSERT INTO {year_table} (inv_id, inv_desc, quantity_sold, price)
+    #         VALUES (?, ?, ?, ?)
+    #     """, data_to_insert)
 
-        yearly_conn.commit()
-        print(f"✓ Yearly data inserted for {year}")
+    #     yearly_conn.commit()
+    #     print(f"✓ Yearly data inserted for {year}")
 
-    yearly_conn.close()
-    print("\nAll yearly summaries complete.")
+    # yearly_conn.close()
+    # print("\nAll yearly summaries complete.")
     
     # connectionPath = os.path.join("db", "inventory_db.db")
     # connection = sqlite3.connect(connectionPath)

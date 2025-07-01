@@ -106,6 +106,10 @@
             <!-- Top Header -->
             <div class="top-header">
                 <button class="notifications-btn">🔔</button>
+                <div class="datetime-display" id="datetimeDisplay">
+                    <div id="currentDate"></div>
+                    <div id="currentTime"></div>
+                </div>
             </div>
 
             <!-- Main Content -->
@@ -148,6 +152,32 @@
                 container.style.height = `${windowWidth / targetRatio}px`;
             }
         }
+        function updateDateTime() {
+            const now = new Date();
+
+            const dateOptions = {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            };
+
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true 
+            };
+
+            const dateStr = now.toLocaleDateString('en-PH', dateOptions);
+            const timeStr = now.toLocaleTimeString('en-PH', timeOptions);
+
+            document.getElementById('currentDate').textContent = dateStr;
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

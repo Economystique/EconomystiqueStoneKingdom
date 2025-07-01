@@ -19,14 +19,7 @@
                     <span class="icon"><img class="icon-img" src="static/img/topProductsIcon.png" alt=""></span>
                     Top Products
                 </h2>
-                {% for product in best_sellers %}
-                <div class="product-item">
-                    <div class="product-info">
-                        <span class="quantity">{{ product.rank }}</span>
-                        <span class="revenue">{{ product.name }}</span>
-                    </div>
-                </div>
-                {% endfor %}
+
             </div>
             
             <!-- Least Sold Products Card -->
@@ -35,14 +28,7 @@
                     <span class="icon"><img class="icon-img" src="static/img/leastSoldIcon.png" alt=""></span>
                     Least Sold Products
                 </h2>
-                {% for product in least_products %}
-                <div class="product-item">
-                    <div class="product-info">
-                        <span class="quantity">{{ product.rank }}</span>
-                        <span>{{ product.name}}</span>  
-                    </div>
-                </div>
-                {% endfor %}
+
             </div>  
 
             <!-- Near Expiry Products Card -->
@@ -165,6 +151,9 @@
                     }
                 }
             });
+
+            updateTopAndLeastProducts('daily');
+
         });
 
         function toggleView(period) {
@@ -175,8 +164,48 @@
             // Fetch new data
             fetch(`/api/sales/${period}`)
                 .then(response => response.json())
-                .then(data => updateTableAndChart(data))
+                .then(data => {
+                    updateTableAndChart(data);
+                    updateTopAndLeastProducts(period); 
+                })
                 .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function updateTopAndLeastProducts(period) {
+            fetch(`/api/top_least/${period}`)
+            .then(res => res.json())
+            .then(data => {
+                // === Update Top Products ===
+                const topCard = document.querySelector('.top-products');
+                const topItems = topCard.querySelectorAll('.product-item');
+                topItems.forEach(item => item.remove()); // Remove existing items
+
+                data.best_sellers.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'product-item';
+                    div.innerHTML = `<div class="product-info">
+                                        <span class="quantity">${product.rank}</span>
+                                        <span class="revenue">${product.name}</span>
+                                    </div>`;
+                    topCard.appendChild(div);
+                });
+
+                // === Update Least Sold Products ===
+                const leastCard = document.querySelector('.least-sold');
+                const leastItems = leastCard.querySelectorAll('.product-item');
+                leastItems.forEach(item => item.remove()); // Remove existing items
+
+                data.least_products.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'product-item';
+                    div.innerHTML = `<div class="product-info">
+                                        <span class="quantity">${product.rank}</span>
+                                        <span>${product.name}</span>
+                                    </div>`;
+                    leastCard.appendChild(div);
+                });
+            })
+            .catch(err => console.error('Failed to load top/least products:', err));
         }
 
         function updateTableAndChart(data) {
