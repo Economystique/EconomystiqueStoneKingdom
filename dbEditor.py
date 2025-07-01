@@ -5,7 +5,49 @@ import bcrypt
 import random
 
 def edit_database():
-    pass
+    
+    # Step 1: Connect to databases
+    inv_conn = sqlite3.connect('db/inventory_db.db')
+    batch_conn = sqlite3.connect('db/batches_db.db')
+    inv_cursor = inv_conn.cursor()
+    batch_cursor = batch_conn.cursor()
+
+    inv_cursor.execute("""
+        SELECT inv_id, quantity, unit, exp_date, rec_date
+        FROM inv_dynamic
+        ORDER BY rec_date ASC
+    """)
+    rows = inv_cursor.fetchall()
+
+    # Step 3: Group into 10 batches
+    total = len(rows)
+    batch_size = total // 10 + (total % 10 > 0)  # Evenly distribute with ceiling
+
+    batches = [rows[i:i + batch_size] for i in range(0, total, batch_size)]
+
+    # Step 4: Insert each group into Ba00001 to Ba00010
+    for i, batch_data in enumerate(batches):
+        table_name = f"Ba{str(i+1).zfill(5)}"
+        for row in batch_data:
+            inv_id, quantity, unit, exp_date, rec_date = row
+
+            # Get inv_desc from inv_static
+            inv_cursor.execute("SELECT inv_desc FROM inv_static WHERE inv_id = ?", (inv_id,))
+            result = inv_cursor.fetchone()
+            inv_desc = result[0] if result else "Unknown"
+
+            # Insert into batch table
+            batch_cursor.execute(f"""
+                INSERT OR IGNORE INTO {table_name} (inv_id, inv_desc, quantity, unit, exp_date, rec_date)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (inv_id, inv_desc, quantity, unit, exp_date, rec_date))
+
+    # Step 5: Commit and close connections
+    batch_conn.commit()
+    inv_conn.close()
+    batch_conn.close()
+
+    print("Transfer to batch tables completed.")
     
     # Add BLOB in inv_static
     
