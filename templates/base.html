@@ -155,24 +155,23 @@
         function updateDateTime() {
             const now = new Date();
 
-            const dateOptions = {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            };
+            // Get weekday in uppercase, e.g., TUE
+            const weekday = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+            // Get date as DD/MM/YYYY
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const formattedDate = `${weekday} | ${day}/${month}/${year}`;
 
-            const timeOptions = {
-                hour: '2-digit',
+            // Get time as h:mm:ss AM/PM
+            const timeStr = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
                 minute: '2-digit',
                 second: '2-digit',
-                hour12: true 
-            };
+                hour12: true
+            });
 
-            const dateStr = now.toLocaleDateString('en-PH', dateOptions);
-            const timeStr = now.toLocaleTimeString('en-PH', timeOptions);
-
-            document.getElementById('currentDate').textContent = dateStr;
+            document.getElementById('currentDate').textContent = formattedDate;
             document.getElementById('currentTime').textContent = timeStr;
         }
 
