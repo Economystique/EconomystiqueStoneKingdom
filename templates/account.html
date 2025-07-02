@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.min.css">
 {% endblock %}
 
 {% block content %}
@@ -21,14 +22,20 @@
         </div>
 
         <div class="personal-text">
-            <p class="section-label">{{ 'Edit profile to select title' if not user_data.owner_name else 'Business Owner' }}</p>
-            <h2 class="owner-name" id="ownerNameText">{{ user_data.owner_name or 'Edit profile to set your name' }}</h2>
-            <input type="text" name="owner_name" id="ownerNameInput" value="{{ user_data.owner_name or '' }}" class="editable-input" style="display: none;">
+            <p class="section-label" id="titleLabel">{{ user_data.title or 'Select Title' }}</p>
+            <select name="title" id="titleSelect" class="editable-select" style="display: none;">
+                <option value="">Select Title</option>
+                <option value="Business Owner" {{ 'selected' if user_data.title == 'Business Owner' else '' }}>Business Owner</option>
+                <option value="Employee" {{ 'selected' if user_data.title == 'Employee' else '' }}>Employee</option>
+            </select>
+            
+            <h2 class="owner-name" id="ownerNameText">{{ user_data.owner_name or 'Input your name' }}</h2>
+            <input type="text" name="owner_name" id="ownerNameInput" value="{{ user_data.owner_name or '' }}" placeholder="Input your name" class="editable-input" style="display: none;">
 
             <p class="info-line">
                 <span class="info-label">Contact Information:</span>
-                <span id="contactText">{{ user_data.contact or 'Edit business information' }}</span>
-                <input type="text" name="contact" id="contactInput" value="{{ user_data.contact or '' }}" class="editable-input" style="display: none;">
+                <span id="contactText">{{ user_data.contact or 'Input contact information' }}</span>
+                <input type="tel" name="contact" id="contactInput" value="{{ user_data.contact or '' }}" placeholder="Input contact information" class="editable-input" style="display: none;">
             </p>
             <br>
             <p class="info-line">
@@ -50,25 +57,25 @@
 
         <div class="biz-text">
             <p class="section-label">Business Information</p>
-            <h2 class="biz-name" id="bizNameText">{{ user_data.biz_name or 'Edit business information' }}</h2>
-            <input type="text" name="biz_name" id="bizNameInput" value="{{ user_data.biz_name or '' }}" class="editable-input" style="display: none;">
+            <h2 class="biz-name" id="bizNameText">{{ user_data.biz_name or 'Input business name' }}</h2>
+            <input type="text" name="biz_name" id="bizNameInput" value="{{ user_data.biz_name or '' }}" placeholder="Input business name" class="editable-input" style="display: none;">
 
             <p class="info-line">
                 <span class="info-label">Industry:</span>
-                <span id="industryText">{{ user_data.industry or 'Edit business information' }}</span>
-                <input type="text" name="industry" id="industryInput" value="{{ user_data.industry or '' }}" class="editable-input" style="display: none;">
+                <span id="industryText">{{ user_data.industry or 'Input industry' }}</span>
+                <input type="text" name="industry" id="industryInput" value="{{ user_data.industry or '' }}" placeholder="Input industry" class="editable-input" style="display: none;">
             </p>
 
             <p class="info-line">
                 <span class="info-label">Business Type:</span>
-                <span id="bizTypeText">{{ user_data.biz_type or 'Edit business information' }}</span>
-                <input type="text" name="biz_type" id="bizTypeInput" value="{{ user_data.biz_type or '' }}" class="editable-input" style="display: none;">
+                <span id="bizTypeText">{{ user_data.biz_type or 'Input business type' }}</span>
+                <input type="text" name="biz_type" id="bizTypeInput" value="{{ user_data.biz_type or '' }}" placeholder="Input business type" class="editable-input" style="display: none;">
             </p>
 
             <p class="info-line">
                 <span class="info-label">Address:</span>
-                <span id="addressText">{{ user_data.address or 'Edit business information' }}</span>
-                <input type="text" name="address" id="addressInput" value="{{ user_data.address or '' }}" class="editable-input" style="display: none;">
+                <span id="addressText">{{ user_data.address or 'Input business address' }}</span>
+                <input type="text" name="address" id="addressInput" value="{{ user_data.address or '' }}" placeholder="Input business address" class="editable-input" style="display: none;">
             </p>
         </div>
     </form>
@@ -122,10 +129,28 @@
         </div>
     </div>
 
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Success</h3>
+                <span class="close" onclick="closeSuccessModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Changes saved successfully!</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeSuccessModal()" class="modal-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/imask/7.6.0/imask.min.js"></script>
 <script>
 // Global variable to track edit state
 let isPersonalEditing = false;
@@ -135,7 +160,65 @@ let isBusinessEditing = false;
 window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('avatarUploadBtn').style.display = 'none';
     document.getElementById('bizLogoUploadBtn').style.display = 'none';
+    
+    // Placeholder for empty fields
+    applyPlaceholderStyling();
+    // Initialize intl-tel-input and input mask for contact field
+    var contactInput = document.querySelector('#contactInput');
+    var contactText = document.getElementById('contactText');
+    var iti = null;
+    var mask = null;
+    if (contactInput) {
+        iti = window.intlTelInput(contactInput, {
+            initialCountry: 'ph',
+            nationalMode: false,
+            formatOnDisplay: true,
+            utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/utils.js'
+        });
+        mask = IMask(contactInput, {
+            mask: '000-000-0000'
+        });
+        // Hide intl-tel-input UI if not in edit mode
+        if (contactInput.style.display === 'none') {
+            var itiContainer = contactInput.closest('.iti');
+            if (itiContainer) itiContainer.style.display = 'none';
+        }
+        // On page load, format the contactText with country code if value exists
+        if (contactText && contactInput.value) {
+            iti.setNumber(contactInput.value);
+            contactText.textContent = iti.getNumber() || contactInput.value;
+        }
+    }
 });
+
+function applyPlaceholderStyling() {
+    const placeholderTexts = [
+        'Select Title',
+        'Input your name',
+        'Input contact information', 
+        'Input business name',
+        'Input industry',
+        'Input business type',
+        'Input business address'
+    ];
+    
+    const textElements = [
+        'titleLabel',
+        'ownerNameText',
+        'contactText',
+        'bizNameText', 
+        'industryText',
+        'bizTypeText',
+        'addressText'
+    ];
+    
+    textElements.forEach((elementId, index) => {
+        const element = document.getElementById(elementId);
+        if (element && element.textContent === placeholderTexts[index]) {
+            element.classList.add('placeholder-text');
+        }
+    });
+}
 
 function showModal(message) {
     document.getElementById('modalMessage').textContent = message;
@@ -155,6 +238,10 @@ function closeChangeUsernameModal() {
     // Clear form
     document.getElementById('newUsername').value = '';
     document.getElementById('confirmPassword').value = '';
+}
+
+function closeSuccessModal() {
+    document.getElementById('successModal').style.display = 'none';
 }
 
 function changeUsername(event) {
@@ -229,11 +316,22 @@ function toggleEdit() {
         document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
     };
     ['ownerName', 'contact'].forEach(id => showText(id, false));
+    
+    // Show/hide title dropdown
+    document.getElementById('titleLabel').style.display = 'none';
+    document.getElementById('titleSelect').style.display = 'inline-block';
+    
     document.getElementById('editBtn').style.display = 'none';
     document.getElementById('saveBtn').style.display = 'inline-block';
     // Show only avatar upload button in user profile edit mode
     document.getElementById('avatarUploadBtn').style.display = 'flex';
     document.getElementById('bizLogoUploadBtn').style.display = 'none';
+    // Show intl-tel-input UI
+    var contactInput = document.querySelector('#contactInput');
+    if (contactInput) {
+        var itiContainer = contactInput.closest('.iti');
+        if (itiContainer) itiContainer.style.display = '';
+    }
 }
 
 function toggleBusinessEdit() {
@@ -256,11 +354,14 @@ function toggleBusinessEdit() {
     document.getElementById('avatarUploadBtn').style.display = 'none';
 }
 
-function updateProfile(event) {
+window.updateProfile = function(event) {
     event.preventDefault();
+    var contactInput = document.getElementById('contactInput');
+    var iti = contactInput && window.intlTelInputGlobals && window.intlTelInputGlobals.getInstance(contactInput);
     const formData = {
+        title: document.getElementById('titleSelect').value,
         owner_name: document.getElementById('ownerNameInput').value,
-        contact: document.getElementById('contactInput').value
+        contact: iti ? iti.getNumber() : (contactInput ? contactInput.value : '')
     };
     fetch('/api/update_personal_profile', {
         method: 'POST',
@@ -272,19 +373,54 @@ function updateProfile(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('ownerNameText').textContent = formData.owner_name;
-            document.getElementById('contactText').textContent = formData.contact;
+            // Update display text
+            const titleLabel = document.getElementById('titleLabel');
+            const ownerNameText = document.getElementById('ownerNameText');
+            const contactText = document.getElementById('contactText');
+            titleLabel.textContent = formData.title || 'Select Title';
+            ownerNameText.textContent = formData.owner_name || 'Input your name';
+            // Show international format in view mode
+            if (iti && formData.contact) {
+                contactText.textContent = iti.getNumber();
+            } else {
+                contactText.textContent = formData.contact || 'Input contact information';
+            }
+            // Apply placeholder styling if empty
+            if (!formData.title) {
+                titleLabel.classList.add('placeholder-text');
+            } else {
+                titleLabel.classList.remove('placeholder-text');
+            }
+            if (!formData.owner_name) {
+                ownerNameText.classList.add('placeholder-text');
+            } else {
+                ownerNameText.classList.remove('placeholder-text');
+            }
+            if (!formData.contact) {
+                contactText.classList.add('placeholder-text');
+            } else {
+                contactText.classList.remove('placeholder-text');
+            }
             const showText = (id, show) => {
                 document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
                 document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
             };
             ['ownerName', 'contact'].forEach(id => showText(id, true));
+            document.getElementById('titleLabel').style.display = 'inline';
+            document.getElementById('titleSelect').style.display = 'none';
             document.getElementById('editBtn').style.display = 'inline-block';
             document.getElementById('saveBtn').style.display = 'none';
             // Hide avatar upload button after saving
             document.getElementById('avatarUploadBtn').style.display = 'none';
+            // Hide intl-tel-input UI after saving
+            if (contactInput) {
+                var itiContainer = contactInput.closest('.iti');
+                if (itiContainer) itiContainer.style.display = 'none';
+            }
             // Reset edit state
             isPersonalEditing = false;
+            // Show success modal
+            document.getElementById('successModal').style.display = 'block';
         } else {
             alert('Error: ' + data.error);
         }
@@ -313,10 +449,42 @@ function updateBusiness(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('bizNameText').textContent = formData.biz_name;
-            document.getElementById('industryText').textContent = formData.industry;
-            document.getElementById('bizTypeText').textContent = formData.biz_type;
-            document.getElementById('addressText').textContent = formData.address;
+            // Update display text
+            const bizNameText = document.getElementById('bizNameText');
+            const industryText = document.getElementById('industryText');
+            const bizTypeText = document.getElementById('bizTypeText');
+            const addressText = document.getElementById('addressText');
+            
+            bizNameText.textContent = formData.biz_name || 'Input business name';
+            industryText.textContent = formData.industry || 'Input industry';
+            bizTypeText.textContent = formData.biz_type || 'Input business type';
+            addressText.textContent = formData.address || 'Input business address';
+            
+            // Apply placeholder styling if empty
+            if (!formData.biz_name) {
+                bizNameText.classList.add('placeholder-text');
+            } else {
+                bizNameText.classList.remove('placeholder-text');
+            }
+            
+            if (!formData.industry) {
+                industryText.classList.add('placeholder-text');
+            } else {
+                industryText.classList.remove('placeholder-text');
+            }
+            
+            if (!formData.biz_type) {
+                bizTypeText.classList.add('placeholder-text');
+            } else {
+                bizTypeText.classList.remove('placeholder-text');
+            }
+            
+            if (!formData.address) {
+                addressText.classList.add('placeholder-text');
+            } else {
+                addressText.classList.remove('placeholder-text');
+            }
+            
             const showText = (id, show) => {
                 document.getElementById(id + 'Text').style.display = show ? 'inline' : 'none';
                 document.getElementById(id + 'Input').style.display = show ? 'none' : 'inline-block';
@@ -328,6 +496,8 @@ function updateBusiness(event) {
             document.getElementById('bizLogoUploadBtn').style.display = 'none';
             // Reset edit state
             isBusinessEditing = false;
+            // Show success modal
+            document.getElementById('successModal').style.display = 'block';
         } else {
             alert('Error: ' + data.error);
         }
@@ -342,12 +512,16 @@ function updateBusiness(event) {
 window.onclick = function(event) {
     const editConflictModal = document.getElementById('editConflictModal');
     const changeUsernameModal = document.getElementById('changeUsernameModal');
+    const successModal = document.getElementById('successModal');
     
     if (event.target == editConflictModal) {
         closeModal();
     }
     if (event.target == changeUsernameModal) {
         closeChangeUsernameModal();
+    }
+    if (event.target == successModal) {
+        closeSuccessModal();
     }
 }
 
