@@ -31,13 +31,16 @@
                     <div class="form-product">
                         <label>Inventory ID/Description</label>
                         <br>
-                        <select>
+                        <select id="product-select">
                             <option value="">Select a product</option>
+                            {% for inv_id, inv_desc, unit in products %}
+                                <option value="{{ inv_id }}" data-unit="{{ unit }}">{{ inv_id }} - {{ inv_desc }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <br><br>
                     <div class="form-quantity">
-                        <label>Quantity</label>
+                        <label>Quantity <span id="unit-label" style="color:gray; font-size:0.95em;"></span></label>
                         <br>
                         <input type="number" placeholder="Enter quantity">
                     </div>
@@ -64,17 +67,12 @@
                                 <th>Inventory ID</th>
                                 <th>Inventory Description</th>
                                 <th>Quantity</th>
+                                <th>Cost</th>
                                 <th>Expiration Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Sample row, for sample look only remove dis -->
-                            <tr>
-                                <td>INV001</td>
-                                <td>Chocolate Cake Mix</td>
-                                <td>10</td>
-                                <td>2025-08-15</td>
-                            </tr>
+                            
                         </tbody>
                     </table>
                 </div>
@@ -205,6 +203,119 @@
         const showRestock = (defaultTarget === "restock");
         actionButtonsOne.style.display = showRestock ? "flex" : "none";
         actionButtonsTwo.style.display = showRestock ? "flex" : "none";
+
+        const productSelect = document.getElementById("product-select");
+        const unitLabel = document.getElementById("unit-label");
+        function updateUnitLabel() {
+            const selected = productSelect.options[productSelect.selectedIndex];
+            const unit = selected.getAttribute("data-unit");
+            if (unit) {
+                unitLabel.textContent = `(per ${unit})`;
+            } else {
+                unitLabel.textContent = '';
+            }
+        }
+        productSelect.addEventListener("change", updateUnitLabel);
+        updateUnitLabel(); // initialize on load
+
+        // Fetch and display restock cart on load
+        function loadRestockCart() {
+            fetch('/api/restock_cart')
+                .then(response => response.json())
+                .then(cart => {
+                    tableBody.innerHTML = '';
+                    cart.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.inv_id}</td>
+                            <td>${item.inv_desc}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.cost}</td>
+                            <td>${item.exp_date}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+        loadRestockCart();
+
+        // Add to table logic
+        const addBtn = document.querySelector('.btn-add');
+        const clearBtn = document.querySelector('.btn-clear');
+        const tableBody = document.querySelector('.inventory-table tbody');
+        const quantityInput = document.querySelector('.form-quantity input');
+        const costInput = document.querySelector('.form-cost input');
+        const dateInput = document.querySelector('.form-date input');
+
+        addBtn.addEventListener('click', function() {
+            const selected = productSelect.options[productSelect.selectedIndex];
+            const invIdDesc = selected.text;
+            const invId = selected.value;
+            const quantity = quantityInput.value;
+            const cost = costInput.value;
+            const expDate = dateInput.value;
+
+            if (!invId || !quantity || !cost || !expDate) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Split invIdDesc to get ID and Description
+            const [id, ...descArr] = invIdDesc.split(' - ');
+            const desc = descArr.join(' - ');
+
+            // Send to backend
+            fetch('/api/restock_cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    inv_id: id,
+                    inv_desc: desc,
+                    quantity: quantity,
+                    cost: cost,
+                    exp_date: expDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadRestockCart();
+                    // Clear form fields
+                    productSelect.selectedIndex = 0;
+                    quantityInput.value = '';
+                    costInput.value = '';
+                    dateInput.value = '';
+                    updateUnitLabel();
+                } else {
+                    alert('Failed to add to restock cart.');
+                }
+            })
+            .catch(() => {
+                alert('Failed to add to restock cart.');
+            });
+        });
+
+        clearBtn.addEventListener('click', function() {
+            tableBody.innerHTML = `<tr><td></td><td></td><td></td><td></td><td></td></tr>`;
+        });
+
+        // Confirm button logic
+        const confirmBtn = document.querySelector('.btn-confirm');
+        confirmBtn.addEventListener('click', function() {
+            fetch('/api/restock_cart/confirm', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        tableBody.innerHTML = '';
+                        alert('Restock confirmed and inventory updated!');
+                    } else {
+                        alert('Failed to confirm restock.');
+                    }
+                })
+                .catch(() => {
+                    alert('Failed to confirm restock.');
+                });
+        });
     });
 </script>
 {% endblock %}

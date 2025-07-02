@@ -386,8 +386,13 @@ def products():
 #for manage button in inventory/products
 @app.route('/manage')
 def manage():
-    #add here
-    return render_template('manage.html')
+    conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+    cursor = conn.cursor()
+    cursor.execute("SELECT inv_id, inv_desc, unit FROM inv_static")
+    products = cursor.fetchall()
+    conn.close()
+    # products will be a list of tuples (inv_id, inv_desc, unit)
+    return render_template('manage.html', products=products)
 
 @app.route('/sales')
 @login_required
@@ -1204,6 +1209,120 @@ def biz_logo_image(username):
         return send_file(io.BytesIO(row['biz_logo_blob']), mimetype='image/png')
     else:
         return send_file(os.path.join('static', 'img', 'dashboardIcon.png'), mimetype='image/png')
+
+@app.route('/api/restock_cart/add', methods=['POST'])
+def add_to_restock_cart():
+    data = request.get_json()
+    inv_id = data.get('inv_id')
+    inv_desc = data.get('inv_desc')
+    quantity = data.get('quantity')
+    cost = data.get('cost')
+    exp_date = data.get('exp_date')
+    session_id = session.get('username', 'guest')
+
+    if not all([inv_id, inv_desc, quantity, cost, exp_date]):
+        return jsonify({'error': 'Missing data'}), 400
+
+    db_path = os.path.join('db', 'restock_db.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS restock_cart (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT,
+            inv_id TEXT,
+            inv_desc TEXT,
+            quantity INTEGER,
+            cost REAL,
+            exp_date TEXT
+        )
+    """)
+    cursor.execute("""
+        INSERT INTO restock_cart (session_id, inv_id, inv_desc, quantity, cost, exp_date)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (session_id, inv_id, inv_desc, quantity, cost, exp_date))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/restock_cart', methods=['GET'])
+def get_restock_cart():
+    session_id = session.get('username', 'guest')
+    db_path = os.path.join('db', 'restock_db.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS restock_cart (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT,
+            inv_id TEXT,
+            inv_desc TEXT,
+            quantity INTEGER,
+            cost REAL,
+            exp_date TEXT
+        )
+    """)
+    cursor.execute("SELECT inv_id, inv_desc, quantity, cost, exp_date FROM restock_cart WHERE session_id = ?", (session_id,))
+    items = cursor.fetchall()
+    conn.close()
+    cart = [
+        {
+            'inv_id': row[0],
+            'inv_desc': row[1],
+            'quantity': row[2],
+            'cost': row[3],
+            'exp_date': row[4]
+        } for row in items
+    ]
+    return jsonify(cart)
+
+@app.route('/api/restock_cart/confirm', methods=['POST'])
+def confirm_restock_cart():
+    session_id = session.get('username', 'guest')
+    db_path = os.path.join('db', 'restock_db.db')
+    inv_db_path = os.path.join('db', 'inventory_db.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT inv_id, inv_desc, quantity, cost, exp_date FROM restock_cart WHERE session_id = ?", (session_id,))
+    items = cursor.fetchall()
+    # Move to inv_dynamic
+    inv_conn = sqlite3.connect(inv_db_path)
+    inv_cursor = inv_conn.cursor()
+    inv_cursor.execute("""
+        CREATE TABLE IF NOT EXISTS inv_dynamic (
+            actual_id TEXT PRIMARY KEY,
+            batch_id TEXT,
+            inv_id TEXT,
+            quantity INTEGER,
+            unit TEXT,
+            exp_date DATE,
+            rec_date DATE,
+            cost REAL
+        )
+    """)
+    from datetime import datetime
+    for row in items:
+        inv_id, inv_desc, quantity, cost, exp_date = row
+        # Generate actual_id and batch_id (simple version)
+        now = datetime.now().strftime('%Y%m%d%H%M%S%f')
+        actual_id = f'IT{now}{inv_id}'
+        batch_id = f'Ba{now[-5:]}'
+        rec_date = datetime.now().strftime('%Y-%m-%d')
+        # Get unit from inv_static
+        inv_cursor.execute("SELECT unit FROM inv_static WHERE inv_id = ?", (inv_id,))
+        unit_row = inv_cursor.fetchone()
+        unit = unit_row[0] if unit_row else ''
+        inv_cursor.execute("""
+            INSERT INTO inv_dynamic (actual_id, batch_id, inv_id, quantity, unit, exp_date, rec_date, cost)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (actual_id, batch_id, inv_id, quantity, unit, exp_date, rec_date, cost))
+    inv_conn.commit()
+    inv_conn.close()
+    # Clear restock_cart
+    cursor.execute("DELETE FROM restock_cart WHERE session_id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     # Start Flask server in a separate thread
