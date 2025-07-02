@@ -990,6 +990,7 @@ def checkout():
 def update_personal_profile():
     try:
         data = request.get_json()
+        title = data.get('title', '').strip()
         owner_name = data.get('owner_name', '').strip()
         contact = data.get('contact', '').strip()
         
@@ -999,9 +1000,9 @@ def update_personal_profile():
         # Update the user's personal profile information
         cursor.execute("""
             UPDATE user_data 
-            SET owner_name = ?, contact = ?
+            SET title = ?, owner_name = ?, contact = ?
             WHERE user_name = ?
-        """, (owner_name, contact, session['username']))
+        """, (title, owner_name, contact, session['username']))
         
         conn.commit()
         conn.close()

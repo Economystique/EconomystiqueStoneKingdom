@@ -42,6 +42,7 @@ def init_db():
                 print(f"Error adding column {column}: {e}")
 
     # Add profile columns to existing user_data table
+    add_column_if_not_exists('user_data', 'title', 'TEXT')
     add_column_if_not_exists('user_data', 'owner_name', 'TEXT')
     add_column_if_not_exists('user_data', 'contact', 'TEXT')
     add_column_if_not_exists('user_data', 'biz_name', 'TEXT')
