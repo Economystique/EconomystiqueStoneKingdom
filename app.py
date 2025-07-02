@@ -799,7 +799,7 @@ def wastage():
     conn = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT inv_id, inv_desc, quantity, unit, waste_date, remark FROM wastages
+        SELECT waste_id, batch_id, inv_id, inv_desc, quantity, unit, waste_date, remark FROM wastages
     """)
     rows = cursor.fetchall()
     conn.close()
@@ -807,12 +807,14 @@ def wastage():
     # Convert rows (tuples) into list of dicts
     wastage_record = [
         {
-            'inv_id': row[0],
-            'inv_desc': row[1],
-            'quantity': row[2],
-            'unit': row[3],
-            'waste_date': row[4],
-            'remark': row[5]
+            'waste_id': row[0],
+            'batch_id': row[1],
+            'inv_id': row[2],
+            'inv_desc': row[3],
+            'quantity': row[4],
+            'unit': row[5],
+            'waste_date': row[7],
+            'remark': row[6]
         } for row in rows
     ]
     return render_template('wastage.html', wastage_data=wastage_record)

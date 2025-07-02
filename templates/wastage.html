@@ -32,6 +32,8 @@
         <table class="wastage-table">
             <thead>
                 <tr>
+                    <th>Wastage ID</th>
+                    <th>Batch ID</th>
                     <th>Inventory ID</th>
                     <th>Inventory Description</th>
                     <th>Quantity</th>
@@ -43,6 +45,8 @@
             <tbody>
                 {% for wastage in wastage_data %}
                 <tr>
+                    <td>{{ wastage.waste_id }}</td>
+                    <td>{{ wastage.batch_id }}</td>
                     <td>{{ wastage.inv_id }}</td>
                     <td>{{ wastage.inv_desc }}</td>
                     <td>{{ wastage.quantity }}</td>
