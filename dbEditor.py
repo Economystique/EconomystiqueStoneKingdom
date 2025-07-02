@@ -3,22 +3,14 @@ import sqlite3
 import uuid
 import bcrypt
 import random
+from datetime import date, datetime, timedelta
 
 def edit_database():
-    # wastePath = os.path.join('db','wastage_db.db')
-    # wasteConn = sqlite3.connect(wastePath)
-    # wasteCursor = wasteConn.cursor()
-    
-    # wasteCursor.execute("""
-    #     CREATE TABLE IF NOT EXISTS wastages (
-    #         waste_id TEXT PRIMARY KEY,
-    #         inv_id TEXT,
-    #         batch_id TEXT,
-    #         exp_date TeXT,
-    #         quantity TEXT,
-    #         unit TEXT,
-    #     )
-    # """)
+    # Connect to the database
+    conn = sqlite3.connect(os.path.join("db", "wastage_db.db"))
+    cursor = conn.cursor()
+
+    cursor.execute("DROP TABLE wastage_record")
     # # Step 1: Connect to databases
     # inv_conn = sqlite3.connect('db/inventory_db.db')
     # batch_conn = sqlite3.connect('db/batches_db.db')

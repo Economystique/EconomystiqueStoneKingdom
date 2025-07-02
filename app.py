@@ -799,7 +799,7 @@ def wastage():
     conn = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT inv_id, inv_desc, quantity, unit, dec_date, remark FROM wastage_record
+        SELECT inv_id, inv_desc, quantity, unit, waste_date, remark FROM wastages
     """)
     rows = cursor.fetchall()
     conn.close()
@@ -811,7 +811,7 @@ def wastage():
             'inv_desc': row[1],
             'quantity': row[2],
             'unit': row[3],
-            'dec_date': row[4],
+            'waste_date': row[4],
             'remark': row[5]
         } for row in rows
     ]
