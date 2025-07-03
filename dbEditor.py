@@ -5,7 +5,24 @@ import bcrypt
 import random
 from datetime import date, datetime, timedelta
 
-def edit_database(): {}
+def edit_database(): 
+    #DELETING BATCHES MANUALLY MUEHEHEHE
+    #import sqlite3
+
+    # batches_db_path = "db/batches_db.db"
+    # conn = sqlite3.connect(batches_db_path)
+    # cursor = conn.cursor()
+
+    # for batch_num in range(11, 15):
+    #     table_name = f"Ba{batch_num:05d}"
+    #     cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
+    #     print(f"Dropped table {table_name} (if it existed)")
+
+    # conn.commit()
+    # conn.close()
+    # print("Done.") 
+    #END FOR THE BATCHES
+
     #WE'RE GOIN ON A TRIP W/ OUR FAVORITE ROCKETSHIP WE'LL REBUILD RESTOCK,,
     # import os
     # import sqlite3
@@ -50,13 +67,13 @@ def edit_database(): {}
     # cursor = conn.cursor()
 
 
-    #palitan according sa gusto idelete hehe
+    # #palitan according sa gusto idelete hehe
     # ids_to_delete = [
-    #     "IT20250702160031503135INVa00001",
-    #     "IT20250702161354963044INVa00002",
-    #     "IT20250702161354965472INVa00008",
-    #     "IT20250702161354965472INVa00011",
-    #     "IT20250703093739322787INVa00003"
+    #     "ITa00081",
+    #     "ITa00082",
+    #     "ITa00083",
+    #     "ITa00084",
+    #     "ITa00085"
     # ]
 
     # cursor.executemany(
