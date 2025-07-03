@@ -444,15 +444,11 @@
         });
 
         addCancelBtn.addEventListener('click', function() {
-            // Clear form
-            addNewForm.querySelectorAll('input').forEach(input => {
-                if (!input.readOnly) input.value = '';
-            });
-            addNewForm.querySelectorAll('select').forEach(select => {
-                select.selectedIndex = 0;
-            });
-            // Clear image preview
-            clearImagePreview();
+            // Clear all form fields in Add New Product
+            addNewForm.querySelectorAll('input').forEach(input => input.value = '');
+            // Optionally reset selects, etc. if present
+            // Redirect to products page
+            window.location.href = '/products';
         });
 
         // Image upload functionality
@@ -513,6 +509,11 @@
             uploadBtn.style.display = 'inline-block';
             removeBtn.style.display = 'none';
         }
+
+        const cancelBtn = document.querySelector('.btn-cancel');
+        cancelBtn.addEventListener('click', function() {
+            window.location.href = '/products';
+        });
     });
 </script>
 {% endblock %}
