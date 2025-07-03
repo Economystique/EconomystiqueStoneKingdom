@@ -5,7 +5,43 @@ import bcrypt
 import random
 from datetime import date, datetime, timedelta
 
-def edit_database():
+def edit_database(): {}
+    #WE'RE GOIN ON A TRIP W/ OUR FAVORITE ROCKETSHIP WE'LL REBUILD RESTOCK,,
+    # import os
+    # import sqlite3
+
+    # db_path = "db/restock_db.db"
+
+    # # 1. Delete the old database file
+    # if os.path.exists(db_path):
+    #     os.remove(db_path)
+    #     print("Deleted old restock_db.db")
+    # else:
+    #     print("restock_db.db does not exist, creating new database.")
+
+    # # 2. Recreate the database and table (no AUTOINCREMENT)
+    # conn = sqlite3.connect(db_path)
+    # cursor = conn.cursor()
+
+    # cursor.execute("""
+    #     CREATE TABLE restock_cart (
+    #         id TEXT PRIMARY KEY,
+    #         session_id TEXT,
+    #         inv_id TEXT,
+    #         inv_desc TEXT,
+    #         quantity INTEGER,
+    #         cost REAL,
+    #         exp_date TEXT
+    #     )
+    # """)
+
+    # conn.commit()
+    # conn.close()
+
+    # print("Rebuilt restock_db.db with restock_cart table and no AUTOINCREMENT. No sqlite_sequence will exist.") 
+    #LITTLE EINSTEINS
+
+
     #DELETER ni pat sa mga inv_dynamic dummy data/user input
     # import sqlite3
 
@@ -706,9 +742,5 @@ def edit_database():
     
     # connection.commit()
     # connection.close()
-
-
-
-
 
 edit_database()

@@ -1247,7 +1247,7 @@ def add_to_restock_cart():
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS restock_cart (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             session_id TEXT,
             inv_id TEXT,
             inv_desc TEXT,
