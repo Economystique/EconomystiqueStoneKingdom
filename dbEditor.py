@@ -6,17 +6,45 @@ import random
 from datetime import date, datetime, timedelta
 
 def edit_database():
+    #DELETER ni pat sa mga inv_dynamic dummy data/user input
+    # import sqlite3
+
+    # db_path = "db/inventory_db.db"
+    # conn = sqlite3.connect(db_path)
+    # cursor = conn.cursor()
+
+
+    #palitan according sa gusto idelete hehe
+    # ids_to_delete = [
+    #     "IT20250702160031503135INVa00001",
+    #     "IT20250702161354963044INVa00002",
+    #     "IT20250702161354965472INVa00008",
+    #     "IT20250702161354965472INVa00011",
+    #     "IT20250703093739322787INVa00003"
+    # ]
+
+    # cursor.executemany(
+    #     "DELETE FROM inv_dynamic WHERE actual_id = ?",
+    #     [(id_,) for id_ in ids_to_delete]
+    # )
+
+    # conn.commit()
+    # conn.close()
+
+    # print("Specified rows have been deleted from inv_dynamic.")
+    #eEND NG DELETER NI PAT HEHE
+
     # Connect to the database
-    conn = sqlite3.connect(os.path.join("db", "batches_db.db"))
-    cursor = conn.cursor()
+    #conn = sqlite3.connect(os.path.join("db", "batches_db.db"))
+    #cursor = conn.cursor()
     
-    for x in range(1,10):
-        cursor.execute(f""" ALTER TABLE Ba0000{x} ADD COLUMN cost REAL
-        """)
-    cursor.execute(f""" ALTER TABLE Ba00010 ADD COLUMN cost REAL
-        """)
-    conn.commit()
-    conn.close()
+    # for x in range(1,10):
+    #     cursor.execute(f""" ALTER TABLE Ba0000{x} ADD COLUMN cost REAL
+    #     """)
+    # cursor.execute(f""" ALTER TABLE Ba00010 ADD COLUMN cost REAL
+    #     """)
+    # conn.commit()
+    # conn.close()
     # cursor.execute("""CREATE TABLE IF NOT EXISTS wastage_cart (
     #     waste_id TEXT PRIMARY KEY,
     #     inv_id TEXT,
@@ -678,4 +706,9 @@ def edit_database():
     
     # connection.commit()
     # connection.close()
+
+
+
+
+
 edit_database()
