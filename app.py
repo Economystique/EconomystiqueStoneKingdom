@@ -796,6 +796,7 @@ def get_year_performance_data():
 @app.route('/wastage')
 @login_required
 def wastage():
+    # --- Fetch wastage records ---
     conn = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
     cursor = conn.cursor()
     cursor.execute("""
@@ -803,8 +804,7 @@ def wastage():
     """)
     rows = cursor.fetchall()
     conn.close()
-    
-    # Convert rows (tuples) into list of dicts
+
     wastage_record = [
         {
             'waste_id': row[0],
@@ -813,11 +813,23 @@ def wastage():
             'inv_desc': row[3],
             'quantity': row[4],
             'unit': row[5],
-            'waste_date': row[7],
-            'remark': row[6]
+            'waste_date': row[6],
+            'remark': row[7]
         } for row in rows
     ]
-    return render_template('wastage.html', wastage_data=wastage_record)
+
+    # --- Fetch inventory list from inv_static ---
+    inv_conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+    inv_cursor = inv_conn.cursor()
+    inv_cursor.execute("SELECT inv_id, inv_desc, unit FROM inv_static ORDER BY inv_id")
+    inv_rows = inv_cursor.fetchall()
+    inv_conn.close()
+
+    inv_data = [
+        {'inv_id': row[0], 'inv_desc': row[1], 'unit': row[2]} for row in inv_rows
+    ]
+
+    return render_template('wastage.html', wastage_data=wastage_record, inv_data=inv_data)
 
 #modal for declaring wastage
 @app.route('/declare_wastage', methods=['POST'])
@@ -828,7 +840,7 @@ def declare_wastage():
     remark   = request.form.get('remark', '')
 
     # add DB + inventory shit logic here u got dis kim lessgow!
-    
+    # Olrayt leszgo!
     flash('Wastage recorded successfully!', 'success')
     return redirect(url_for('wastage'))
 

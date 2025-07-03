@@ -10,7 +10,17 @@ def edit_database():
     conn = sqlite3.connect(os.path.join("db", "wastage_db.db"))
     cursor = conn.cursor()
 
-    cursor.execute("DROP TABLE wastage_record")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS wastage_cart (
+        waste_id TEXT PRIMARY KEY,
+        inv_id TEXT,
+        inv_desc TEXT,
+        batch_id TEXT,
+        exp_date DATE,
+        quantity INTEGER,
+        unit TEXT,
+        remark TEXT,
+        waste_date DATE
+        )""")
     # # Step 1: Connect to databases
     # inv_conn = sqlite3.connect('db/inventory_db.db')
     # batch_conn = sqlite3.connect('db/batches_db.db')

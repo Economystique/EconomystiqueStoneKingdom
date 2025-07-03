@@ -263,7 +263,7 @@
 
 
 
-/*dis the one for da modal bro c=====3*/
+/*dis the one for da modal bro (`)c=====3*/
 /* Modal styles */
     .modal {
         position: fixed;
@@ -282,7 +282,7 @@
         padding: 2rem 2.5rem;
         border-radius: 10px;
         width: 100%;
-        max-width: 800px;
+        max-width: 1200px;
         position: relative;
         box-shadow: 0 6px 20px rgba(0,0,0,.15);
     }
@@ -290,6 +290,7 @@
     .modal-wrapper {
         display: flex;
         flex-direction: row;
+        justify-content: space-between;
         gap: 1rem;
     }
 
@@ -338,22 +339,24 @@
     #declareWastageForm textarea {
         background-color: #e8e6e6;
     }
-
+.form-container {
+    width: 35%;
+}
     /* table */
 .declare-wastage-table table {
-    width: 420px;
     border-collapse: collapse;
     border-radius: 8px;
     overflow: hidden;
+    justify-self: stretch;
     background-color: #e8e6e6;
 }
 
 .declare-wastage-table {
     background-color: #e8e6e6;
-    width: 420px;
+    width: 65%;
     border-radius: 8px;
-    height: 320px;
     border: 1px solid #ccc;
+    margin-bottom: 1rem;
 }
 
 /* Header row */
@@ -373,9 +376,16 @@
     font-size: 14px;
 }
 
-.waste-table td {
+.waste-table td, tr {
     background-color: #e8e6e6;
+    justify-self: stretch;
+    align-content: center;
 }
+    .button-container{
+        display: flex;
+        justify-content:space-between;
+        align-items: center;
+    }
 
     .declare-buttons {
         display: flex;
