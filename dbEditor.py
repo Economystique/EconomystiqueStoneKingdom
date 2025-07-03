@@ -7,20 +7,27 @@ from datetime import date, datetime, timedelta
 
 def edit_database():
     # Connect to the database
-    conn = sqlite3.connect(os.path.join("db", "wastage_db.db"))
+    conn = sqlite3.connect(os.path.join("db", "batches_db.db"))
     cursor = conn.cursor()
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS wastage_cart (
-        waste_id TEXT PRIMARY KEY,
-        inv_id TEXT,
-        inv_desc TEXT,
-        batch_id TEXT,
-        exp_date DATE,
-        quantity INTEGER,
-        unit TEXT,
-        remark TEXT,
-        waste_date DATE
-        )""")
+    
+    for x in range(1,10):
+        cursor.execute(f""" ALTER TABLE Ba0000{x} ADD COLUMN cost REAL
+        """)
+    cursor.execute(f""" ALTER TABLE Ba00010 ADD COLUMN cost REAL
+        """)
+    conn.commit()
+    conn.close()
+    # cursor.execute("""CREATE TABLE IF NOT EXISTS wastage_cart (
+    #     waste_id TEXT PRIMARY KEY,
+    #     inv_id TEXT,
+    #     inv_desc TEXT,
+    #     batch_id TEXT,
+    #     exp_date DATE,
+    #     quantity INTEGER,
+    #     unit TEXT,
+    #     remark TEXT,
+    #     waste_date DATE
+    #     )""")
     # # Step 1: Connect to databases
     # inv_conn = sqlite3.connect('db/inventory_db.db')
     # batch_conn = sqlite3.connect('db/batches_db.db')
