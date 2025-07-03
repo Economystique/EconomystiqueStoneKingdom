@@ -1247,7 +1247,7 @@ def add_to_restock_cart():
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS restock_cart (
-            id TEXT PRIMARY KEY,
+            id INTEGER PRIMARY KEY,
             session_id TEXT,
             inv_id TEXT,
             inv_desc TEXT,
@@ -1256,10 +1256,14 @@ def add_to_restock_cart():
             exp_date TEXT
         )
     """)
+    # Get next id
+    cursor.execute("SELECT MAX(id) FROM restock_cart")
+    max_id = cursor.fetchone()[0]
+    next_id = 1 if max_id is None else int(max_id) + 1
     cursor.execute("""
-        INSERT INTO restock_cart (session_id, inv_id, inv_desc, quantity, cost, exp_date)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (session_id, inv_id, inv_desc, quantity, cost, exp_date))
+        INSERT INTO restock_cart (id, session_id, inv_id, inv_desc, quantity, cost, exp_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (next_id, session_id, inv_id, inv_desc, quantity, cost, exp_date))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -1297,16 +1301,61 @@ def get_restock_cart():
 
 @app.route('/api/restock_cart/confirm', methods=['POST'])
 def confirm_restock_cart():
+    import sqlite3
+    import os
+    from datetime import datetime
     session_id = session.get('username', 'guest')
     db_path = os.path.join('db', 'restock_db.db')
     inv_db_path = os.path.join('db', 'inventory_db.db')
+    batches_db_path = os.path.join('db', 'batches_db.db')
+
+    # 1. Get all items from restock_cart for this session
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT inv_id, inv_desc, quantity, cost, exp_date FROM restock_cart WHERE session_id = ?", (session_id,))
     items = cursor.fetchall()
-    # Move to inv_dynamic
+
+    # 2. Get unit for each item from inv_static and prepare for batch table
     inv_conn = sqlite3.connect(inv_db_path)
     inv_cursor = inv_conn.cursor()
+    batch_items = []
+    rec_date = datetime.now().strftime('%Y-%m-%d')
+    for row in items:
+        inv_id, inv_desc, quantity, cost, exp_date = row
+        inv_cursor.execute("SELECT unit FROM inv_static WHERE inv_id = ?", (inv_id,))
+        unit_row = inv_cursor.fetchone()
+        unit = unit_row[0] if unit_row else ''
+        batch_items.append((inv_id, inv_desc, quantity, unit, exp_date, rec_date, cost))
+
+    # 3. Create new batch table in batches_db.db
+    batches_conn = sqlite3.connect(batches_db_path)
+    batches_cursor = batches_conn.cursor()
+    # Find next batch table name
+    batches_cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'Ba%'")
+    batch_tables = [row[0] for row in batches_cursor.fetchall()]
+    if batch_tables:
+        last_num = max(int(name[2:]) for name in batch_tables if name[2:].isdigit())
+        next_batch = f"Ba{last_num+1:05d}"
+    else:
+        next_batch = "Ba00001"
+    # Create the new batch table
+    batches_cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS {next_batch} (
+            inv_id TEXT,
+            inv_desc TEXT,
+            quantity INTEGER,
+            unit TEXT,
+            exp_date TEXT,
+            rec_date TEXT,
+            cost REAL
+        )
+    """)
+    # Insert items into the new batch table
+    batches_cursor.executemany(f"INSERT INTO {next_batch} (inv_id, inv_desc, quantity, unit, exp_date, rec_date, cost) VALUES (?, ?, ?, ?, ?, ?, ?)", batch_items)
+    batches_conn.commit()
+    batches_conn.close()
+
+    # 4. Insert into inv_dynamic as before
     inv_cursor.execute("""
         CREATE TABLE IF NOT EXISTS inv_dynamic (
             actual_id TEXT PRIMARY KEY,
@@ -1319,25 +1368,27 @@ def confirm_restock_cart():
             cost REAL
         )
     """)
-    from datetime import datetime
+    # Get current max actual_id
+    inv_cursor.execute("SELECT MAX(CAST(SUBSTR(actual_id, 5) AS INTEGER)) FROM inv_dynamic WHERE actual_id LIKE 'ITa%'")
+    max_actual_id = inv_cursor.fetchone()[0]
+    next_actual_id_num = 1 if max_actual_id is None else max_actual_id + 1
     for row in items:
         inv_id, inv_desc, quantity, cost, exp_date = row
-        # Generate actual_id and batch_id (simple version)
-        now = datetime.now().strftime('%Y%m%d%H%M%S%f')
-        actual_id = f'IT{now}{inv_id}'
-        batch_id = f'Ba{now[-5:]}'
+        batch_id = next_batch
         rec_date = datetime.now().strftime('%Y-%m-%d')
-        # Get unit from inv_static
         inv_cursor.execute("SELECT unit FROM inv_static WHERE inv_id = ?", (inv_id,))
         unit_row = inv_cursor.fetchone()
         unit = unit_row[0] if unit_row else ''
+        actual_id = f'ITa{next_actual_id_num:05d}'
+        next_actual_id_num += 1
         inv_cursor.execute("""
             INSERT INTO inv_dynamic (actual_id, batch_id, inv_id, quantity, unit, exp_date, rec_date, cost)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (actual_id, batch_id, inv_id, quantity, unit, exp_date, rec_date, cost))
     inv_conn.commit()
     inv_conn.close()
-    # Clear restock_cart
+
+    # 5. Clear restock_cart
     cursor.execute("DELETE FROM restock_cart WHERE session_id = ?", (session_id,))
     conn.commit()
     conn.close()
@@ -1401,6 +1452,17 @@ def add_new_product():
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/restock_cart/clear', methods=['POST'])
+def clear_restock_cart():
+    session_id = session.get('username', 'guest')
+    db_path = os.path.join('db', 'restock_db.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM restock_cart WHERE session_id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     # Start Flask server in a separate thread

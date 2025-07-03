@@ -324,7 +324,19 @@
         });
 
         clearBtn.addEventListener('click', function() {
-            tableBody.innerHTML = `<tr><td></td><td></td><td></td><td></td><td></td></tr>`;
+            fetch('/api/restock_cart/clear', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        tableBody.innerHTML = '';
+                        loadRestockCart();
+                    } else {
+                        alert('Failed to clear restock cart.');
+                    }
+                })
+                .catch(() => {
+                    alert('Failed to clear restock cart.');
+                });
         });
 
         // Confirm button logic
