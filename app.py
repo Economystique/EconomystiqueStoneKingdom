@@ -390,9 +390,16 @@ def manage():
     cursor = conn.cursor()
     cursor.execute("SELECT inv_id, inv_desc, unit FROM inv_static")
     products = cursor.fetchall()
+    
+    # Get the next inventory ID
+    cursor.execute("SELECT MAX(CAST(SUBSTR(inv_id, 5) AS INTEGER)) FROM inv_static")
+    max_id = cursor.fetchone()[0]
+    next_id = 1 if max_id is None else max_id + 1
+    next_inv_id = f"INVa{next_id:05d}"
+    
     conn.close()
     # products will be a list of tuples (inv_id, inv_desc, unit)
-    return render_template('manage.html', products=products)
+    return render_template('manage.html', products=products, next_inv_id=next_inv_id)
 
 @app.route('/sales')
 @login_required
@@ -1323,6 +1330,65 @@ def confirm_restock_cart():
     conn.commit()
     conn.close()
     return jsonify({'success': True})
+
+@app.route('/api/add_new_product', methods=['POST'])
+def add_new_product():
+    try:
+        data = request.get_json()
+        
+        # Extract form data
+        inv_desc = data.get('inv_desc', '').strip()
+        barcode = data.get('barcode', '').strip()
+        category = data.get('category', '').strip()
+        subcategory = data.get('subcategory', '').strip()
+        unit = data.get('unit', '').strip()
+        reorder_point = data.get('reorder_point', 0)
+        price = data.get('price', 0.0)
+        cost = data.get('cost', 0.0)
+        
+        # Validate required fields
+        if not inv_desc:
+            return jsonify({'success': False, 'message': 'Inventory description is required'})
+        
+        if not unit:
+            return jsonify({'success': False, 'message': 'Unit is required'})
+        
+        conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+        cursor = conn.cursor()
+        
+        # Get the next inventory ID
+        cursor.execute("SELECT MAX(CAST(SUBSTR(inv_id, 5) AS INTEGER)) FROM inv_static")
+        max_id = cursor.fetchone()[0]
+        next_id = 1 if max_id is None else max_id + 1
+        inv_id = f"INVa{next_id:05d}"
+        
+        # Check if barcode already exists (if provided)
+        if barcode:
+            cursor.execute("SELECT inv_id FROM inv_static WHERE barcode = ?", (barcode,))
+            if cursor.fetchone():
+                conn.close()
+                return jsonify({'success': False, 'message': 'Barcode already exists'})
+        
+        # Get image data
+        image_data = data.get('image')
+        
+        # Insert new product into inv_static
+        cursor.execute("""
+            INSERT INTO inv_static (inv_id, inv_desc, cat, sub_cat, unit, rop, barcode, price, cost, image)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (inv_id, inv_desc, category, subcategory, unit, reorder_point, barcode, price, cost, image_data))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Product added successfully',
+            'inv_id': inv_id
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 if __name__ == '__main__':
     # Start Flask server in a separate thread
