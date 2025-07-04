@@ -38,7 +38,7 @@ here is a comment for the css part of this in the wastage.css-->
 
                 <div class="form-group">
                     <label for="quantity" id="quantityLabel">Quantity</label>
-                    <input type="number" name="quantity" id="quantity" min="0.01" step="0.01" required>
+                    <input type="number" name="quantity" id="quantity" min="1" step="1" required>
                 </div>
 
                 <div class="form-group">
@@ -67,15 +67,31 @@ here is a comment for the css part of this in the wastage.css-->
                             </tr>
                         </thead>
                         <tbody id="tempWasteTableContents">
+                            {% for item in wastage_cart %}
+                            <tr>
+                                <td>{{ item.inv_id }}</td>
+                                <td>{{ item.inv_desc }}</td>
+                                <td>{{ item.batch_id }}</td>
+                                <td>{{ item.exp_date }}</td>
+                                <td>{{ item.quantity }} {{ item.unit }}</td>
+                                <td>{{ item.wastage_date }}</td>
+                                <td>{{ item.remark }}</td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-        <div class="button-container">
-            <div class="">
+        <div class="upper-button-container">
+            <div>
                 <button type="button" form="declareWastageForm" class="btn-primary" id="addButton" >Add</button>
             </div>
+            <div>
+                <button type="button" form="declareWastageForm" class="btn-primary" id="clearButton" >Clear Table</button>
+            </div>
+        </div>
+        <div class="lower-button-container">
             <div class="declare-buttons">
                 <button type="button" class="btn-secondary" id="cancelWastageBtn">Cancel</button>
                 <button type="submit" form="declareWastageForm" class="btn-primary">Confirm</button>
@@ -157,6 +173,53 @@ document.addEventListener('DOMContentLoaded', function () {
             declareForm.reset();
             updateQuantityLabel(); // reset label as well
         }
+    });
+
+    const addButton = document.getElementById('addButton');
+    const tempTableBody = document.getElementById('tempWasteTableContents');
+    addButton.addEventListener('click', function () {
+        const inv_id   = invSelect.value;
+        const batch_id = batchSelect.value;
+        const quantity = parseFloat(document.getElementById('quantity').value);
+        const dec_date = document.getElementById('dec_date').value;
+        const remark   = document.getElementById('remark').value;
+
+        if (!inv_id || !batch_id || isNaN(quantity) || !dec_date) {
+            alert('Please complete all required fields.');
+            return;
+        }
+
+        fetch('/insert_wastage_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ inv_id, batch_id, quantity, dec_date, remark })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.entry.inv_id}</td>
+                    <td>${data.entry.inv_desc}</td>
+                    <td>${data.entry.batch_id}</td>
+                    <td>${data.entry.exp_date}</td>
+                    <td>${data.entry.quantity} ${data.entry.unit}</td>
+                    <td>${data.entry.waste_date}</td>
+                    <td>${data.entry.remark}</td>
+                `;
+                tempTableBody.appendChild(row);
+                document.getElementById('declareWastageForm').reset();
+                invSelect.dispatchEvent(new Event('change'));  // update quantity label
+            } else {
+                alert('Error adding wastage: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Insert error:', error);
+            alert('Something went wrong.');
+        });
     });
 });
 </script>

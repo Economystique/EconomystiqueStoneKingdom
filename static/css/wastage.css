@@ -381,9 +381,17 @@
     justify-self: stretch;
     align-content: center;
 }
-    .button-container{
+    .upper-button-container{
         display: flex;
         justify-content:space-between;
+        align-items: center;
+    }
+
+    .lower-button-container{
+        display: flex;
+        justify-self: stretch;
+        justify-content: center;
+        align-content: center;
         align-items: center;
     }
 
@@ -410,4 +418,8 @@
         padding: .6rem 1.5rem;
         border-radius: 8px;
         cursor: pointer;
+    }
+    
+    #remark {
+        resize: none;
     }
