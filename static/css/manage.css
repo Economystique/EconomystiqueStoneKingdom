@@ -317,6 +317,34 @@
     background:#fafafa; 
     }
 
+/*Kim*/
+/* main Choices input box */
+.choices__inner {
+    border-radius: 8px !important; 
+    background-color: #f9f9f9;
+    border: 1px solid #ccc !important;
+    padding: 10px 12px;
+    font-size: 14px;
+    height: 47px;
+    
+}
+
+/* Remove focus border */
+.choices__inner:focus {
+    outline: none !important;
+}
+
+/* dropdown items */
+.choices__list--dropdown {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.choices__item--selectable {
+    color: #333;
+}
+/*Kim end*/
+
 .auto-id { 
     color:#c0392b; 
     font-weight:600; 
