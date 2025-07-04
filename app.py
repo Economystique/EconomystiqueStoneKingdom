@@ -856,6 +856,23 @@ def declare_wastage():
     flash('Wastage recorded successfully!', 'success')
     return redirect(url_for('wastage'))
 
+@app.route('/get_batches/<inv_id>')
+@login_required
+def get_batches(inv_id):
+    conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT batch_id, exp_date FROM inv_dynamic
+        WHERE inv_id = ?
+        ORDER BY exp_date ASC
+    """, (inv_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    # Format results as list of dicts
+    batch_data = [{'batch_id': row[0], 'exp_date': row[1]} for row in rows]
+    return jsonify(batch_data)
+
 @app.route('/pos')
 @login_required
 def pos():

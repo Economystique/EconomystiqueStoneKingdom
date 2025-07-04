@@ -6,6 +6,7 @@ import random
 from datetime import date, datetime, timedelta
 
 def edit_database(): 
+    pass
     #DELETING BATCHES MANUALLY MUEHEHEHE
     #import sqlite3
 

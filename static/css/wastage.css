@@ -282,7 +282,7 @@
         padding: 2rem 2.5rem;
         border-radius: 10px;
         width: 100%;
-        max-width: 1200px;
+        max-width: 1400px;
         position: relative;
         box-shadow: 0 6px 20px rgba(0,0,0,.15);
     }
@@ -340,7 +340,7 @@
         background-color: #e8e6e6;
     }
 .form-container {
-    width: 35%;
+    width: 30%;
 }
     /* table */
 .declare-wastage-table table {
@@ -353,7 +353,7 @@
 
 .declare-wastage-table {
     background-color: #e8e6e6;
-    width: 65%;
+    width: 70%;
     border-radius: 8px;
     border: 1px solid #ccc;
     margin-bottom: 1rem;
