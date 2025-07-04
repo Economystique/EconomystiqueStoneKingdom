@@ -45,7 +45,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def get_available_years():
+def get_available_years():  
     db_path = os.path.join('db/salesdb', 'sales_yearly.db')
     years = []
 
@@ -888,7 +888,7 @@ def get_batches(inv_id):
     conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT batch_id, exp_date FROM inv_dynamic
+        SELECT batch_id, exp_date, quantity, unit FROM inv_dynamic
         WHERE inv_id = ?
         ORDER BY exp_date ASC
     """, (inv_id,))
@@ -896,21 +896,41 @@ def get_batches(inv_id):
     conn.close()
 
     # Format results as list of dicts
-    batch_data = [{'batch_id': row[0], 'exp_date': row[1]} for row in rows]
+    batch_data = [{'batch_id': row[0], 'exp_date': row[1], 'quantity': row[2], 'unit': row[3]} for row in rows]
     return jsonify(batch_data)
 
 @app.route('/insert_wastage_cart', methods=['POST'])
 @login_required
 def insert_wastage_cart():
     data = request.get_json()
-    inv_id       = data.get('inv_id')
-    batch_id     = data.get('batch_id')
-    quantity     = data.get('quantity')
+    inv_id     = data.get('inv_id')
+    batch_id   = data.get('batch_id')
+    quantity   = data.get('quantity')
     waste_date = data.get('dec_date')
-    remark       = data.get('remark', '')
+    remark     = data.get('remark', '')
 
     try:
-        # --- Fetch inv_desc and unit from inv_static ---
+        # --- Validate available quantity in inv_dynamic ---
+        conn_check = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+        cursor_check = conn_check.cursor()
+        cursor_check.execute("""
+            SELECT quantity FROM inv_dynamic
+            WHERE inv_id = ? AND batch_id = ?
+        """, (inv_id, batch_id))
+        check_row = cursor_check.fetchone()
+        conn_check.close()
+
+        if not check_row:
+            return jsonify({'success': False, 'error': 'Inventory batch not found'}), 400
+
+        available_qty = check_row[0]
+        if quantity > available_qty:
+            return jsonify({
+                'success': False,
+                'error': f'Declared quantity ({quantity}) exceeds available ({available_qty}).'
+            }), 400
+
+        # --- Fetch inv_desc and unit ---
         conn_inv = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
         cursor_inv = conn_inv.cursor()
         cursor_inv.execute("SELECT inv_desc, unit FROM inv_static WHERE inv_id = ?", (inv_id,))
@@ -922,7 +942,7 @@ def insert_wastage_cart():
 
         inv_desc, unit = inv_row
 
-        # --- Fetch exp_date from inv_dynamic ---
+        # --- Fetch exp_date ---
         conn_batch = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
         cursor_batch = conn_batch.cursor()
         cursor_batch.execute("SELECT exp_date FROM inv_dynamic WHERE batch_id = ?", (batch_id,))
@@ -934,29 +954,21 @@ def insert_wastage_cart():
 
         exp_date = batch_row[0]
 
-        # --- Generate next waste_id ---
+        # --- Generate waste_id ---
         conn_waste = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
         cursor_waste = conn_waste.cursor()
 
-        cursor_waste.execute("""
-            SELECT waste_id FROM wastages
-            WHERE waste_id LIKE 'Wa_____' ORDER BY waste_id DESC LIMIT 1
-        """)
+        cursor_waste.execute("SELECT waste_id FROM wastages WHERE waste_id LIKE 'Wa_____' ORDER BY waste_id DESC LIMIT 1")
         last_id_main = cursor_waste.fetchone()
 
-        cursor_waste.execute("""
-            SELECT waste_id FROM wastage_cart
-            WHERE waste_id LIKE 'Wa_____' ORDER BY waste_id DESC LIMIT 1
-        """)
+        cursor_waste.execute("SELECT waste_id FROM wastage_cart WHERE waste_id LIKE 'Wa_____' ORDER BY waste_id DESC LIMIT 1")
         last_id_cart = cursor_waste.fetchone()
 
-        # Determine the highest current number from both tables
         def extract_num(wid):
             return int(wid[2:]) if wid else 0
 
-        num_main = extract_num(last_id_main[0]) if last_id_main else 0
-        num_cart = extract_num(last_id_cart[0]) if last_id_cart else 0
-        next_num = max(num_main, num_cart) + 1
+        next_num = max(extract_num(last_id_main[0]) if last_id_main else 0,
+                       extract_num(last_id_cart[0]) if last_id_cart else 0) + 1
         new_waste_id = f"Wa{next_num:05d}"
 
         # --- Insert into wastage_cart ---
@@ -988,6 +1000,71 @@ def insert_wastage_cart():
             }
         })
 
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/clear_wastage_cart', methods=['POST'])
+@login_required
+def clear_wastage_cart():
+    try:
+        conn = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM wastage_cart")
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/confirm_wastage', methods=['POST'])
+@login_required
+def confirm_wastage():
+    try:
+        conn_waste = sqlite3.connect(os.path.join('db', 'wastage_db.db'))
+        cursor_waste = conn_waste.cursor()
+
+        # Fetch all records from wastage_cart
+        cursor_waste.execute("SELECT * FROM wastage_cart")
+        rows = cursor_waste.fetchall()
+
+        if not rows:
+            return jsonify({'success': False, 'error': 'No items to confirm'}), 400
+
+        # Open inventory DB for deduction
+        conn_inv = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+        cursor_inv = conn_inv.cursor()
+
+        for row in rows:
+            # Unpack fields from wastage_cart
+            waste_id, inv_id, inv_desc, batch_id, exp_date, quantity, unit, remark, waste_date = row
+
+            # Insert into wastages table
+            cursor_waste.execute("""
+                INSERT INTO wastages (
+                    waste_id, inv_id, inv_desc, batch_id, exp_date,
+                    quantity, unit, remark, waste_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, row)
+
+            # Subtract from inv_dynamic
+            cursor_inv.execute("""
+                UPDATE inv_dynamic
+                SET quantity = quantity - ?
+                WHERE inv_id = ? AND batch_id = ?
+            """, (quantity, inv_id, batch_id))
+
+        # Clear the cart
+        cursor_waste.execute("DELETE FROM wastage_cart")
+
+        # Commit both databases
+        conn_waste.commit()
+        conn_inv.commit()
+
+        # Close connections
+        conn_waste.close()
+        conn_inv.close()
+
+        return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

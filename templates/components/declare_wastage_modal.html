@@ -2,6 +2,8 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/wastage.css') }}"> 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
 <!--linagay ko na sa wastage.css ung css nalagay ko kasi sa wastage to initially but this is needed at the products also so i had to create another file for it. 
 here is a comment for the css part of this in the wastage.css-->
 {% endblock %}
@@ -16,7 +18,7 @@ here is a comment for the css part of this in the wastage.css-->
         <div class="modal-wrapper">
             <form class="form-container" id="declareWastageForm" action="{{ url_for('declare_wastage') }}" method="post">
                 <div class="form-group">
-                    <label for="inv_id">Inventory ID/Name</label>
+                    <label for="inv_id">Inventory ID - Inventory Description</label>
                     <select name="inv_id" id="inv_id" required>
                         {% if inv_data %}
                             {% for inv in inv_data %}
@@ -30,7 +32,7 @@ here is a comment for the css part of this in the wastage.css-->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="inv_id">Batch ID / Received Date</label>
+                    <label for="batch_id">Batch ID - Quantity On Hand - Expiry Date
                     <select name="batch_id" id="batch_id" required>
                         <option disabled selected>Select inventory first</option>
                     </select>
@@ -88,7 +90,7 @@ here is a comment for the css part of this in the wastage.css-->
                 <button type="button" form="declareWastageForm" class="btn-primary" id="addButton" >Add</button>
             </div>
             <div>
-                <button type="button" form="declareWastageForm" class="btn-primary" id="clearButton" >Clear Table</button>
+                <button type="button" form="declareWastageForm" class="btn-secondary" id="clearButton" >Clear Table</button>
             </div>
         </div>
         <div class="lower-button-container">
@@ -98,10 +100,20 @@ here is a comment for the css part of this in the wastage.css-->
             </div>
         </div>
     </div>
+    <div id="confirmModal" class="modal hidden">
+    <div class="last-confirmation-content">
+        <h3>Are you sure with these details?</h3>
+        <div class="confirm-buttons">
+            <button id="confirmYesBtn" class="btn-primary">Yes</button>
+            <button id="confirmCancelBtn" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('wastageModal');
@@ -112,34 +124,67 @@ document.addEventListener('DOMContentLoaded', function () {
     const invSelect = document.getElementById('inv_id');
     const qtyLabel = document.getElementById('quantityLabel');
     const batchSelect = document.getElementById('batch_id');
+    const confirmBtn = document.querySelector('button[type="submit"]');
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmYesBtn = document.getElementById('confirmYesBtn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+    let batchChoices = new Choices(batchSelect, {
+        searchEnabled: true,
+        shouldSort: false,
+        itemSelectText: '',
+        placeholderValue: 'Select a batch'
+    });
 
     invSelect.addEventListener('change', function () {
         const selectedInvId = this.value;
-        updateQuantityLabel();  // still update the label
+        updateQuantityLabel();  
 
-        // Clear previous batch options
-        batchSelect.innerHTML = '<option disabled selected>Loading...</option>';
+        // Clear existing options from the native select element too
+        batchSelect.innerHTML = '';
+
+        // Clear and set Choices instance placeholder while loading
+        batchChoices.clearChoices();
+        batchChoices.setChoices([
+            { value: "", label: "Select a batch", disabled: true, selected: true }
+        ]);
 
         fetch(`/get_batches/${selectedInvId}`)
             .then(response => response.json())
             .then(data => {
-                batchSelect.innerHTML = '';
-
-                if (data.length > 0) {
-                    data.forEach(batch => {
-                        const option = document.createElement('option');
-                        option.value = batch.batch_id;
-                        option.textContent = `${batch.batch_id} - ${batch.exp_date}`;
-                        batchSelect.appendChild(option);
-                    });
+                if (Array.isArray(data) && data.length > 0) {
+                    batchChoices.clearChoices();
+                    batchChoices.setChoices(
+                        data.map(batch => ({
+                            value: batch.batch_id,
+                            label: `${batch.batch_id} | ${batch.quantity} ${batch.unit}s | ${batch.exp_date}`
+                        })),
+                        'value',
+                        'label',
+                        false
+                    );
                 } else {
-                    batchSelect.innerHTML = '<option disabled selected>No batches available</option>';
+                    batchChoices.clearChoices();
+                    batchChoices.setChoices([
+                        { value: "", label: "No available batches", disabled: true, selected: true }
+                    ]);
                 }
             })
             .catch(error => {
                 console.error('Error fetching batches:', error);
-                batchSelect.innerHTML = '<option disabled selected>Error loading batches</option>';
+                batchChoices.clearChoices();
+                batchChoices.setChoices([
+                    { value: "", label: "Error loading batches", disabled: true, selected: true }
+                ]);
             });
+    });
+
+    const invChoices = new Choices(invSelect, {
+        searchEnabled: true,
+        shouldSort: false,
+        placeholder: true,
+        itemSelectText: '',
+        placeholderValue: 'Select an item'
     });
 
     invSelect.dispatchEvent(new Event('change'));
@@ -152,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function openModal() {
         modal.classList.remove('hidden');
-        updateQuantityLabel(); // ensure label is correct when opening
+        updateQuantityLabel();
     }
 
     function closeModal() {
@@ -171,7 +216,12 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.addEventListener('transitionend', () => {
         if (modal.classList.contains('hidden') && declareForm) {
             declareForm.reset();
-            updateQuantityLabel(); // reset label as well
+            invChoices.setChoiceByValue("");
+            batchChoices.clearChoices();
+            batchChoices.setChoices([
+                { value: "", label: "Select inventory first", disabled: true, selected: true }
+            ]);
+            updateQuantityLabel(); 
         }
     });
 
@@ -211,7 +261,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 `;
                 tempTableBody.appendChild(row);
                 document.getElementById('declareWastageForm').reset();
-                invSelect.dispatchEvent(new Event('change'));  // update quantity label
+                invChoices.setChoiceByValue("");
+                invSelect.dispatchEvent(new Event('change')); 
             } else {
                 alert('Error adding wastage: ' + data.error);
             }
@@ -219,6 +270,67 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Insert error:', error);
             alert('Something went wrong.');
+        });
+    });
+
+    const clearButton = document.getElementById('clearButton');
+
+    clearButton.addEventListener('click', function () {
+        fetch('/clear_wastage_cart', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Silently clear frontend table
+                tempTableBody.innerHTML = '';
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing cart:', error); // Optional: useful for debugging
+        });
+    });
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const tempTable = document.getElementById('tempWasteTableContents');
+            const hasRows = tempTable && tempTable.querySelectorAll('tr').length > 0;
+
+            if (!hasRows) {
+                alert('Add an item to the list first.');
+                return;
+            }
+
+            confirmModal.classList.remove('hidden');
+        });
+    }
+
+    confirmCancelBtn.addEventListener('click', function () {
+        confirmModal.classList.add('hidden');
+    });
+
+    confirmYesBtn.addEventListener('click', function () {
+        fetch('/confirm_wastage', {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // ✅ Close both modals
+                confirmModal.classList.add('hidden');
+                document.getElementById('wastageModal').classList.add('hidden');
+
+                // ✅ Reload page to reflect updated data
+                location.reload();
+            } else {
+                alert('Failed to confirm: ' + data.error);
+            }
+        })
+        .catch(err => {
+            console.error('Error confirming wastage:', err);
+            alert('Something went wrong while confirming.');
         });
     });
 });
