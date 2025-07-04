@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/manage.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 {% endblock %}
 
 <!-- {% block header_title %}Manage{% endblock %} --> 
@@ -31,6 +32,8 @@
                     <div class="form-product">
                         <label>Inventory ID/Description</label>
                         <br>
+                        <!--Kim-->
+                        <!--search-select thingy-->
                         <select id="product-select">
                             <option value="">Select a product</option>
                             {% for inv_id, inv_desc, unit in products %}
@@ -189,7 +192,9 @@
 {% endblock %}
 
 {% block extra_js %}
-<!--js-->
+<!--Kim-->
+<!--search dropdown import-->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const tabButtons = document.querySelectorAll(".tab-btn");
@@ -513,6 +518,15 @@
         const cancelBtn = document.querySelector('.btn-cancel');
         cancelBtn.addEventListener('click', function() {
             window.location.href = '/products';
+        });
+        //Kim
+        //for search dropdown
+        const choices = new Choices(productSelect, {
+            searchEnabled: true,
+            itemSelectText: '',
+            shouldSort: false,
+            placeholder: true,
+            placeholderValue: 'Select a product'
         });
     });
 </script>
