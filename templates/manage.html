@@ -121,12 +121,28 @@
                 
                 <div class="form-row">
                     <label>Category</label>
-                    <input type="text" placeholder="Enter product category">
+                    <div class="custom-dropdown">
+                        <input type="text" id="category-input" placeholder="Select or type a new category" list="category-list">
+                        <datalist id="category-list">
+                            <option value="">Select a category</option>
+                        </datalist>
+                    </div>
+                    <small style="color: #666; font-size: 12px; margin-top: 4px; display: block;">
+                        Type to search existing categories or type a new one
+                    </small>
                 </div>
 
                 <div class="form-row">
                     <label>Subcategory</label>
-                    <input type="text" placeholder="Enter product subcategory">
+                    <div class="custom-dropdown">
+                        <input type="text" id="subcategory-input" placeholder="Select or type a new subcategory" list="subcategory-list">
+                        <datalist id="subcategory-list">
+                            <option value="">Select a subcategory</option>
+                        </datalist>
+                    </div>
+                    <small style="color: #666; font-size: 12px; margin-top: 4px; display: block;">
+                        Type to search existing subcategories or type a new one
+                    </small>
                 </div>
 
                 <div class="form-row">
@@ -376,8 +392,8 @@
             // Get form values
             const invDesc = addNewForm.querySelector('input[placeholder="Enter a product description"]').value.trim();
             const barcode = addNewForm.querySelector('input[placeholder="Enter a product barcode"]').value.trim();
-            const category = addNewForm.querySelector('input[placeholder="Enter product category"]').value.trim();
-            const subcategory = addNewForm.querySelector('input[placeholder="Enter product subcategory"]').value.trim();
+            const category = categoryInput.value.trim();
+            const subcategory = subcategoryInput.value.trim();
             const unit = addNewForm.querySelector('input[placeholder="Enter product unit"]').value.trim();
             const reorderPoint = addNewForm.querySelector('input[placeholder="Enter product reorder point"]').value.trim();
             const price = addNewForm.querySelector('input[placeholder="Enter product price"]').value.trim();
@@ -431,9 +447,9 @@
                         addNewForm.querySelectorAll('input').forEach(input => {
                             if (!input.readOnly) input.value = '';
                         });
-                        addNewForm.querySelectorAll('select').forEach(select => {
-                            select.selectedIndex = 0;
-                        });
+                        // Clear inputs
+                        categoryInput.value = '';
+                        subcategoryInput.value = '';
                         // Clear image preview
                         clearImagePreview();
                         // Refresh the page to update the inventory ID
@@ -451,7 +467,6 @@
         addCancelBtn.addEventListener('click', function() {
             // Clear all form fields in Add New Product
             addNewForm.querySelectorAll('input').forEach(input => input.value = '');
-            // Optionally reset selects, etc. if present
             // Redirect to products page
             window.location.href = '/products';
         });
@@ -528,6 +543,40 @@
             placeholder: true,
             placeholderValue: 'Select a product'
         });
+
+        // Initialize category and subcategory inputs
+        const categoryInput = document.getElementById('category-input');
+        const subcategoryInput = document.getElementById('subcategory-input');
+        const categoryList = document.getElementById('category-list');
+        const subcategoryList = document.getElementById('subcategory-list');
+        
+        // Load categories and subcategories from database
+        function loadCategories() {
+            fetch('/api/get_categories')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Populate category datalist
+                        data.categories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category;
+                            categoryList.appendChild(option);
+                        });
+                        
+                        // Populate subcategory datalist
+                        data.subcategories.forEach(subcategory => {
+                            const option = document.createElement('option');
+                            option.value = subcategory;
+                            subcategoryList.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading categories:', error);
+                });
+        }
+        
+        loadCategories();
     });
 </script>
 {% endblock %}

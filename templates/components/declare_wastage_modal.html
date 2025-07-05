@@ -77,7 +77,7 @@ here is a comment for the css part of this in the wastage.css-->
                                 <td>{{ item.exp_date }}</td>
                                 <td>{{ item.quantity }} {{ item.unit }}</td>
                                 <td>{{ item.wastage_date }}</td>
-                                <td>{{ item.remark }}</td>
+                                <td data-full-text="{{ item.remark }}">{{ item.remark }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

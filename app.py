@@ -1573,6 +1573,31 @@ def confirm_restock_cart():
     conn.close()
     return jsonify({'success': True})
 
+@app.route('/api/get_categories', methods=['GET'])
+def get_categories():
+    try:
+        conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+        cursor = conn.cursor()
+        
+        # Get unique categories
+        cursor.execute("SELECT DISTINCT cat FROM inv_static WHERE cat IS NOT NULL AND cat != '' ORDER BY cat")
+        categories = [row[0] for row in cursor.fetchall()]
+        
+        # Get unique subcategories
+        cursor.execute("SELECT DISTINCT sub_cat FROM inv_static WHERE sub_cat IS NOT NULL AND sub_cat != '' ORDER BY sub_cat")
+        subcategories = [row[0] for row in cursor.fetchall()]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'categories': categories,
+            'subcategories': subcategories
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
 @app.route('/api/add_new_product', methods=['POST'])
 def add_new_product():
     try:

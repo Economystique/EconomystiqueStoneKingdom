@@ -317,6 +317,31 @@
     background:#fafafa; 
     }
 
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.custom-dropdown input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+    font-size: 14px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.custom-dropdown input:focus {
+    outline: none;
+    border-color: #2b5b64;
+    background-color: #fff;
+}
+
+.custom-dropdown input::placeholder {
+    color: #999;
+}
+
 /*Kim*/
 /* main Choices input box */
 .choices__inner {
@@ -342,6 +367,49 @@
 
 .choices__item--selectable {
     color: #333;
+}
+
+/* Additional styles for better dropdown functionality */
+.choices__input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    padding: 0;
+    margin: 0;
+}
+
+.choices__input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.choices__list--single {
+    padding: 0;
+}
+
+.choices__item--choice {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.choices__item--choice:hover {
+    background-color: #f0f0f0;
+}
+
+.choices__item--choice.is-highlighted {
+    background-color: #e3f2fd;
+}
+
+/* Style for the "Add new" functionality */
+.choices__item--choice.choices__item--add {
+    background-color: #e8f5e8;
+    font-style: italic;
+}
+
+.choices__item--choice.choices__item--add:hover {
+    background-color: #d4edda;
 }
 /*Kim end*/
 
