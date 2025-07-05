@@ -34,12 +34,12 @@
 
         <div class="products-grid">
             {% for product in products %}
-            <div class="product-card" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }}, {{ product.stock }})">
+            <div class="product-card" data-name="{{ product.name | lower }}" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }}, {{ product.stock }})">
                 <div class="product-image-small">
                     {% if product.image %}
                     <img src="{{ url_for('static', filename='img/products/' + product.image) }}" alt="{{ product.name }}">
                     {% else %}
-                    <span>🧁</span>
+                    <img src="{{ url_for('static', filename='img/item_white_bkgd.png') }}" alt="Default product image">
                     {% endif %}
                 </div>
                 <div class="product-infos">
@@ -50,6 +50,7 @@
             </div>
             {% endfor %}
         </div>
+        <p id="noResults" style="display:none; text-align:center; margin-top: 1rem;">No products found.</p>
     </div>
     </div>
 
@@ -58,6 +59,19 @@
                 <h2 style="margin: 0">Cart</h2>
                 <button onclick="clearCart()">🗑️</button>
             </div>
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
             <div class="cart-items" id="cartItems">
                 <!-- Items added via JS -->
             </div>
@@ -69,4 +83,29 @@
             </div>
         </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchProducts');
+    const productCards = Array.from(document.querySelectorAll('.product-card'));
+
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+
+        productCards.forEach(card => {
+            const name = card.dataset.name;
+            const visible = name.includes(searchTerm);
+            card.style.display = visible ? '' : 'none';
+            if (visible) visibleCount++;
+        });
+
+        document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    searchInput.addEventListener('input', filterProducts);
+});
+</script>
 {% endblock %}

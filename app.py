@@ -1071,74 +1071,41 @@ def confirm_wastage():
 @app.route('/pos')
 @login_required
 def pos():
-    products = [
-        {
-            "id": 1,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 2,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 3,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 4,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 5,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 6,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 7,
-            "name":
-              "Red Velvet",
-            
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 8,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        },
-        {
-            "id": 9,
-            "name": "Red Velvet",
-            "price": 375.00,
-            "stock": 12,
-            "image": None  # No image fallback
-        }
-    ]
-    
+    conn = sqlite3.connect(os.path.join('db', 'inventory_db.db'))
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # Query all static inventory
+    cursor.execute("""
+        SELECT inv_id, inv_desc, price, image
+        FROM inv_static
+    """)
+    static_data = cursor.fetchall()
+
+    # Query dynamic inventory to compute stock per inv_id
+    cursor.execute("""
+        SELECT inv_id, SUM(quantity) as stock
+        FROM inv_dynamic
+        GROUP BY inv_id
+    """)
+    dynamic_data = cursor.fetchall()
+    conn.close()
+
+    # Map dynamic data for quick lookup
+    stock_map = {row['inv_id']: row['stock'] for row in dynamic_data}
+
+    # Merge static and dynamic data
+    products = []
+    for row in static_data:
+        inv_id = row['inv_id']
+        products.append({
+            "id": inv_id,
+            "name": row['inv_desc'],
+            "price": row['price'],
+            "stock": stock_map.get(inv_id, 0),
+            "image": None  # You can change this to handle actual image blob conversion if needed
+        })
+
     return render_template('pos.html', products=products)
 
 @app.route('/account')
